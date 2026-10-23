@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { eq } from 'drizzle-orm';
 import express, { Router, type Response } from 'express';
@@ -15,7 +15,9 @@ import { authId, requireRole } from '../../middleware/auth';
 /**
  * Uploads: profile photo (AVATAR) aur ID document (KYC).
  *  - File ka type uske ASLI bytes (magic bytes) se jaancha jaata hai; naam/mime par bharosa nahi
- *  - Disk par random naam se rakhi jaati hai (asli file naam kabhi use nahi hota)
+ *  - File ke bytes database (Postgres) mein rakhe jaate hain, taaki hosting par restart se mitein nahi.
+ *    Purani files (data null) disk ke UPLOAD_DIR se padhi jaati hain.
+ *  - Random naam se pehchaan (asli file naam kabhi use nahi hota)
  *  - AVATAR public hai (GET /files/:id). KYC kabhi public nahi: sirf admin (GET /admin/uploads/:id, audit log ke saath)
  */
 
@@ -84,12 +86,10 @@ uploadsRouter.post(
     }
 
     const storageKey = `${randomUUID()}.${type.ext}`;
-    await mkdir(uploadDir(), { recursive: true });
-    await writeFile(path.join(uploadDir(), storageKey), buf, { mode: 0o600 });
     const [row] = await db
       .insert(uploads)
-      .values({ ownerId: userId, kind: input.kind, mime: type.mime, size: buf.length, storageKey })
-      .returning();
+      .values({ ownerId: userId, kind: input.kind, mime: type.mime, size: buf.length, storageKey, data: buf })
+      .returning({ id: uploads.id, kind: uploads.kind });
     res.status(201).json({ id: row!.id, kind: row!.kind, url: row!.kind === 'AVATAR' ? avatarUrl(row!.id) : null });
   },
 );
@@ -100,13 +100,19 @@ uploadsRouter.post(
  */
 export async function sendUpload(res: Response, id: string, opts: { allowKyc?: boolean } = {}) {
   const [row] = await db.select().from(uploads).where(eq(uploads.id, id)).limit(1);
-  if (!row || (row.kind === 'KYC' && !opts.allowKyc) || !STORAGE_KEY.test(row.storageKey)) throw notFound('File');
+  if (!row || (row.kind === 'KYC' && !opts.allowKyc)) throw notFound('File');
   let data: Buffer;
-  try {
-    data = await readFile(path.join(uploadDir(), row.storageKey));
-  } catch (err) {
-    logger.error({ err, id }, 'Upload file disk par nahi mili');
-    throw notFound('File');
+  if (row.data) {
+    data = row.data;
+  } else {
+    // Purani file: disk par
+    if (!STORAGE_KEY.test(row.storageKey)) throw notFound('File');
+    try {
+      data = await readFile(path.join(uploadDir(), row.storageKey));
+    } catch (err) {
+      logger.error({ err, id }, 'Upload file na database mein mili na disk par');
+      throw notFound('File');
+    }
   }
   res.setHeader('Content-Type', row.mime);
   res.setHeader('Content-Length', String(data.length));

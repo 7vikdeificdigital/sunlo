@@ -8,6 +8,7 @@ import { sql } from 'drizzle-orm';
 import {
   boolean,
   check,
+  customType,
   doublePrecision,
   index,
   integer,
@@ -20,6 +21,13 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+
+/** Binary data (file ke bytes) Postgres mein */
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return 'bytea';
+  },
+});
 
 const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
 const updatedAt = () =>
@@ -130,6 +138,7 @@ export const uploads = pgTable('uploads', {
   mime: text('mime').notNull(),
   size: integer('size').notNull(),
   storageKey: text('storage_key').notNull().unique(), // disk par random naam; asli file naam kabhi use nahi
+  data: bytea('data'), // file ke bytes database mein (hosting par disk mit jaati hai). Purani rows mein null = disk par
   createdAt: createdAt(),
 });
 

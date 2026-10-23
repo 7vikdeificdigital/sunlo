@@ -84,7 +84,7 @@ const profileSchema = z
   .strict(); // status, rating, approval jaise fields vendor khud nahi badal sakta
 
 async function ownUpload(userId: string, id: string, kind: 'AVATAR' | 'KYC') {
-  const [u] = await db.select().from(uploads).where(and(eq(uploads.id, id), eq(uploads.ownerId, userId), eq(uploads.kind, kind))).limit(1);
+  const [u] = await db.select({ id: uploads.id }).from(uploads).where(and(eq(uploads.id, id), eq(uploads.ownerId, userId), eq(uploads.kind, kind))).limit(1);
   if (!u) throw badRequest('BAD_UPLOAD', 'File nahi mili, dobara upload karein');
 }
 
