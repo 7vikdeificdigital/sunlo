@@ -32,6 +32,7 @@ interface Report {
 export function Reports() {
   const qc = useQueryClient();
   const [status, setStatus] = useState<'OPEN' | 'RESOLVED'>('OPEN');
+  const [warnVendor, setWarnVendor] = useState(true);
   const [resolving, setResolving] = useState<Report | null>(null);
   const q = useQuery({ queryKey: ['reports', status], queryFn: () => api<{ items: Report[] }>('/admin/reports', { query: { status, limit: 50 } }) });
   return (
@@ -92,9 +93,15 @@ export function Reports() {
           title="Report resolve"
           label="Kya kaarvai ki? (jaise: vendor ko chetavni, suspend, refund)"
           confirm="Resolve karein"
+          extra={
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+              <input type="checkbox" checked={warnVendor} onChange={(e) => setWarnVendor(e.target.checked)} />
+              Vendor ko warning notification bhejein
+            </label>
+          }
           onClose={() => setResolving(null)}
           onSubmit={async (resolution) => {
-            await api(`/admin/reports/${resolving.id}/resolve`, { method: 'POST', body: { resolution } });
+            await api(`/admin/reports/${resolving.id}/resolve`, { method: 'POST', body: { resolution, warnVendor } });
             qc.invalidateQueries({ queryKey: ['reports'] });
             qc.invalidateQueries({ queryKey: ['dashboard'] });
           }}

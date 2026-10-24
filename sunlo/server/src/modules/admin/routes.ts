@@ -725,14 +725,21 @@ adminRouter.get('/admin/reports', async (req, res) => {
 
 adminRouter.post('/admin/reports/:id/resolve', async (req, res) => {
   const { id } = params(req, idParam);
-  const { resolution } = body(req, z.object({ resolution: z.string().trim().min(5).max(500) }));
+  const { resolution, warnVendor } = body(req, z.object({ resolution: z.string().trim().min(5).max(500), warnVendor: z.boolean().default(true) }));
   const [r] = await db
     .update(reports)
     .set({ status: 'RESOLVED', resolution, resolvedBy: authId(req), resolvedAt: new Date() })
     .where(and(eq(reports.id, id), eq(reports.status, 'OPEN')))
     .returning();
   if (!r) throw conflict('INVALID_STATE', 'Report pehle hi resolve ho chuki hai');
-  await audit(req, 'report.resolve', 'report', id, { resolution });
+  await audit(req, 'report.resolve', 'report', id, { resolution, warnVendor });
+  // Reporter (user) ko batao ki shikayat par kaarvai ho gayi
+  await notify(r.reporterId, 'Aapki shikayat par kaarvai hui ✅', resolution, { type: 'report_resolved', reportId: id });
+  // Vendor ko chetavani
+  if (warnVendor) {
+    const [v] = await db.select({ userId: vendors.userId }).from(vendors).where(eq(vendors.id, r.vendorId));
+    if (v) await notify(v.userId, 'Aapke khilaaf shikayat par chetavani ⚠️', resolution, { type: 'warning', reportId: id });
+  }
   res.json(r);
 });
 
