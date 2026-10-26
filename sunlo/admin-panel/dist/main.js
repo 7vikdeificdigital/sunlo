@@ -25113,7 +25113,7 @@ function Gifts() {
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("tr", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "Gift" }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { className: "right", children: "Keemat" }),
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "SVGA animation" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "Animation (SVGA / WebM)" }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "Status" }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", {})
         ] }) }),
@@ -25125,27 +25125,27 @@ function Gifts() {
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { className: "right num", children: rupees(g.price, true) }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("td", { children: [
-            g.hasSvga ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "badge b-good", children: "Lagi hui" }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "badge b-mute", children: "Emoji animation" }),
+            g.hasSvga ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "badge b-good", children: "Animation lagi hai" }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "badge b-mute", children: "Emoji animation" }),
             " ",
             /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("label", { className: "btn ghost sm", style: { cursor: "pointer" }, children: [
-              g.hasSvga ? "Badlein" : ".svga upload",
+              g.hasSvga ? "Badlein" : ".svga / .webm upload",
               /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
                 "input",
                 {
                   type: "file",
-                  accept: ".svga",
+                  accept: ".svga,.webm",
                   hidden: true,
                   onChange: (e) => {
                     const f = e.target.files?.[0];
                     e.target.value = "";
                     if (!f) return;
-                    if (f.size > 5 * 1024 * 1024) return setMsg({ ok: false, t: "File 5 MB se badi hai" });
-                    void run(async () => api(`/admin/gifts/${g.id}/svga`, { method: "POST", body: { dataBase64: await fileToBase64(f) } }), "SVGA upload ho gayi");
+                    if (f.size > 6 * 1024 * 1024) return setMsg({ ok: false, t: "File 6 MB se badi hai" });
+                    void run(async () => api(`/admin/gifts/${g.id}/svga`, { method: "POST", body: { dataBase64: await fileToBase64(f) } }), "Animation upload ho gayi");
                   }
                 }
               )
             ] }),
-            g.hasSvga ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { className: "btn ghost sm", disabled: busy, onClick: () => run(() => api(`/admin/gifts/${g.id}/svga`, { method: "DELETE" }), "SVGA hata di"), children: "Hatayein" }) : null
+            g.hasSvga ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { className: "btn ghost sm", disabled: busy, onClick: () => run(() => api(`/admin/gifts/${g.id}/svga`, { method: "DELETE" }), "Animation hata di"), children: "Hatayein" }) : null
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { children: g.isActive ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "badge b-good", children: "Chalu" }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "badge b-mute", children: "Band" }) }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { className: "btn ghost sm", onClick: () => setEdit({ id: g.id, name: g.name, icon: g.icon, price: String(g.price / 100), sortOrder: String(g.sortOrder), isActive: g.isActive }), children: "Edit" }) })

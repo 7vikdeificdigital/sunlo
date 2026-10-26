@@ -17,6 +17,8 @@ export const gifts = pgTable(
     price: integer('price').notNull(), // paise
     svgaData: bytea('svga_data'),
     svgaVersion: integer('svga_version').notNull().default(0),
+    mediaType: text('media_type'), // 'svga' | 'webm' (svga_data mein kya rakha hai)
+    thumbData: bytea('thumb_data'), // chhota PNG preview (gift sheet ke liye)
     isActive: boolean('is_active').notNull().default(true),
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

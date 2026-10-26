@@ -59,7 +59,7 @@ export function buildApp() {
 
   // Aam JSON limit 100kb; sirf upload route apna bada limit khud lagata hai
   const json = express.json({ limit: '100kb' });
-  app.use((req, res, next) => (req.path === `${API_PREFIX}/uploads` || /\/admin\/gifts\/[^/]+\/svga$/.test(req.path) ? next() : json(req, res, next)));
+  app.use((req, res, next) => (req.path === `${API_PREFIX}/uploads` || /\/admin\/gifts\/[^/]+\/(svga|thumb)$/.test(req.path) ? next() : json(req, res, next)));
 
   const api = Router();
   for (const r of publicRouters) api.use(r);

@@ -89,7 +89,7 @@ export function Gifts() {
         </div>
         <table>
           <thead>
-            <tr><th>Gift</th><th className="right">Keemat</th><th>SVGA animation</th><th>Status</th><th /></tr>
+            <tr><th>Gift</th><th className="right">Keemat</th><th>Animation (SVGA / WebM)</th><th>Status</th><th /></tr>
           </thead>
           <tbody>
             {d.items.map((g) => (
@@ -97,23 +97,23 @@ export function Gifts() {
                 <td><span style={{ fontSize: 22 }}>{g.icon}</span> <b>{g.name}</b></td>
                 <td className="right num">{rupees(g.price, true)}</td>
                 <td>
-                  {g.hasSvga ? <span className="badge b-good">Lagi hui</span> : <span className="badge b-mute">Emoji animation</span>}{' '}
+                  {g.hasSvga ? <span className="badge b-good">Animation lagi hai</span> : <span className="badge b-mute">Emoji animation</span>}{' '}
                   <label className="btn ghost sm" style={{ cursor: 'pointer' }}>
-                    {g.hasSvga ? 'Badlein' : '.svga upload'}
+                    {g.hasSvga ? 'Badlein' : '.svga / .webm upload'}
                     <input
                       type="file"
-                      accept=".svga"
+                      accept=".svga,.webm"
                       hidden
                       onChange={(e) => {
                         const f = e.target.files?.[0];
                         e.target.value = '';
                         if (!f) return;
-                        if (f.size > 5 * 1024 * 1024) return setMsg({ ok: false, t: 'File 5 MB se badi hai' });
-                        void run(async () => api(`/admin/gifts/${g.id}/svga`, { method: 'POST', body: { dataBase64: await fileToBase64(f) } }), 'SVGA upload ho gayi');
+                        if (f.size > 6 * 1024 * 1024) return setMsg({ ok: false, t: 'File 6 MB se badi hai' });
+                        void run(async () => api(`/admin/gifts/${g.id}/svga`, { method: 'POST', body: { dataBase64: await fileToBase64(f) } }), 'Animation upload ho gayi');
                       }}
                     />
                   </label>
-                  {g.hasSvga ? <button className="btn ghost sm" disabled={busy} onClick={() => run(() => api(`/admin/gifts/${g.id}/svga`, { method: 'DELETE' }), 'SVGA hata di')}>Hatayein</button> : null}
+                  {g.hasSvga ? <button className="btn ghost sm" disabled={busy} onClick={() => run(() => api(`/admin/gifts/${g.id}/svga`, { method: 'DELETE' }), 'Animation hata di')}>Hatayein</button> : null}
                 </td>
                 <td>{g.isActive ? <span className="badge b-good">Chalu</span> : <span className="badge b-mute">Band</span>}</td>
                 <td className="right">

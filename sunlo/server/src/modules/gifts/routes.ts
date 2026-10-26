@@ -12,7 +12,8 @@ import { audit } from '../admin/audit';
 import { postTxn } from '../wallet/ledger';
 import { giftSends, gifts } from './schema';
 
-const MAX_SVGA_BYTES = 5 * 1024 * 1024;
+const MAX_SVGA_BYTES = 6 * 1024 * 1024;
+const MAX_THUMB_BYTES = 400 * 1024;
 
 /** SVGA = zlib (0x78) ya ZIP ('PK') container. Aur kuch ho to reject. */
 function looksLikeSvga(buf: Buffer) {
@@ -20,6 +21,9 @@ function looksLikeSvga(buf: Buffer) {
   if (buf[0] === 0x78) return true;
   return buf[0] === 0x50 && buf[1] === 0x4b && buf[2] === 0x03 && buf[3] === 0x04;
 }
+/** WebM (transparent video) = EBML header 1A 45 DF A3 */
+const looksLikeWebm = (buf: Buffer) => buf.length > 16 && buf[0] === 0x1a && buf[1] === 0x45 && buf[2] === 0xdf && buf[3] === 0xa3;
+const looksLikePng = (buf: Buffer) => buf.length > 16 && buf[0] === 0x89 && buf.toString('ascii', 1, 4) === 'PNG';
 
 const publicCols = {
   id: gifts.id,
@@ -27,25 +31,37 @@ const publicCols = {
   icon: gifts.icon,
   price: gifts.price,
   svgaVersion: gifts.svgaVersion,
+  mediaType: gifts.mediaType,
+  hasThumb: sql<boolean>`${gifts.thumbData} is not null`,
   isActive: gifts.isActive,
   sortOrder: gifts.sortOrder,
 };
-type GiftRow = { id: string; name: string; icon: string; price: number; svgaVersion: number; isActive: boolean; sortOrder: number };
+type GiftRow = { id: string; name: string; icon: string; price: number; svgaVersion: number; mediaType: string | null; hasThumb: boolean; isActive: boolean; sortOrder: number };
 const shape = (g: GiftRow) => ({
   id: g.id,
   name: g.name,
   icon: g.icon,
   price: g.price,
-  svgaUrl: g.svgaVersion > 0 ? `/gifts/${g.id}/svga?v=${g.svgaVersion}` : null, // API_URL ke saath jodein
+  svgaUrl: g.svgaVersion > 0 ? `/gifts/${g.id}/svga?v=${g.svgaVersion}` : null, // animation file (svga ya webm), API_URL ke saath jodein
+  mediaType: g.svgaVersion > 0 ? (g.mediaType ?? 'svga') : null,
+  thumbUrl: g.hasThumb ? `/gifts/${g.id}/thumb?v=${g.svgaVersion}` : null,
 });
 
 // ---------- Public: animation file (login ke bina, taaki player seedha le sake) ----------
 export const giftsPublic = Router();
 giftsPublic.get('/gifts/:id/svga', async (req, res) => {
   const { id } = params(req, idParam);
-  const [g] = await db.select({ d: gifts.svgaData }).from(gifts).where(eq(gifts.id, id)).limit(1);
+  const [g] = await db.select({ d: gifts.svgaData, t: gifts.mediaType }).from(gifts).where(eq(gifts.id, id)).limit(1);
   if (!g?.d) throw notFound('Animation');
-  res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader('Content-Type', g.t === 'webm' ? 'video/webm' : 'application/octet-stream');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(g.d);
+});
+giftsPublic.get('/gifts/:id/thumb', async (req, res) => {
+  const { id } = params(req, idParam);
+  const [g] = await db.select({ d: gifts.thumbData }).from(gifts).where(eq(gifts.id, id)).limit(1);
+  if (!g?.d) throw notFound('Preview');
+  res.setHeader('Content-Type', 'image/png');
   res.setHeader('Cache-Control', 'public, max-age=86400');
   res.send(g.d);
 });
@@ -110,7 +126,8 @@ giftsPrivate.post('/sessions/:id/gifts', requireRole('USER'), async (req, res) =
 
   const [u] = await db.select({ n: users.name }).from(users).where(eq(users.id, userId)).limit(1);
   const fromUser = u?.n || 'Ek user';
-  const payload = { sessionId: id, giftId: out.gift.id, name: out.gift.name, icon: out.gift.icon, price: out.gift.price, svgaUrl: shape(out.gift).svgaUrl, from: fromUser };
+  const sh = shape(out.gift);
+  const payload = { sessionId: id, giftId: out.gift.id, name: out.gift.name, icon: out.gift.icon, price: out.gift.price, svgaUrl: sh.svgaUrl, mediaType: sh.mediaType, thumbUrl: sh.thumbUrl, from: fromUser };
   emitToSession(id, 'gift', payload);
   emitToUser(userId, 'gift', payload); // room join na bhi ho to dikhe
   if (out.vendorUserId) emitToUser(out.vendorUserId, 'gift', payload);
@@ -165,11 +182,12 @@ giftsPrivate.post('/admin/gifts/:id/svga', express.json({ limit: '8mb' }), async
   const b64 = dataBase64.replace(/^data:[^,]*;base64,/, '');
   if (!/^[A-Za-z0-9+/\s]+={0,2}\s*$/.test(b64)) throw badRequest('BAD_FILE', 'File sahi nahi hai');
   const buf = Buffer.from(b64, 'base64');
-  if (buf.length > MAX_SVGA_BYTES) throw badRequest('FILE_TOO_LARGE', 'SVGA file 5 MB se badi hai');
-  if (!looksLikeSvga(buf)) throw badRequest('BAD_FILE', 'Yeh SVGA file nahi lag rahi');
+  if (buf.length > MAX_SVGA_BYTES) throw badRequest('FILE_TOO_LARGE', 'File 6 MB se badi hai');
+  const kind = looksLikeWebm(buf) ? 'webm' : looksLikeSvga(buf) ? 'svga' : null;
+  if (!kind) throw badRequest('BAD_FILE', 'Yeh SVGA ya WebM file nahi lag rahi');
   const [g] = await db
     .update(gifts)
-    .set({ svgaData: buf, svgaVersion: sql`${gifts.svgaVersion} + 1` })
+    .set({ svgaData: buf, mediaType: kind, svgaVersion: sql`${gifts.svgaVersion} + 1` })
     .where(eq(gifts.id, id))
     .returning({ id: gifts.id });
   if (!g) throw notFound('Gift');
@@ -177,9 +195,20 @@ giftsPrivate.post('/admin/gifts/:id/svga', express.json({ limit: '8mb' }), async
   res.json({ ok: true });
 });
 
+giftsPrivate.post('/admin/gifts/:id/thumb', express.json({ limit: '1mb' }), async (req, res) => {
+  const { id } = params(req, idParam);
+  const { dataBase64 } = body(req, z.object({ dataBase64: z.string().min(16).max(Math.ceil((MAX_THUMB_BYTES * 4) / 3) + 16) }));
+  const buf = Buffer.from(dataBase64.replace(/^data:[^,]*;base64,/, ''), 'base64');
+  if (buf.length > MAX_THUMB_BYTES || !looksLikePng(buf)) throw badRequest('BAD_FILE', 'Preview PNG honi chahiye (max 400 KB)');
+  const [g] = await db.update(gifts).set({ thumbData: buf }).where(eq(gifts.id, id)).returning({ id: gifts.id });
+  if (!g) throw notFound('Gift');
+  await audit(req, 'gift.thumb', 'gift', id, { bytes: buf.length });
+  res.json({ ok: true });
+});
+
 giftsPrivate.delete('/admin/gifts/:id/svga', async (req, res) => {
   const { id } = params(req, idParam);
-  await db.update(gifts).set({ svgaData: null, svgaVersion: 0 }).where(eq(gifts.id, id));
+  await db.update(gifts).set({ svgaData: null, svgaVersion: 0, mediaType: null }).where(eq(gifts.id, id));
   await audit(req, 'gift.svga.remove', 'gift', id);
   res.json({ ok: true });
 });
