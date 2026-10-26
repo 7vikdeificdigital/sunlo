@@ -5,6 +5,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { ApiError, auth } from '@/lib/api';
 import { Dashboard } from '@/pages/Dashboard';
+import { Gifts } from '@/pages/Gifts';
 import { Login } from '@/pages/Login';
 import { Payments, SessionDetail, Sessions, Withdrawals } from '@/pages/Money';
 import { Reports, Reviews, TicketDetail, Tickets } from '@/pages/Safety';
@@ -40,6 +41,7 @@ function App() {
         <Route path="tickets/:id" element={<TicketDetail />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="catalog" element={<Catalog />} />
+        <Route path="gifts" element={<Gifts />} />
         <Route path="settings" element={<Settings />} />
         <Route path="audit" element={<Audit />} />
         <Route path="*" element={<Navigate to="/" replace />} />

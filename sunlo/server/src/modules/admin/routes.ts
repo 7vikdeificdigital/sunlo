@@ -556,6 +556,7 @@ const settingsSchema = z
     appName: z.string().trim().min(2).max(40),
     gstPct: z.number().int().min(0).max(28),
     commissionPct: z.number().int().min(0).max(90),
+    giftCommissionPct: z.number().int().min(0).max(90),
     minSessionMinutes: z.number().int().min(1).max(30),
     requestTimeoutSec: z.number().int().min(20).max(300),
     minRechargePaise: z.number().int().min(100).max(1_000_000),

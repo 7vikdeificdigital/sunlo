@@ -15,6 +15,13 @@
       "when": 1792737051970,
       "tag": "0001_upload_data",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792995096255,
+      "tag": "0002_gifts",
+      "breakpoints": true
     }
   ]
 }

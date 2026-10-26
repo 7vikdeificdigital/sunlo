@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS = {
   appName: 'Sunlo',
   currency: 'INR',
   gstPct: 18, // recharge par GST
+  giftCommissionPct: 30, // har gift mein platform ka hissa (%)
   commissionPct: 30, // har session mein platform ka hissa (%)
   minSessionMinutes: 5, // session shuru karne ke liye kam se kam itne minute ka balance
   requestTimeoutSec: 60, // vendor itne second mein accept na kare to MISSED

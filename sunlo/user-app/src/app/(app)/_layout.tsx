@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { GiftLayer } from '@/components/GiftLayer';
 import { Redirect, Stack, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { Loader, Screen } from '@/components/ui';
@@ -45,5 +46,10 @@ export default function AppLayout() {
   const onOnboarding = segments.includes('onboarding' as never);
   if (me.data && !me.data.user.profileComplete && !onOnboarding) return <Redirect href="/onboarding" />;
 
-  return <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />;
+  return (
+    <>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
+      <GiftLayer role="user" />
+    </>
+  );
 }

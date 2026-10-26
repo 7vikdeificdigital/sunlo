@@ -36,6 +36,7 @@ const NAV: { group: string; items: { to: string; label: string; count?: keyof Da
     group: 'Setup',
     items: [
       { to: '/catalog', label: 'Categories & packs' },
+      { to: '/gifts', label: 'Gifts' },
       { to: '/settings', label: 'Settings' },
       { to: '/audit', label: 'Audit log' },
     ],
