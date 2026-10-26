@@ -36,6 +36,7 @@ import { escapeLike } from '../../lib/sql';
 import { body, idParam, pagination, params, query } from '../../lib/validate';
 import { authId, requireRole } from '../../middleware/auth';
 import { sendUpload } from '../uploads/routes';
+import { giftSeries, giftTotals } from '../gifts/stats';
 import { postTxn } from '../wallet/ledger';
 import { audit } from './audit';
 
@@ -123,19 +124,22 @@ adminRouter.get('/admin/dashboard', async (_req, res) => {
       .where(and(eq(users.role, 'USER'), gte(users.createdAt, d14)))
       .groupBy(sql`1`),
   ]);
+  const gift30 = await giftTotals(d30);
+  const giftDays = await giftSeries(d14);
   const series = Array.from({ length: 14 }, (_, i) => {
     const d = new Date(d14.getTime() + i * 86400_000 + 5.5 * 3600_000).toISOString().slice(0, 10);
     const r = rechargeSeries.find((x) => x.day === d);
     const s = sessionSeries.find((x) => x.day === d);
     const nu = userSeries.find((x) => x.day === d);
-    return { day: d, recharge: r?.amount ?? 0, gross: s?.gross ?? 0, commission: s?.commission ?? 0, sessions: s?.sessions ?? 0, newUsers: nu?.n ?? 0 };
+    const g = giftDays.find((x) => x.day === d);
+    return { day: d, recharge: r?.amount ?? 0, gross: (s?.gross ?? 0) + (g?.gross ?? 0), commission: (s?.commission ?? 0) + (g?.commission ?? 0), sessions: s?.sessions ?? 0, newUsers: nu?.n ?? 0 };
   });
 
   res.json({
     users: u,
     vendors: v,
     sessions: sess,
-    last30: { gross: rev30.gross, commission: rev30.gross - rev30.vendorShare, minutes: rev30.minutes, recharge: recharge30.amount, gst: recharge30.gst, payments: recharge30.n },
+    last30: { gross: rev30.gross + gift30.gross, commission: rev30.gross + gift30.gross - rev30.vendorShare - (gift30.gross - gift30.commission), gifts: gift30, minutes: rev30.minutes, recharge: recharge30.amount, gst: recharge30.gst, payments: recharge30.n },
     pending: { withdrawals: wd.n, withdrawalAmount: wd.amount, tickets: tk.n, reports: rp.n, vendorApprovals: v.pending },
     series,
   });

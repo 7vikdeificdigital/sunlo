@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { API_URL, api, errorMessage } from '@/lib/api';
 import { getSocket } from '@/lib/socket';
 import { colors } from '@/theme';
+import { Coin, CoinPrice } from './Coin';
 import { SvgaView } from './SvgaView';
 import { Text } from './ui';
 import { WebmView } from './WebmView';
@@ -15,10 +16,11 @@ import { WebmView } from './WebmView';
 type Media = 'svga' | 'webm' | null;
 type Gift = { id: string; name: string; icon: string; price: number; svgaUrl: string | null; mediaType: Media; thumbUrl: string | null };
 type GiftEvent = Gift & { sessionId: string; giftId?: string; from: string };
-type Anim = { key: number; icon: string; title: string; sub: string | null; mediaUrl: string | null; mediaType: Media; thumbUrl: string | null; big: boolean; epic: boolean };
+type Anim = { key: number; icon: string; title: string; sub: string | null; coins: number | null; mediaUrl: string | null; mediaType: Media; thumbUrl: string | null; big: boolean; epic: boolean; small: boolean };
 type SessionLite = { status?: string; acceptedAt?: string | null };
 
-const rupees = (paise: number) => `₹${(paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+/** 500 coin (₹500) se chhote gifts chhote dikhte hain, bade gifts poori screen par */
+const EPIC_PAISE = 50000;
 const full = (u: string | null) => (u ? `${API_URL}${u}` : null);
 
 /** /call/<id> ya /session/<id> screen par ho to session id */
@@ -105,7 +107,7 @@ function Overlay({ anim, onDone, top }: { anim: Anim; onDone: () => void; top: n
   const glowScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1.08] });
   return (
     <View pointerEvents="none" style={[StyleSheet.absoluteFill, { zIndex: 50 }]}>
-      {anim.big ? (
+      {anim.big && !anim.small ? (
         <Animated.View style={[StyleSheet.absoluteFill, { opacity: fade, backgroundColor: 'rgba(4,14,13,0.45)', alignItems: 'center', justifyContent: 'center' }]}>
           <Animated.View style={{ width: 380, height: 380, borderRadius: 190, backgroundColor: 'rgba(21,192,174,0.14)', transform: [{ scale: glowScale }], alignItems: 'center', justifyContent: 'center' }}>
             <View style={{ width: 270, height: 270, borderRadius: 135, backgroundColor: 'rgba(255,122,89,0.14)' }} />
@@ -113,8 +115,10 @@ function Overlay({ anim, onDone, top }: { anim: Anim; onDone: () => void; top: n
         </Animated.View>
       ) : null}
 
-      {anim.mediaUrl && anim.mediaType === 'webm' ? <WebmView url={anim.mediaUrl} onDone={onDone} /> : null}
-      {anim.mediaUrl && anim.mediaType === 'svga' ? <SvgaView url={anim.mediaUrl} onDone={onDone} /> : null}
+      <View pointerEvents="none" style={anim.small && anim.mediaUrl ? { position: 'absolute', alignSelf: 'center', bottom: 150, width: '52%', aspectRatio: 9 / 16 } : StyleSheet.absoluteFill}>
+        {anim.mediaUrl && anim.mediaType === 'webm' ? <WebmView url={anim.mediaUrl} onDone={onDone} /> : null}
+        {anim.mediaUrl && anim.mediaType === 'svga' ? <SvgaView url={anim.mediaUrl} onDone={onDone} /> : null}
+      </View>
       {!anim.mediaUrl ? <EmojiBurst anim={anim} onDone={onDone} /> : null}
       {anim.epic ? <Sparkles /> : null}
 
@@ -125,7 +129,12 @@ function Overlay({ anim, onDone, top }: { anim: Anim; onDone: () => void; top: n
           </View>
           <View style={{ gap: 1 }}>
             <Text style={{ color: colors.white, fontSize: 14 }} numberOfLines={1}>{anim.title}</Text>
-            {anim.sub ? <Text style={{ color: '#7FE9D8', fontSize: 11.5 }}>{anim.sub}</Text> : null}
+            {anim.coins !== null ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Coin size={13} />
+                <Text style={{ color: '#7FE9D8', fontSize: 11.5 }}>{anim.coins.toLocaleString('en-IN')} {anim.sub}</Text>
+              </View>
+            ) : null}
           </View>
         </LinearGradient>
       </Animated.View>
@@ -170,12 +179,14 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
         mediaType: e.mediaType ?? null,
         thumbUrl: full(e.thumbUrl),
         title: role === 'vendor' ? `${e.from} ne ${e.name} bheja` : `Aapne ${e.name} bheja`,
-        sub: role === 'vendor' ? `${rupees(e.price)} ka gift mila` : `${rupees(e.price)}`,
+        sub: role === 'vendor' ? 'coins ka gift mila' : 'coins',
+        coins: Math.round(e.price / 100),
         big: true,
-        epic: e.price >= 50000,
+        epic: e.price >= EPIC_PAISE,
+        small: e.price < EPIC_PAISE,
       });
-      void qc.invalidateQueries({ queryKey: ['me'] });
-      void qc.invalidateQueries({ queryKey: ['wallet'] });
+      // Wallet, kamai, history sab taaza (gifts ka catalog chhod kar)
+      void qc.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'gifts' && q.queryKey[0] !== 'session' });
     };
     s.on('gift', on);
     return () => {
@@ -194,7 +205,7 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
       if (lastMinute.current?.id !== sid) lastMinute.current = { id: sid, m: m - 1 };
       if (m > lastMinute.current.m) {
         lastMinute.current.m = m;
-        push({ icon: '🎉', mediaUrl: null, mediaType: null, thumbUrl: null, title: `${m} minute poore ho gaye`, sub: null, big: false, epic: false });
+        push({ icon: '🎉', mediaUrl: null, mediaType: null, thumbUrl: null, title: `${m} minute poore ho gaye`, sub: null, coins: null, big: false, epic: false, small: false });
       }
     }, 1000);
     return () => clearInterval(t);
@@ -262,7 +273,7 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
                 <Ionicons name="gift" size={20} color="#FF9A6B" />
                 <Text style={{ color: colors.white, fontSize: 18 }}>Gift bhejein</Text>
               </View>
-              <Text style={{ color: '#8FB1AC', fontSize: 12.5, marginBottom: 12 }}>Aapke wallet se katega. Jo gift chuna hai, wahi neeche button par dikhega.</Text>
+              <Text style={{ color: '#8FB1AC', fontSize: 12.5, marginBottom: 12 }}>Aapke wallet se coins katenge. Jo gift chuna hai, wahi neeche button par dikhega.</Text>
               {msg ? (
                 <View style={{ backgroundColor: 'rgba(214,69,69,0.18)', borderRadius: 12, padding: 10, marginBottom: 10 }}>
                   <Text style={{ color: '#FF9C9C', fontSize: 12.5 }}>{msg}</Text>
@@ -290,7 +301,7 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
                       {g.thumbUrl ? <Image source={{ uri: full(g.thumbUrl)! }} style={{ width: 62, height: 62 }} resizeMode="contain" /> : <Text style={{ fontSize: 40, height: 62, lineHeight: 62 }}>{g.icon}</Text>}
                       <Text style={{ color: colors.white, fontSize: 12.5 }} numberOfLines={1}>{g.name}</Text>
                       <View style={{ paddingHorizontal: 9, paddingVertical: 2, borderRadius: 10, backgroundColor: on ? '#5EE6D2' : 'rgba(255,200,87,0.16)' }}>
-                        <Text style={{ color: on ? '#04201D' : '#FFC857', fontSize: 11.5 }}>{rupees(g.price)}</Text>
+                        <CoinPrice paise={g.price} size={11.5} color={on ? '#04201D' : '#FFC857'} />
                       </View>
                     </Pressable>
                   );
@@ -301,7 +312,8 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
               <Pressable onPress={send} disabled={!pickedGift || sending} style={{ marginTop: 12, opacity: !pickedGift || sending ? 0.5 : 1 }}>
                 <LinearGradient colors={['#FF9A6B', '#FF5E7E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 }}>
                   <Ionicons name="paper-plane" size={18} color={colors.white} />
-                  <Text style={{ color: colors.white, fontSize: 15 }}>{sending ? 'Bhej rahe hain...' : pickedGift ? `${pickedGift.name} bhejein · ${rupees(pickedGift.price)}` : 'Pehle gift chunein'}</Text>
+                  <Text style={{ color: colors.white, fontSize: 15 }}>{sending ? 'Bhej rahe hain...' : pickedGift ? `${pickedGift.name} bhejein ·` : 'Pehle gift chunein'}</Text>
+                  {pickedGift && !sending ? <CoinPrice paise={pickedGift.price} size={15} color={colors.white} /> : null}
                 </LinearGradient>
               </Pressable>
             </LinearGradient>

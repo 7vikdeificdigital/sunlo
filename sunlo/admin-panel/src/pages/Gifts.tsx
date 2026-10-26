@@ -2,7 +2,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ErrorBox, Loading, Modal, PageHead } from '@/components/ui';
 import { api, errMsg } from '@/lib/api';
-import { rupees } from '@/lib/format';
+import { Link } from 'react-router-dom';
+import { dt, rupees } from '@/lib/format';
 
 interface Gift {
   id: string;
@@ -13,8 +14,20 @@ interface Gift {
   isActive: boolean;
   hasSvga: boolean;
 }
+interface Recent {
+  id: string;
+  sessionId: string;
+  giftName: string;
+  price: number;
+  commissionPct: number;
+  vendorEarning: number;
+  createdAt: string;
+  userName: string | null;
+  vendorName: string;
+}
 interface Resp {
   items: Gift[];
+  recent: Recent[];
   last30: { count: number; gross: number; commission: number };
   commissionPct: number;
 }
@@ -89,13 +102,13 @@ export function Gifts() {
         </div>
         <table>
           <thead>
-            <tr><th>Gift</th><th className="right">Keemat</th><th>Animation (SVGA / WebM)</th><th>Status</th><th /></tr>
+            <tr><th>Gift</th><th className="right">Keemat (coins)</th><th>Animation (SVGA / WebM)</th><th>Status</th><th /></tr>
           </thead>
           <tbody>
             {d.items.map((g) => (
               <tr key={g.id} style={{ opacity: g.isActive ? 1 : 0.5 }}>
                 <td><span style={{ fontSize: 22 }}>{g.icon}</span> <b>{g.name}</b></td>
-                <td className="right num">{rupees(g.price, true)}</td>
+                <td className="right num">{rupees(g.price).replace('₹', '')} coins</td>
                 <td>
                   {g.hasSvga ? <span className="badge b-good">Animation lagi hai</span> : <span className="badge b-mute">Emoji animation</span>}{' '}
                   <label className="btn ghost sm" style={{ cursor: 'pointer' }}>
@@ -125,11 +138,38 @@ export function Gifts() {
         </table>
       </div>
 
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="card-head"><h3>Haal ke gifts (user → vendor)</h3></div>
+        {d.recent.length === 0 ? (
+          <p className="faint" style={{ margin: 0 }}>Abhi tak koi gift nahi bheja gaya.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr><th>Kab</th><th>Gift</th><th>User</th><th>Vendor</th><th className="right">Coins</th><th className="right">Vendor ko</th><th className="right">Platform</th><th /></tr>
+            </thead>
+            <tbody>
+              {d.recent.map((r) => (
+                <tr key={r.id}>
+                  <td className="faint">{dt(r.createdAt)}</td>
+                  <td><b>{r.giftName}</b></td>
+                  <td>{r.userName ?? 'User'}</td>
+                  <td>{r.vendorName}</td>
+                  <td className="right num">{rupees(r.price)}</td>
+                  <td className="right num">{rupees(r.vendorEarning)}</td>
+                  <td className="right num">{rupees(r.price - r.vendorEarning)} <span className="faint">({r.commissionPct}%)</span></td>
+                  <td className="right"><Link className="btn ghost sm" to={`/sessions/${r.sessionId}`}>Session</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
       {edit ? (
         <Modal title={edit.id ? 'Gift edit' : 'Naya gift'} onClose={() => setEdit(null)}>
           <div className="field"><label>Naam</label><input className="input" value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} maxLength={30} /></div>
           <div className="field"><label>Emoji / icon</label><input className="input" value={edit.icon} onChange={(e) => setEdit({ ...edit, icon: e.target.value })} maxLength={8} /></div>
-          <div className="field"><label>Keemat (₹)</label><input className="input" inputMode="decimal" value={edit.price} onChange={(e) => setEdit({ ...edit, price: e.target.value })} /></div>
+          <div className="field"><label>Keemat (coins, 1 coin = ₹1)</label><input className="input" inputMode="decimal" value={edit.price} onChange={(e) => setEdit({ ...edit, price: e.target.value })} /></div>
           <div className="field"><label>Order</label><input className="input" inputMode="numeric" value={edit.sortOrder} onChange={(e) => setEdit({ ...edit, sortOrder: e.target.value })} /></div>
           <label className="row"><input type="checkbox" checked={edit.isActive} onChange={(e) => setEdit({ ...edit, isActive: e.target.checked })} /> Chalu</label>
           <div className="row" style={{ justifyContent: 'flex-end', marginTop: 12 }}>

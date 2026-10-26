@@ -22,6 +22,7 @@ import { body, idParam, pagination, params, query } from '../../lib/validate';
 import { authId, requireRole } from '../../middleware/auth';
 import { vendorSessions } from '../sessions/service';
 import { avatarUrl } from '../uploads/routes';
+import { giftVendorEarning } from '../gifts/stats';
 import { postTxn } from '../wallet/ledger';
 import { maskName } from '../vendors/routes';
 
@@ -200,6 +201,10 @@ vendorSelfRouter.get('/vendor/earnings', async (req, res) => {
     return { earning: r.earning, minutes: r.minutes, sessions: r.sessions };
   };
   const [today, week, month] = await Promise.all([stat(startToday), stat(since(7)), stat(since(30))]);
+  const [gT, gW, gM] = await Promise.all([startToday, since(7), since(30)].map((d) => giftVendorEarning(v.id, d)));
+  today.earning += gT;
+  week.earning += gW;
+  month.earning += gM;
   const txns = w
     ? await db
         .select({ id: walletTransactions.id, type: walletTransactions.type, amount: walletTransactions.amount, balanceAfter: walletTransactions.balanceAfter, note: walletTransactions.note, createdAt: walletTransactions.createdAt })

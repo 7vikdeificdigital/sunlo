@@ -7,6 +7,7 @@ import { Button, Card, Row, Screen, Segmented, Text } from '@/components/ui';
 import { formatDateTime, rupees } from '@/lib/format';
 import { useEarnings, useVendorMe, useWithdrawals } from '@/lib/queries';
 import type { WalletTxn } from '@/lib/types';
+import { GiftsReceivedCard } from '@/components/GiftsReceivedCard';
 import { colors, font, gradient, radius, space } from '@/theme';
 
 const TXN: Record<WalletTxn['type'], string> = {
@@ -93,12 +94,14 @@ export default function Earnings() {
           </>
         ) : null}
 
+        <GiftsReceivedCard />
+
         <Text variant="h3">Hisaab</Text>
         {(e.data?.transactions ?? []).length === 0 ? <Text variant="small">Abhi koi entry nahi.</Text> : null}
         {(e.data?.transactions ?? []).map((t) => (
           <Row key={t.id} style={{ backgroundColor: colors.surface, borderRadius: radius.md, padding: space.md }} gap={space.md}>
             <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">{TXN[t.type]}</Text>
+              <Text variant="bodyStrong">{t.note?.startsWith('Gift') ? 'Gift mila' : TXN[t.type]}</Text>
               <Text variant="caption">
                 {t.note ? `${t.note} · ` : ''}
                 {formatDateTime(t.createdAt)}

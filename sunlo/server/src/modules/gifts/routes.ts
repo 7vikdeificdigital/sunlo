@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { and, asc, eq, gte, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../../db/client';
 import { consultSessions, users, vendors, wallets } from '../../db/schema';
@@ -152,8 +152,26 @@ giftsPrivate.get('/admin/gifts', async (_req, res) => {
     .select({ n: sql<number>`count(*)::int`, gross: sql<number>`coalesce(sum(${giftSends.price}),0)::int`, vendor: sql<number>`coalesce(sum(${giftSends.vendorEarning}),0)::int` })
     .from(giftSends)
     .where(gte(giftSends.createdAt, since));
+  const recent = await db
+    .select({
+      id: giftSends.id,
+      sessionId: giftSends.sessionId,
+      giftName: giftSends.giftName,
+      price: giftSends.price,
+      commissionPct: giftSends.commissionPct,
+      vendorEarning: giftSends.vendorEarning,
+      createdAt: giftSends.createdAt,
+      userName: users.name,
+      vendorName: vendors.displayName,
+    })
+    .from(giftSends)
+    .innerJoin(users, eq(users.id, giftSends.userId))
+    .innerJoin(vendors, eq(vendors.id, giftSends.vendorId))
+    .orderBy(desc(giftSends.createdAt))
+    .limit(40);
   res.json({
     items: rows.map((g) => ({ ...g, hasSvga: g.svgaVersion > 0 })),
+    recent,
     last30: { count: t?.n ?? 0, gross: t?.gross ?? 0, commission: (t?.gross ?? 0) - (t?.vendor ?? 0) },
     commissionPct: (await getSettings()).giftCommissionPct,
   });
@@ -211,4 +229,59 @@ giftsPrivate.delete('/admin/gifts/:id/svga', async (req, res) => {
   await db.update(gifts).set({ svgaData: null, svgaVersion: 0, mediaType: null }).where(eq(gifts.id, id));
   await audit(req, 'gift.svga.remove', 'gift', id);
   res.json({ ok: true });
+});
+
+// ---------- Session ke gifts (admin) ----------
+giftsPrivate.get('/admin/sessions/:id/gifts', requireRole('ADMIN'), async (req, res) => {
+  const { id } = params(req, idParam);
+  const rows = await db
+    .select({ id: giftSends.id, giftName: giftSends.giftName, price: giftSends.price, commissionPct: giftSends.commissionPct, vendorEarning: giftSends.vendorEarning, createdAt: giftSends.createdAt })
+    .from(giftSends)
+    .where(eq(giftSends.sessionId, id))
+    .orderBy(asc(giftSends.createdAt));
+  const gross = rows.reduce((a, r) => a + r.price, 0);
+  const vendor = rows.reduce((a, r) => a + r.vendorEarning, 0);
+  res.json({ items: rows, total: { count: rows.length, gross, vendor, commission: gross - vendor } });
+});
+
+// ---------- Vendor: mile hue gifts ----------
+giftsPrivate.get('/vendor/gifts', requireRole('VENDOR'), async (req, res) => {
+  const [v] = await db.select({ id: vendors.id }).from(vendors).where(eq(vendors.userId, authId(req))).limit(1);
+  if (!v) throw notFound('Vendor');
+  const rows = await db
+    .select({
+      id: giftSends.id,
+      sessionId: giftSends.sessionId,
+      giftId: giftSends.giftId,
+      giftName: giftSends.giftName,
+      price: giftSends.price,
+      vendorEarning: giftSends.vendorEarning,
+      createdAt: giftSends.createdAt,
+      userName: users.name,
+      version: gifts.svgaVersion,
+      hasThumb: sql<boolean>`${gifts.thumbData} is not null`,
+    })
+    .from(giftSends)
+    .innerJoin(users, eq(users.id, giftSends.userId))
+    .leftJoin(gifts, eq(gifts.id, giftSends.giftId))
+    .where(eq(giftSends.vendorId, v.id))
+    .orderBy(desc(giftSends.createdAt))
+    .limit(100);
+  const [t] = await db
+    .select({ n: sql<number>`count(*)::int`, coins: sql<number>`coalesce(sum(${giftSends.price}),0)::int`, earning: sql<number>`coalesce(sum(${giftSends.vendorEarning}),0)::int` })
+    .from(giftSends)
+    .where(eq(giftSends.vendorId, v.id));
+  res.json({
+    total: { count: t?.n ?? 0, price: t?.coins ?? 0, earning: t?.earning ?? 0 },
+    items: rows.map((r) => ({
+      id: r.id,
+      sessionId: r.sessionId,
+      giftName: r.giftName,
+      price: r.price,
+      vendorEarning: r.vendorEarning,
+      createdAt: r.createdAt,
+      userName: r.userName,
+      thumbUrl: r.hasThumb ? `/gifts/${r.giftId}/thumb?v=${r.version ?? 0}` : null,
+    })),
+  });
 });

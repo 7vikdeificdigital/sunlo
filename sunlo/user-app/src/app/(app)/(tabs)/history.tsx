@@ -77,7 +77,7 @@ function WalletList() {
               <Ionicons name={credit ? 'arrow-down' : 'arrow-up'} size={18} color={credit ? colors.success : colors.danger} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">{TXN_LABEL[item.type]}</Text>
+              <Text variant="bodyStrong">{item.note?.startsWith('Gift') ? 'Gift bheja' : TXN_LABEL[item.type]}</Text>
               <Text variant="caption">
                 {item.note ? `${item.note} · ` : ''}
                 {formatDateTime(item.createdAt)}

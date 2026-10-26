@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Empty, ErrorBox, Loading, Modal, PageHead, Pager, ReasonDialog, Status, Tabs } from '@/components/ui';
 import { api, errMsg } from '@/lib/api';
 import { dt, mins, rupees } from '@/lib/format';
+import { SessionGifts } from './SessionGifts';
 
 // ======================= Sessions =======================
 
@@ -130,6 +131,7 @@ export function SessionDetail() {
           </button>
         ) : null}
       </PageHead>
+      <SessionGifts id={s.id} />
       <div className="grid g2" style={{ alignItems: 'start' }}>
         <div className="card">
           <dl className="kv">

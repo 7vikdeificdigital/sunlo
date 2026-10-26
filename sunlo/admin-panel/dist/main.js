@@ -25112,7 +25112,7 @@ function Gifts() {
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("table", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("tr", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "Gift" }),
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { className: "right", children: "Keemat" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { className: "right", children: "Keemat (coins)" }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "Animation (SVGA / WebM)" }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "Status" }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", {})
@@ -25123,7 +25123,10 @@ function Gifts() {
             " ",
             /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("b", { children: g.name })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { className: "right num", children: rupees(g.price, true) }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("td", { className: "right num", children: [
+            rupees(g.price).replace("\u20B9", ""),
+            " coins"
+          ] }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("td", { children: [
             g.hasSvga ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "badge b-good", children: "Animation lagi hai" }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "badge b-mute", children: "Emoji animation" }),
             " ",
@@ -25152,6 +25155,39 @@ function Gifts() {
         ] }, g.id)) })
       ] })
     ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "card", style: { marginTop: 16 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "card-head", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h3", { children: "Haal ke gifts (user \u2192 vendor)" }) }),
+      d2.recent.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "faint", style: { margin: 0 }, children: "Abhi tak koi gift nahi bheja gaya." }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("table", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "Kab" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "Gift" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "User" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { children: "Vendor" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { className: "right", children: "Coins" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { className: "right", children: "Vendor ko" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", { className: "right", children: "Platform" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("th", {})
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("tbody", { children: d2.recent.map((r) => /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { className: "faint", children: dt(r.createdAt) }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("b", { children: r.giftName }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { children: r.userName ?? "User" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { children: r.vendorName }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { className: "right num", children: rupees(r.price) }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { className: "right num", children: rupees(r.vendorEarning) }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("td", { className: "right num", children: [
+            rupees(r.price - r.vendorEarning),
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("span", { className: "faint", children: [
+              "(",
+              r.commissionPct,
+              "%)"
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Link, { className: "btn ghost sm", to: `/sessions/${r.sessionId}`, children: "Session" }) })
+        ] }, r.id)) })
+      ] })
+    ] }),
     edit ? /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Modal, { title: edit.id ? "Gift edit" : "Naya gift", onClose: () => setEdit(null), children: [
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "field", children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("label", { children: "Naam" }),
@@ -25162,7 +25198,7 @@ function Gifts() {
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("input", { className: "input", value: edit.icon, onChange: (e) => setEdit({ ...edit, icon: e.target.value }), maxLength: 8 })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "field", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("label", { children: "Keemat (\u20B9)" }),
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("label", { children: "Keemat (coins, 1 coin = \u20B91)" }),
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("input", { className: "input", inputMode: "decimal", value: edit.price, onChange: (e) => setEdit({ ...edit, price: e.target.value }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "field", children: [
@@ -25238,7 +25274,58 @@ function Login() {
 
 // src/pages/Money.tsx
 var import_react6 = __toESM(require_react(), 1);
+
+// src/pages/SessionGifts.tsx
 var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+function SessionGifts({ id }) {
+  const q = useQuery({ queryKey: ["session-gifts", id], queryFn: () => api(`/admin/sessions/${id}/gifts`) });
+  if (!q.data || q.data.items.length === 0) return null;
+  const t = q.data.total;
+  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "card", style: { marginBottom: 16 }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "card-head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("h3", { children: [
+        "Gifts diye gaye (",
+        t.count,
+        ")"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { className: "faint", children: [
+        "Total ",
+        rupees(t.gross),
+        " coins \xB7 Vendor ko ",
+        rupees(t.vendor),
+        " \xB7 Platform ",
+        rupees(t.commission)
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Kab" }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Gift" }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Coins" }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Vendor ko" }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Platform" })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("tbody", { children: q.data.items.map((g) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "faint", children: dt(g.createdAt) }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("b", { children: g.giftName }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: rupees(g.price).replace("\u20B9", "") }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: rupees(g.vendorEarning) }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("td", { className: "right num", children: [
+          rupees(g.price - g.vendorEarning),
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { className: "faint", children: [
+            "(",
+            g.commissionPct,
+            "%)"
+          ] })
+        ] })
+      ] }, g.id)) })
+    ] })
+  ] });
+}
+
+// src/pages/Money.tsx
+var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
 function Sessions() {
   const [sp] = useSearchParams();
   const vendorId = sp.get("vendorId") ?? void 0;
@@ -25251,9 +25338,9 @@ function Sessions() {
     refetchInterval: 15e3
   });
   (0, import_react6.useEffect)(() => setPage(1), [status]);
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(PageHead, { title: "Sessions", sub: vendorId ? "Ek vendor ke sessions" : "Saare chat / call sessions" }),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(PageHead, { title: "Sessions", sub: vendorId ? "Ek vendor ke sessions" : "Saare chat / call sessions" }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       Tabs,
       {
         value: status,
@@ -25267,36 +25354,36 @@ function Sessions() {
         ]
       }
     ) }),
-    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Empty, { text: "Koi session nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("table", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Samay" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "User \u2192 Vendor" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Type" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Status" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Avadhi" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Charge" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Platform" })
+    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Empty, { text: "Koi session nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("table", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Samay" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "User \u2192 Vendor" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Type" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Status" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "right", children: "Avadhi" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "right", children: "Charge" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "right", children: "Platform" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("tbody", { children: q.data.items.map((s) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { className: "click", onClick: () => nav(`/sessions/${s.id}`), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { children: dt(s.requestedAt) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("td", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("tbody", { children: q.data.items.map((s) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { className: "click", onClick: () => nav(`/sessions/${s.id}`), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: dt(s.requestedAt) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("td", { children: [
             s.userName ?? "User",
             " \u2192 ",
-            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("b", { children: s.vendorName })
+            /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("b", { children: s.vendorName })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { children: s.type }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("td", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Status, { s: s.status }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: s.type }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("td", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Status, { s: s.status }),
             " ",
-            s.refundedAmount ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "badge b-info", children: "Refund" }) : null
+            s.refundedAmount ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: "badge b-info", children: "Refund" }) : null
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: mins(s.billedSeconds) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: rupees(s.chargedAmount) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: rupees(s.chargedAmount - s.vendorEarning) })
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right num", children: mins(s.billedSeconds) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right num", children: rupees(s.chargedAmount) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right num", children: rupees(s.chargedAmount - s.vendorEarning) })
         ] }, s.id)) })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Pager, { page, setPage, hasMore: page * 25 < q.data.total })
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Pager, { page, setPage, hasMore: page * 25 < q.data.total })
     ] })
   ] });
 }
@@ -25306,98 +25393,99 @@ function SessionDetail() {
   const q = useQuery({ queryKey: ["session", id], queryFn: () => api(`/admin/sessions/${id}`) });
   const [refund, setRefund] = (0, import_react6.useState)(false);
   const [amt, setAmt] = (0, import_react6.useState)("");
-  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Loading, {});
-  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ErrorBox, { e: q.error });
+  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Loading, {});
+  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(ErrorBox, { e: q.error });
   const s = q.data;
   const canRefund = s.status === "COMPLETED" && s.chargedAmount > 0 && !s.refundedAmount;
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(PageHead, { title: `${s.type} session`, sub: `${s.userName ?? "User"} \u2192 ${s.vendorName} \xB7 ${dt(s.requestedAt)}`, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Link, { to: "/sessions", className: "btn ghost", children: "\u2190 Sessions" }),
-      canRefund ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("button", { className: "btn danger", onClick: () => setRefund(true), children: "Refund" }) : null
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(PageHead, { title: `${s.type} session`, sub: `${s.userName ?? "User"} \u2192 ${s.vendorName} \xB7 ${dt(s.requestedAt)}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { to: "/sessions", className: "btn ghost", children: "\u2190 Sessions" }),
+      canRefund ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("button", { className: "btn danger", onClick: () => setRefund(true), children: "Refund" }) : null
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "grid g2", style: { alignItems: "start" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "card", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("dl", { className: "kv", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Status" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("dd", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Status, { s: s.status }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(SessionGifts, { id: s.id }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "grid g2", style: { alignItems: "start" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "card", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("dl", { className: "kv", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Status" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("dd", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Status, { s: s.status }),
           " ",
-          s.endReason ? /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { className: "faint", children: [
+          s.endReason ? /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("span", { className: "faint", children: [
             "(",
             s.endReason,
             ")"
           ] }) : null
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "User" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Link, { to: `/users/${s.userId}`, children: s.userName ?? "User" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Vendor" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Link, { to: `/vendors/${s.vendorId}`, children: s.vendorName }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Topic" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("dd", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "User" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { to: `/users/${s.userId}`, children: s.userName ?? "User" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Vendor" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { to: `/vendors/${s.vendorId}`, children: s.vendorName }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Topic" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("dd", { children: [
           s.intake?.topic ?? "\u2014",
-          s.intake?.note ? /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "faint", children: [
+          s.intake?.note ? /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "faint", children: [
             "\u201C",
             s.intake.note,
             "\u201D"
           ] }) : null
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Shuru / Khatam" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("dd", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Shuru / Khatam" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("dd", { children: [
           dt(s.acceptedAt),
           " \u2192 ",
           dt(s.endedAt)
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Avadhi" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { children: mins(s.billedSeconds) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Rate" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("dd", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Avadhi" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { children: mins(s.billedSeconds) }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Rate" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("dd", { children: [
           rupees(s.ratePerMin),
           "/min"
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Charge" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { className: "num", children: rupees(s.chargedAmount) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Vendor ko" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { className: "num", children: rupees(s.vendorEarning) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("dt", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Charge" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { className: "num", children: rupees(s.chargedAmount) }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Vendor ko" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { className: "num", children: rupees(s.vendorEarning) }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("dt", { children: [
           "Platform (",
           s.commissionPct,
           "%)"
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { className: "num", children: rupees(s.chargedAmount - s.vendorEarning) }),
-        s.refundedAmount ? /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Refund" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { className: "num", children: rupees(s.refundedAmount) })
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { className: "num", children: rupees(s.chargedAmount - s.vendorEarning) }),
+        s.refundedAmount ? /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Refund" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { className: "num", children: rupees(s.refundedAmount) })
         ] }) : null
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "card", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "card-head", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("h3", { children: "Chat transcript" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "faint", children: "Dekhna audit log mein darj hai" })
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "card-head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("h3", { children: "Chat transcript" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: "faint", children: "Dekhna audit log mein darj hai" })
         ] }),
-        s.messages.length ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "chat", children: s.messages.map((m) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: `bubble ${m.senderId === s.vendorUserId ? "v" : "u"} ${m.flagged ? "flag" : ""}`, children: [
+        s.messages.length ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "chat", children: s.messages.map((m) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: `bubble ${m.senderId === s.vendorUserId ? "v" : "u"} ${m.flagged ? "flag" : ""}`, children: [
           m.body,
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "t", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "t", children: [
             m.senderId === s.vendorUserId ? s.vendorName : s.userName ?? "User",
             " \xB7 ",
             dt(m.createdAt),
             m.flagged ? " \xB7 \u26A0 contact share ki koshish" : ""
           ] })
-        ] }, m.id)) }) : /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("p", { className: "faint", children: s.type === "CHAT" ? "Koi message nahi" : "Call session: transcript nahi hota" })
+        ] }, m.id)) }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("p", { className: "faint", children: s.type === "CHAT" ? "Koi message nahi" : "Call session: transcript nahi hota" })
       ] })
     ] }),
-    refund ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    refund ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       ReasonDialog,
       {
         title: "Session refund",
         label: "Refund ki wajah (user ko dikhegi)",
         confirm: "Refund karein",
         danger: true,
-        extra: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "field", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("label", { htmlFor: "ramt", children: [
+        extra: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("label", { htmlFor: "ramt", children: [
             "Raqam (\u20B9) \xB7 khaali = poora ",
             rupees(s.chargedAmount)
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("input", { id: "ramt", className: "input", inputMode: "decimal", value: amt, onChange: (e) => setAmt(e.target.value.replace(/[^\d.]/g, "")) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "faint", children: "Vendor ki us hisse ki kamai (jitni wallet mein ho) wapas li jayegi." })
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("input", { id: "ramt", className: "input", inputMode: "decimal", value: amt, onChange: (e) => setAmt(e.target.value.replace(/[^\d.]/g, "")) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: "faint", children: "Vendor ki us hisse ki kamai (jitni wallet mein ho) wapas li jayegi." })
         ] }),
         onClose: () => setRefund(false),
         onSubmit: async (reason) => {
@@ -25419,9 +25507,9 @@ function Payments() {
     )
   });
   (0, import_react6.useEffect)(() => setPage(1), [status]);
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(PageHead, { title: "Payments", sub: "Wallet recharge" }),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(PageHead, { title: "Payments", sub: "Wallet recharge" }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       Tabs,
       {
         value: status,
@@ -25434,30 +25522,30 @@ function Payments() {
         ]
       }
     ) }),
-    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Empty, { text: "Koi payment nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("table", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Samay" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "User" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Status" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Wallet" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Bonus" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "GST" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Kul" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Ref" })
+    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Empty, { text: "Koi payment nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("table", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Samay" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "User" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Status" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "right", children: "Wallet" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "right", children: "Bonus" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "right", children: "GST" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "right", children: "Kul" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Ref" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("tbody", { children: q.data.items.map((p) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { children: dt(p.createdAt) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Link, { to: `/users/${p.userId}`, children: p.userName ?? p.phone }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Status, { s: p.status }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: rupees(p.amount) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: rupees(p.bonus) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: rupees(p.gstAmount) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("b", { children: rupees(p.totalPayable) }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "mono faint", children: p.providerPaymentId ?? p.provider })
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("tbody", { children: q.data.items.map((p) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: dt(p.createdAt) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { to: `/users/${p.userId}`, children: p.userName ?? p.phone }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Status, { s: p.status }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right num", children: rupees(p.amount) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right num", children: rupees(p.bonus) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right num", children: rupees(p.gstAmount) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right num", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("b", { children: rupees(p.totalPayable) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "mono faint", children: p.providerPaymentId ?? p.provider })
         ] }, p.id)) })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Pager, { page, setPage, hasMore: page * 25 < q.data.total })
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Pager, { page, setPage, hasMore: page * 25 < q.data.total })
     ] })
   ] });
 }
@@ -25471,9 +25559,9 @@ function Withdrawals() {
     qc2.invalidateQueries({ queryKey: ["withdrawals"] });
     qc2.invalidateQueries({ queryKey: ["dashboard"] });
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(PageHead, { title: "Withdrawals", sub: "Vendors ko payout. Paisa bhejne ke baad UTR/Ref darj karein." }),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(PageHead, { title: "Withdrawals", sub: "Vendors ko payout. Paisa bhejne ke baad UTR/Ref darj karein." }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       Tabs,
       {
         value: status,
@@ -25485,34 +25573,34 @@ function Withdrawals() {
         ]
       }
     ) }),
-    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Empty, { text: "Is list mein kuch nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("table", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Request" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Vendor" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Account" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { className: "right", children: "Raqam" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", { children: "Status" }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("th", {})
+    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Empty, { text: "Is list mein kuch nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Request" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Vendor" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Account" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { className: "right", children: "Raqam" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Status" }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", {})
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("tbody", { children: q.data.items.map((w) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("tr", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { children: dt(w.createdAt) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Link, { to: `/vendors/${w.vendorId}`, children: w.vendorName }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "faint", children: w.payoutSnapshot.method === "UPI" ? `UPI ${w.payoutSnapshot.upiId}` : `${w.payoutSnapshot.accountHolder} \u2022\u2022\u2022\u2022${w.payoutSnapshot.accountLast4}` }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right num", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("b", { children: rupees(w.amount) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("td", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Status, { s: w.status }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("tbody", { children: q.data.items.map((w) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: dt(w.createdAt) }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { to: `/vendors/${w.vendorId}`, children: w.vendorName }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "faint", children: w.payoutSnapshot.method === "UPI" ? `UPI ${w.payoutSnapshot.upiId}` : `${w.payoutSnapshot.accountHolder} \u2022\u2022\u2022\u2022${w.payoutSnapshot.accountLast4}` }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right num", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("b", { children: rupees(w.amount) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("td", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Status, { s: w.status }),
           " ",
-          w.reference ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "mono faint", children: w.reference }) : null,
-          w.note ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "faint", children: w.note }) : null
+          w.reference ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: "mono faint", children: w.reference }) : null,
+          w.note ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "faint", children: w.note }) : null
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("td", { className: "right", children: w.status === "PENDING" ? /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("button", { className: "btn ghost sm", onClick: () => setReject(w), children: "Reject" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("button", { className: "btn sm", onClick: () => setPay(w), children: "Pay karein" })
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right", children: w.status === "PENDING" ? /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("button", { className: "btn ghost sm", onClick: () => setReject(w), children: "Reject" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("button", { className: "btn sm", onClick: () => setPay(w), children: "Pay karein" })
         ] }) : null })
       ] }, w.id)) })
     ] }) }),
-    pay ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(PayDialog, { w: pay, onClose: () => setPay(null), onDone: refresh2 }) : null,
-    reject ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    pay ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(PayDialog, { w: pay, onClose: () => setPay(null), onDone: refresh2 }) : null,
+    reject ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       ReasonDialog,
       {
         title: "Withdrawal reject",
@@ -25533,18 +25621,18 @@ function PayDialog({ w, onClose, onDone }) {
   const [ref, setRef] = (0, import_react6.useState)("");
   const [err, setErr] = (0, import_react6.useState)(null);
   const [busy, setBusy] = (0, import_react6.useState)(false);
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Modal, { title: `Pay ${rupees(w.amount)} \u2192 ${w.vendorName}`, onClose, children: [
-    details ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dl", { className: "kv", style: { background: "var(--surface-2)", padding: 12, borderRadius: 10 }, children: details.method === "UPI" ? /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "UPI ID" }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { className: "mono", children: details.upiId })
-    ] }) : /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Naam" }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { children: details.accountHolder }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "Account no." }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { className: "mono", children: details.accountNumber }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dt", { children: "IFSC" }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("dd", { className: "mono", children: details.ifsc })
-    ] }) }) : /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Modal, { title: `Pay ${rupees(w.amount)} \u2192 ${w.vendorName}`, onClose, children: [
+    details ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dl", { className: "kv", style: { background: "var(--surface-2)", padding: 12, borderRadius: 10 }, children: details.method === "UPI" ? /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "UPI ID" }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { className: "mono", children: details.upiId })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Naam" }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { children: details.accountHolder }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "Account no." }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { className: "mono", children: details.accountNumber }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dt", { children: "IFSC" }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("dd", { className: "mono", children: details.ifsc })
+    ] }) }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       "button",
       {
         className: "btn ghost",
@@ -25558,14 +25646,14 @@ function PayDialog({ w, onClose, onDone }) {
         children: "Poora account number dikhayein (audit log mein darj hoga)"
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "field", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { htmlFor: "ref", children: "Bank UTR / UPI reference (paisa bhejne ke baad)" }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("input", { id: "ref", className: "input mono", value: ref, onChange: (e) => setRef(e.target.value), maxLength: 100 })
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "field", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("label", { htmlFor: "ref", children: "Bank UTR / UPI reference (paisa bhejne ke baad)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("input", { id: "ref", className: "input mono", value: ref, onChange: (e) => setRef(e.target.value), maxLength: 100 })
     ] }),
-    err ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "error", children: err }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("button", { className: "btn ghost", onClick: onClose, children: "Cancel" }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    err ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "error", children: err }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("button", { className: "btn ghost", onClick: onClose, children: "Cancel" }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
         "button",
         {
           className: "btn good",
@@ -25592,7 +25680,7 @@ function PayDialog({ w, onClose, onDone }) {
 
 // src/pages/Safety.tsx
 var import_react7 = __toESM(require_react(), 1);
-var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
 var REASON_HI = {
   INAPPROPRIATE_BEHAVIOUR: "Galat vyavhar",
   ASKED_FOR_MONEY_OR_CONTACT: "Alag se paise/number maanga",
@@ -25606,9 +25694,9 @@ function Reports() {
   const [warnVendor, setWarnVendor] = (0, import_react7.useState)(true);
   const [resolving, setResolving] = (0, import_react7.useState)(null);
   const q = useQuery({ queryKey: ["reports", status], queryFn: () => api("/admin/reports", { query: { status, limit: 50 } }) });
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(PageHead, { title: "Reports", sub: "Users ki vendors ke khilaaf shikayatein. 24 ghante mein jawab dein." }),
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PageHead, { title: "Reports", sub: "Users ki vendors ke khilaaf shikayatein. 24 ghante mein jawab dein." }),
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       Tabs,
       {
         value: status,
@@ -25619,43 +25707,43 @@ function Reports() {
         ]
       }
     ) }),
-    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Empty, { text: "Koi report nahi \u{1F389}" }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "stack", children: q.data.items.map((r) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "card", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "card-head", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("b", { children: REASON_HI[r.reason] ?? r.reason }),
+    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Empty, { text: "Koi report nahi \u{1F389}" }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "stack", children: q.data.items.map((r) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card-head", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("b", { children: REASON_HI[r.reason] ?? r.reason }),
           " \xB7 ",
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { to: `/vendors/${r.vendorId}`, children: r.vendorName }),
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "faint", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Link, { to: `/vendors/${r.vendorId}`, children: r.vendorName }),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "faint", children: [
             r.reporterName ?? "User",
             " ne \xB7 ",
             dt(r.createdAt)
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Status, { s: r.status })
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Status, { s: r.status })
       ] }),
-      r.details ? /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("p", { style: { margin: "0 0 10px" }, children: [
+      r.details ? /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("p", { style: { margin: "0 0 10px" }, children: [
         "\u201C",
         r.details,
         "\u201D"
       ] }) : null,
-      r.resolution ? /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "notice", children: [
+      r.resolution ? /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "notice", children: [
         "Faisla: ",
         r.resolution
       ] }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "row", children: [
-        r.sessionId ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { className: "btn ghost sm", to: `/sessions/${r.sessionId}`, children: "Session / transcript" }) : null,
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { className: "btn ghost sm", to: `/vendors/${r.vendorId}`, children: "Vendor profile" }),
-        r.status === "OPEN" ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("button", { className: "btn sm", onClick: () => setResolving(r), children: "Resolve karein" }) : null
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "row", children: [
+        r.sessionId ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Link, { className: "btn ghost sm", to: `/sessions/${r.sessionId}`, children: "Session / transcript" }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Link, { className: "btn ghost sm", to: `/vendors/${r.vendorId}`, children: "Vendor profile" }),
+        r.status === "OPEN" ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { className: "btn sm", onClick: () => setResolving(r), children: "Resolve karein" }) : null
       ] })
     ] }, r.id)) }),
-    resolving ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+    resolving ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       ReasonDialog,
       {
         title: "Report resolve",
         label: "Kya kaarvai ki? (jaise: vendor ko chetavni, suspend, refund)",
         confirm: "Resolve karein",
-        extra: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("label", { style: { display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("input", { type: "checkbox", checked: warnVendor, onChange: (e) => setWarnVendor(e.target.checked) }),
+        extra: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("label", { style: { display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { type: "checkbox", checked: warnVendor, onChange: (e) => setWarnVendor(e.target.checked) }),
           "Vendor ko warning notification bhejein"
         ] }),
         onClose: () => setResolving(null),
@@ -25672,9 +25760,9 @@ function Tickets() {
   const [status, setStatus] = (0, import_react7.useState)("OPEN");
   const nav = useNavigate();
   const q = useQuery({ queryKey: ["tickets", status], queryFn: () => api("/admin/tickets", { query: { status, limit: 50 } }) });
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(PageHead, { title: "Support tickets" }),
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PageHead, { title: "Support tickets" }),
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "filters", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       Tabs,
       {
         value: status,
@@ -25685,22 +25773,22 @@ function Tickets() {
         ]
       }
     ) }),
-    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Empty, { text: "Koi ticket nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("table", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Vishay" }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Kaun" }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Status" }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Aakhri update" })
+    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Empty, { text: "Koi ticket nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Vishay" }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Kaun" }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Status" }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Aakhri update" })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("tbody", { children: q.data.items.map((t) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { className: "click", onClick: () => nav(`/tickets/${t.id}`), children: [
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { style: { fontWeight: 600 }, children: t.subject }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("td", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("tbody", { children: q.data.items.map((t) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { className: "click", onClick: () => nav(`/tickets/${t.id}`), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { style: { fontWeight: 600 }, children: t.subject }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("td", { children: [
           t.userName ?? t.phone,
           " ",
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: "badge b-mute", children: t.role === "VENDOR" ? "Vendor" : "User" })
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "badge b-mute", children: t.role === "VENDOR" ? "Vendor" : "User" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Status, { s: t.status }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: dt(t.updatedAt) })
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Status, { s: t.status }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: dt(t.updatedAt) })
       ] }, t.id)) })
     ] }) })
   ] });
@@ -25715,13 +25803,13 @@ function TicketDetail() {
   const [msg, setMsg] = (0, import_react7.useState)("");
   const [err, setErr] = (0, import_react7.useState)(null);
   const [busy, setBusy] = (0, import_react7.useState)(false);
-  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Loading, {});
-  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(ErrorBox, { e: q.error });
+  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Loading, {});
+  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ErrorBox, { e: q.error });
   const t = q.data;
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(PageHead, { title: t.subject, sub: `${t.userName ?? t.phone} \xB7 ${t.role === "VENDOR" ? "Vendor" : "User"}`, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { to: "/tickets", className: "btn ghost", children: "\u2190 Tickets" }),
-      t.status === "OPEN" ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(PageHead, { title: t.subject, sub: `${t.userName ?? t.phone} \xB7 ${t.role === "VENDOR" ? "Vendor" : "User"}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Link, { to: "/tickets", className: "btn ghost", children: "\u2190 Tickets" }),
+      t.status === "OPEN" ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
         "button",
         {
           className: "btn ghost",
@@ -25734,19 +25822,19 @@ function TicketDetail() {
         }
       ) : null
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "card stack", style: { maxWidth: 760 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "chat", style: { maxHeight: 520 }, children: t.messages.map((m) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: `bubble ${m.isStaff ? "u" : "v"}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card stack", style: { maxWidth: 760 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "chat", style: { maxHeight: 520 }, children: t.messages.map((m) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: `bubble ${m.isStaff ? "u" : "v"}`, children: [
         m.body,
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "t", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "t", children: [
           m.isStaff ? "Support team" : t.userName ?? "User",
           " \xB7 ",
           dt(m.createdAt)
         ] })
       ] }, m.id)) }),
-      t.status === "OPEN" ? /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("textarea", { className: "input", placeholder: "Jawab likhein\u2026", value: msg, onChange: (e) => setMsg(e.target.value), maxLength: 2e3, "aria-label": "Jawab" }),
-        err ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "error", children: err }) : null,
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "row", style: { justifyContent: "flex-end" }, children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+      t.status === "OPEN" ? /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("textarea", { className: "input", placeholder: "Jawab likhein\u2026", value: msg, onChange: (e) => setMsg(e.target.value), maxLength: 2e3, "aria-label": "Jawab" }),
+        err ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "error", children: err }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "row", style: { justifyContent: "flex-end" }, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
           "button",
           {
             className: "btn",
@@ -25780,31 +25868,31 @@ function Reviews() {
       { query: { limit: 50 } }
     )
   });
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(import_jsx_runtime10.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(PageHead, { title: "Reviews", sub: "Galat/apmaanjanak review chhupa sakte hain (delete nahi hota)" }),
-    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Empty, { text: "Abhi koi review nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("table", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Rating" }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Review" }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Vendor" }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", { children: "Kab" }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("th", {})
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PageHead, { title: "Reviews", sub: "Galat/apmaanjanak review chhupa sakte hain (delete nahi hota)" }),
+    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Empty, { text: "Abhi koi review nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Rating" }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Review" }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Vendor" }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Kab" }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", {})
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("tbody", { children: q.data.items.map((r) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("tr", { style: { opacity: r.isHidden ? 0.55 : 1 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("td", { className: "num", "aria-label": `${r.rating} star`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("tbody", { children: q.data.items.map((r) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { style: { opacity: r.isHidden ? 0.55 : 1 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("td", { className: "num", "aria-label": `${r.rating} star`, children: [
           "\u2605".repeat(r.rating),
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: "faint", children: "\u2605".repeat(5 - r.rating) })
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "faint", children: "\u2605".repeat(5 - r.rating) })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("td", { children: [
-          r.comment ?? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: "faint", children: "(bina comment)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "faint", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("td", { children: [
+          r.comment ?? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "faint", children: "(bina comment)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "faint", children: [
             "\u2014 ",
             r.userName ?? "User"
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Link, { to: `/vendors/${r.vendorId}`, children: r.vendorName }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { children: dt(r.createdAt) }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Link, { to: `/vendors/${r.vendorId}`, children: r.vendorName }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: dt(r.createdAt) }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
           "button",
           {
             className: "btn ghost sm",
@@ -25822,7 +25910,7 @@ function Reviews() {
 
 // src/pages/Setup.tsx
 var import_react8 = __toESM(require_react(), 1);
-var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
 function Catalog() {
   const qc2 = useQueryClient();
   const cats = useQuery({ queryKey: ["categories"], queryFn: () => api("/admin/categories") });
@@ -25833,60 +25921,60 @@ function Catalog() {
   const [editPack, setEditPack] = (0, import_react8.useState)(null);
   const [kw, setKw] = (0, import_react8.useState)("");
   const [err, setErr] = (0, import_react8.useState)(null);
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PageHead, { title: "Categories & packs", sub: "Topics, recharge packs, home banners aur chat mein band shabd" }),
-    err ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "error", style: { marginBottom: 12 }, children: err }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card", style: { marginBottom: 16 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card-head", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: "Categories" }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { className: "btn sm", onClick: () => setEditCat({ kind: "EXPERT", icon: "chatbubbles-outline", sortOrder: (cats.data?.items.length ?? 0) * 1, isActive: true, description: "" }), children: "+ Nayi category" })
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(PageHead, { title: "Categories & packs", sub: "Topics, recharge packs, home banners aur chat mein band shabd" }),
+    err ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "error", style: { marginBottom: 12 }, children: err }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card", style: { marginBottom: 16 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card-head", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("h3", { children: "Categories" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn sm", onClick: () => setEditCat({ kind: "EXPERT", icon: "chatbubbles-outline", sortOrder: (cats.data?.items.length ?? 0) * 1, isActive: true, description: "" }), children: "+ Nayi category" })
       ] }),
-      cats.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Loading, {}) : /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("table", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Naam" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Type" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Icon" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { className: "right", children: "Vendors" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Status" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", {})
+      cats.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Loading, {}) : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("table", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Naam" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Type" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Icon" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { className: "right", children: "Vendors" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Status" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", {})
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("tbody", { children: cats.data?.items.map((c) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("td", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("b", { children: c.name }),
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "faint", children: c.description })
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("tbody", { children: cats.data?.items.map((c) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("td", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("b", { children: c.name }),
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "faint", children: c.description })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: `badge ${c.kind === "LISTENER" ? "b-good" : "b-info"}`, children: c.kind === "LISTENER" ? "Listener" : "Expert" }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { className: "mono faint", children: c.icon }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { className: "right num", children: c.vendors }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: c.isActive ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "badge b-good", children: "Chalu" }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "badge b-mute", children: "Band" }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { className: "btn ghost sm", onClick: () => setEditCat(c), children: "Edit" }) })
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: `badge ${c.kind === "LISTENER" ? "b-good" : "b-info"}`, children: c.kind === "LISTENER" ? "Listener" : "Expert" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "mono faint", children: c.icon }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "right num", children: c.vendors }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: c.isActive ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "badge b-good", children: "Chalu" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "badge b-mute", children: "Band" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn ghost sm", onClick: () => setEditCat(c), children: "Edit" }) })
         ] }, c.id)) })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "grid g2", style: { alignItems: "start" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card-head", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: "Recharge packs" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { className: "btn sm", onClick: () => setEditPack({ bonusPct: 0, isPopular: false, isActive: true, sortOrder: packs.data?.items.length ?? 0 }), children: "+ Naya pack" })
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid g2", style: { alignItems: "start" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card-head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("h3", { children: "Recharge packs" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn sm", onClick: () => setEditPack({ bonusPct: 0, isPopular: false, isActive: true, sortOrder: packs.data?.items.length ?? 0 }), children: "+ Naya pack" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("tbody", { children: packs.data?.items.map((p) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { style: { opacity: p.isActive ? 1 : 0.5 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("td", { className: "num", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("b", { children: rupees(p.amount) }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("tbody", { children: packs.data?.items.map((p) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { style: { opacity: p.isActive ? 1 : 0.5 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("td", { className: "num", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("b", { children: rupees(p.amount) }),
             " ",
-            p.isPopular ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "badge b-warn", children: "Popular" }) : null
+            p.isPopular ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "badge b-warn", children: "Popular" }) : null
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: p.bonusPct ? `+${p.bonusPct}% bonus` : "\u2014" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: p.isActive ? "" : "Band" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { className: "btn ghost sm", onClick: () => setEditPack(p), children: "Edit" }) })
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: p.bonusPct ? `+${p.bonusPct}% bonus` : "\u2014" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: p.isActive ? "" : "Band" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn ghost sm", onClick: () => setEditPack(p), children: "Edit" }) })
         ] }, p.id)) }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "stack", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { style: { marginBottom: 6 }, children: "Chat mein band shabd" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "faint", style: { marginTop: 0 }, children: "Yeh shabd chat mein apne aap *** ho jaate hain (phone number/email hamesha chhupte hain)." }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "row", style: { flexWrap: "wrap", gap: 6, marginBottom: 10 }, children: kws.data?.items.map((k) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("span", { className: "badge b-mute", style: { paddingRight: 4 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "stack", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("h3", { style: { marginBottom: 6 }, children: "Chat mein band shabd" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "faint", style: { marginTop: 0 }, children: "Yeh shabd chat mein apne aap *** ho jaate hain (phone number/email hamesha chhupte hain)." }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "row", style: { flexWrap: "wrap", gap: 6, marginBottom: 10 }, children: kws.data?.items.map((k) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: "badge b-mute", style: { paddingRight: 4 }, children: [
             k.word,
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
               "button",
               {
                 "aria-label": `${k.word} hatayein`,
@@ -25899,7 +25987,7 @@ function Catalog() {
               }
             )
           ] }, k.id)) }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
             "form",
             {
               className: "row",
@@ -25915,24 +26003,24 @@ function Catalog() {
                 }
               },
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { className: "input", value: kw, onChange: (e) => setKw(e.target.value), placeholder: "Naya shabd", "aria-label": "Naya shabd" }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { className: "btn", type: "submit", children: "Jodein" })
+                /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { className: "input", value: kw, onChange: (e) => setKw(e.target.value), placeholder: "Naya shabd", "aria-label": "Naya shabd" }),
+                /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn", type: "submit", children: "Jodein" })
               ]
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { style: { marginBottom: 8 }, children: "Home banners" }),
-          banners.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("tbody", { children: banners.data.items.map((b) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { style: { opacity: b.isActive ? 1 : 0.5 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("td", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("b", { children: b.title }),
-              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "faint", children: b.subtitle })
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("h3", { style: { marginBottom: 8 }, children: "Home banners" }),
+          banners.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("tbody", { children: banners.data.items.map((b) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { style: { opacity: b.isActive ? 1 : 0.5 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("td", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("b", { children: b.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "faint", children: b.subtitle })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("td", { className: "faint", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("td", { className: "faint", children: [
               "\u2192 ",
               b.link ?? "\u2014"
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "right", children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
               "button",
               {
                 className: "btn ghost sm",
@@ -25943,59 +26031,59 @@ function Catalog() {
                 children: b.isActive ? "Band karein" : "Chalu karein"
               }
             ) })
-          ] }, b.id)) }) }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Empty, { text: "Koi banner nahi" })
+          ] }, b.id)) }) }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Empty, { text: "Koi banner nahi" })
         ] })
       ] })
     ] }),
-    editCat ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(CategoryDialog, { c: editCat, onClose: () => setEditCat(null), onDone: () => qc2.invalidateQueries({ queryKey: ["categories"] }) }) : null,
-    editPack ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PackDialog, { p: editPack, onClose: () => setEditPack(null), onDone: () => qc2.invalidateQueries({ queryKey: ["packs"] }) }) : null
+    editCat ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(CategoryDialog, { c: editCat, onClose: () => setEditCat(null), onDone: () => qc2.invalidateQueries({ queryKey: ["categories"] }) }) : null,
+    editPack ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(PackDialog, { p: editPack, onClose: () => setEditPack(null), onDone: () => qc2.invalidateQueries({ queryKey: ["packs"] }) }) : null
   ] });
 }
 function CategoryDialog({ c, onClose, onDone }) {
   const [v, setV] = (0, import_react8.useState)(c);
   const [err, setErr] = (0, import_react8.useState)(null);
   const set = (p) => setV({ ...v, ...p });
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Modal, { title: c.id ? "Category edit" : "Nayi category", onClose, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { children: "Naam" }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { className: "input", value: v.name ?? "", onChange: (e) => set({ name: e.target.value, ...c.id ? {} : { slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") } }) })
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Modal, { title: c.id ? "Category edit" : "Nayi category", onClose, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { children: "Naam" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { className: "input", value: v.name ?? "", onChange: (e) => set({ name: e.target.value, ...c.id ? {} : { slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") } }) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { children: "Slug (URL ke liye)" }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { className: "input mono", value: v.slug ?? "", onChange: (e) => set({ slug: e.target.value }) })
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { children: "Slug (URL ke liye)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { className: "input mono", value: v.slug ?? "", onChange: (e) => set({ slug: e.target.value }) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { children: "Vivaran" }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { className: "input", value: v.description ?? "", onChange: (e) => set({ description: e.target.value }), maxLength: 200 })
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { children: "Vivaran" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { className: "input", value: v.description ?? "", onChange: (e) => set({ description: e.target.value }), maxLength: 200 })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "grid g2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { children: "Type" }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("select", { className: "input", value: v.kind, onChange: (e) => set({ kind: e.target.value }), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("option", { value: "LISTENER", children: "Listener" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("option", { value: "EXPERT", children: "Expert" })
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid g2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { children: "Type" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("select", { className: "input", value: v.kind, onChange: (e) => set({ kind: e.target.value }), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("option", { value: "LISTENER", children: "Listener" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("option", { value: "EXPERT", children: "Expert" })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { children: "Icon (Ionicons naam)" }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { className: "input mono", value: v.icon ?? "", onChange: (e) => set({ icon: e.target.value }) })
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { children: "Icon (Ionicons naam)" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { className: "input mono", value: v.icon ?? "", onChange: (e) => set({ icon: e.target.value }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { children: "Kram (sort)" }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { className: "input", type: "number", value: v.sortOrder ?? 0, onChange: (e) => set({ sortOrder: Number(e.target.value) }) })
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { children: "Kram (sort)" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { className: "input", type: "number", value: v.sortOrder ?? 0, onChange: (e) => set({ sortOrder: Number(e.target.value) }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { children: "Status" }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("select", { className: "input", value: v.isActive ? "1" : "0", onChange: (e) => set({ isActive: e.target.value === "1" }), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("option", { value: "1", children: "Chalu" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("option", { value: "0", children: "Band" })
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { children: "Status" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("select", { className: "input", value: v.isActive ? "1" : "0", onChange: (e) => set({ isActive: e.target.value === "1" }), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("option", { value: "1", children: "Chalu" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("option", { value: "0", children: "Band" })
         ] })
       ] })
     ] }),
-    err ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "error", children: err }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { className: "btn ghost", onClick: onClose, children: "Cancel" }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+    err ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "error", children: err }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn ghost", onClick: onClose, children: "Cancel" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
         "button",
         {
           className: "btn",
@@ -26022,29 +26110,29 @@ function PackDialog({ p, onClose, onDone }) {
   const [popular, setPopular] = (0, import_react8.useState)(p.isPopular ?? false);
   const [active, setActive] = (0, import_react8.useState)(p.isActive ?? true);
   const [err, setErr] = (0, import_react8.useState)(null);
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Modal, { title: p.id ? "Pack edit" : "Naya pack", onClose, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "grid g2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { children: "Raqam (\u20B9)" }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { className: "input", inputMode: "numeric", value: amt, onChange: (e) => setAmt(e.target.value.replace(/\D/g, "")) })
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Modal, { title: p.id ? "Pack edit" : "Naya pack", onClose, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid g2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { children: "Raqam (\u20B9)" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { className: "input", inputMode: "numeric", value: amt, onChange: (e) => setAmt(e.target.value.replace(/\D/g, "")) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { children: "Bonus %" }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { className: "input", inputMode: "numeric", value: bonus, onChange: (e) => setBonus(e.target.value.replace(/\D/g, "")) })
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { children: "Bonus %" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { className: "input", inputMode: "numeric", value: bonus, onChange: (e) => setBonus(e.target.value.replace(/\D/g, "")) })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("label", { className: "row", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { type: "checkbox", checked: popular, onChange: (e) => setPopular(e.target.checked) }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("label", { className: "row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { type: "checkbox", checked: popular, onChange: (e) => setPopular(e.target.checked) }),
       " Popular dikhayein"
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("label", { className: "row", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { type: "checkbox", checked: active, onChange: (e) => setActive(e.target.checked) }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("label", { className: "row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { type: "checkbox", checked: active, onChange: (e) => setActive(e.target.checked) }),
       " Chalu"
     ] }),
-    err ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "error", children: err }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { className: "btn ghost", onClick: onClose, children: "Cancel" }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+    err ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "error", children: err }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn ghost", onClick: onClose, children: "Cancel" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
         "button",
         {
           className: "btn",
@@ -26090,8 +26178,8 @@ function Settings() {
     for (const f of FIELDS) o[f.k] = f.money ? String(s[f.k] / 100) : String(s[f.k]);
     setV(o);
   }, [q.data]);
-  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Loading, {});
-  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ErrorBox, { e: q.error });
+  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Loading, {});
+  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ErrorBox, { e: q.error });
   async function save() {
     setMsg(null);
     const body = { maskContactInfoInChat: v.maskContactInfoInChat };
@@ -26107,20 +26195,20 @@ function Settings() {
       setMsg({ ok: false, t: errMsg(e) });
     }
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PageHead, { title: "Settings", sub: "Har badlav audit log mein darj hota hai. API keys yahan nahi: woh sirf server ki .env mein." }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "card", style: { maxWidth: 820 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "grid g2", children: FIELDS.map((f) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "field", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { htmlFor: f.k, children: f.l }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { id: f.k, className: "input", value: String(v[f.k] ?? ""), onChange: (e) => setV({ ...v, [f.k]: e.target.value }), inputMode: f.text ? "text" : "decimal" }),
-        f.help ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "faint", children: f.help }) : null
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(PageHead, { title: "Settings", sub: "Har badlav audit log mein darj hota hai. API keys yahan nahi: woh sirf server ki .env mein." }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card", style: { maxWidth: 820 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid g2", children: FIELDS.map((f) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { htmlFor: f.k, children: f.l }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { id: f.k, className: "input", value: String(v[f.k] ?? ""), onChange: (e) => setV({ ...v, [f.k]: e.target.value }), inputMode: f.text ? "text" : "decimal" }),
+        f.help ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "faint", children: f.help }) : null
       ] }, f.k)) }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("label", { className: "row", style: { marginTop: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { type: "checkbox", checked: Boolean(v.maskContactInfoInChat), onChange: (e) => setV({ ...v, maskContactInfoInChat: e.target.checked }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("label", { className: "row", style: { marginTop: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { type: "checkbox", checked: Boolean(v.maskContactInfoInChat), onChange: (e) => setV({ ...v, maskContactInfoInChat: e.target.checked }) }),
         "Chat mein phone number / email / band shabd chhupayein (suraksha ke liye chalu rakhein)"
       ] }),
-      msg ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: msg.ok ? "notice" : "error", style: { marginTop: 14, ...msg.ok ? { background: "var(--good-soft)", color: "var(--good)" } : {} }, children: msg.t }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "row", style: { justifyContent: "flex-end", marginTop: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { className: "btn", onClick: save, children: "Save karein" }) })
+      msg ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: msg.ok ? "notice" : "error", style: { marginTop: 14, ...msg.ok ? { background: "var(--good-soft)", color: "var(--good)" } : {} }, children: msg.t }) : null,
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "row", style: { justifyContent: "flex-end", marginTop: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn", onClick: save, children: "Save karein" }) })
     ] })
   ] });
 }
@@ -26147,38 +26235,38 @@ function Audit() {
     queryKey: ["audit", page],
     queryFn: () => api("/admin/audit-logs", { query: { page, limit: 50 } })
   });
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PageHead, { title: "Audit log", sub: "Har admin ne kya kiya aur kya dekha. Yeh record mitaya nahi ja sakta." }),
-    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Empty, { text: "Abhi koi entry nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("table", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Samay" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Admin" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Kaam" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Kis par" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "Vivaran" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("th", { children: "IP" })
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(PageHead, { title: "Audit log", sub: "Har admin ne kya kiya aur kya dekha. Yeh record mitaya nahi ja sakta." }),
+    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Empty, { text: "Abhi koi entry nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("table", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Samay" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Admin" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Kaam" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Kis par" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Vivaran" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "IP" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("tbody", { children: q.data.items.map((a) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { style: { whiteSpace: "nowrap" }, children: dt(a.createdAt) }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: a.adminEmail }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("b", { children: ACTION_HI[a.action] ?? a.action }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("td", { className: "mono faint", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("tbody", { children: q.data.items.map((a) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { style: { whiteSpace: "nowrap" }, children: dt(a.createdAt) }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: a.adminEmail }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("b", { children: ACTION_HI[a.action] ?? a.action }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("td", { className: "mono faint", children: [
             a.targetType,
             a.targetId ? ` \xB7 ${a.targetId.slice(0, 8)}` : ""
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { className: "faint", style: { maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: a.meta ? JSON.stringify(a.meta) : "" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("td", { className: "mono faint", children: a.ip })
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "faint", style: { maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: a.meta ? JSON.stringify(a.meta) : "" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "mono faint", children: a.ip })
         ] }, a.id)) })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Pager, { page, setPage, hasMore: q.data.items.length === 50 })
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Pager, { page, setPage, hasMore: q.data.items.length === 50 })
     ] })
   ] });
 }
 
 // src/pages/Users.tsx
 var import_react9 = __toESM(require_react(), 1);
-var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
 function Users() {
   const [status, setStatus] = (0, import_react9.useState)("ALL");
   const [search, setSearch] = (0, import_react9.useState)("");
@@ -26189,10 +26277,10 @@ function Users() {
     queryFn: () => api("/admin/users", { query: { status: status === "ALL" ? void 0 : status, search: search || void 0, page, limit: 20 } })
   });
   (0, import_react9.useEffect)(() => setPage(1), [status, search]);
-  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(PageHead, { title: "Users", sub: q.data ? `${q.data.total} users` : void 0 }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "filters", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(PageHead, { title: "Users", sub: q.data ? `${q.data.total} users` : void 0 }),
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "filters", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
         Tabs,
         {
           value: status,
@@ -26204,32 +26292,32 @@ function Users() {
           ]
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { className: "input", placeholder: "Naam, phone ya email", value: search, onChange: (e) => setSearch(e.target.value), "aria-label": "Khojein" })
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("input", { className: "input", placeholder: "Naam, phone ya email", value: search, onChange: (e) => setSearch(e.target.value), "aria-label": "Khojein" })
     ] }),
-    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Empty, { text: "Koi user nahi mila" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("table", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "User" }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Phone" }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Status" }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { className: "right", children: "Wallet" }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("th", { children: "Joda" })
+    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Empty, { text: "Koi user nahi mila" }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("table", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { children: "User" }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { children: "Phone" }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { children: "Status" }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { className: "right", children: "Wallet" }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { children: "Joda" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("tbody", { children: q.data.items.map((u) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { className: "click", onClick: () => nav(`/users/${u.id}`), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "row", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Avatar, { name: u.name ?? "U" }),
-            /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { style: { fontWeight: 600 }, children: u.name ?? "(naam nahi)" }),
-              /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "faint", children: u.email })
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("tbody", { children: q.data.items.map((u) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("tr", { className: "click", onClick: () => nav(`/users/${u.id}`), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Avatar, { name: u.name ?? "U" }),
+            /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { style: { fontWeight: 600 }, children: u.name ?? "(naam nahi)" }),
+              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "faint", children: u.email })
             ] })
           ] }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "mono", children: u.phone }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Status, { s: u.status }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "right num", children: rupees(u.balance) }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: d(u.createdAt) })
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { className: "mono", children: u.phone }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Status, { s: u.status }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { className: "right num", children: rupees(u.balance) }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { children: d(u.createdAt) })
         ] }, u.id)) })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Pager, { page, setPage, hasMore: page * 20 < q.data.total })
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Pager, { page, setPage, hasMore: page * 20 < q.data.total })
     ] })
   ] });
 }
@@ -26239,18 +26327,18 @@ function UserDetail() {
   const q = useQuery({ queryKey: ["user", id], queryFn: () => api(`/admin/users/${id}`) });
   const [dialog, setDialog] = (0, import_react9.useState)(null);
   const [err, setErr] = (0, import_react9.useState)(null);
-  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Loading, {});
-  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ErrorBox, { e: q.error });
+  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Loading, {});
+  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(ErrorBox, { e: q.error });
   const u = q.data;
   const refresh2 = () => {
     qc2.invalidateQueries({ queryKey: ["user", id] });
     qc2.invalidateQueries({ queryKey: ["users"] });
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(PageHead, { title: u.name ?? "User", sub: `${u.phone ?? ""} \xB7 joda ${d(u.createdAt)}`, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Link, { to: "/users", className: "btn ghost", children: "\u2190 Users" }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn ghost", onClick: () => setDialog("adjust"), children: "Wallet adjust" }),
-      u.status === "ACTIVE" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn danger", onClick: () => setDialog("block"), children: "Block" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(PageHead, { title: u.name ?? "User", sub: `${u.phone ?? ""} \xB7 joda ${d(u.createdAt)}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Link, { to: "/users", className: "btn ghost", children: "\u2190 Users" }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { className: "btn ghost", onClick: () => setDialog("adjust"), children: "Wallet adjust" }),
+      u.status === "ACTIVE" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { className: "btn danger", onClick: () => setDialog("block"), children: "Block" }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
         "button",
         {
           className: "btn",
@@ -26266,57 +26354,57 @@ function UserDetail() {
         }
       )
     ] }),
-    err ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ErrorBox, { e: err }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid g3", style: { marginBottom: 16 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card stat", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "label", children: "Wallet" }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "value", children: rupees(u.walletBalance) })
+    err ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(ErrorBox, { e: err }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "grid g3", style: { marginBottom: 16 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card stat", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "label", children: "Wallet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "value", children: rupees(u.walletBalance) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card stat", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "label", children: "Status" }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "value", style: { fontSize: 18, marginTop: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Status, { s: u.status }) })
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card stat", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "label", children: "Status" }),
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "value", style: { fontSize: 18, marginTop: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Status, { s: u.status }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card stat", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "label", children: "Referral code" }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "value mono", style: { fontSize: 18, marginTop: 6 }, children: u.referralCode })
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card stat", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "label", children: "Referral code" }),
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "value mono", style: { fontSize: 18, marginTop: 6 }, children: u.referralCode })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid g2", style: { alignItems: "start" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("h3", { style: { marginBottom: 10 }, children: "Sessions" }),
-        u.sessions.length ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("tbody", { children: u.sessions.map((s) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("td", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Link, { to: `/sessions/${s.id}`, children: s.vendorName }),
-            /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "faint", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "grid g2", style: { alignItems: "start" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("h3", { style: { marginBottom: 10 }, children: "Sessions" }),
+        u.sessions.length ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("tbody", { children: u.sessions.map((s) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("td", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Link, { to: `/sessions/${s.id}`, children: s.vendorName }),
+            /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "faint", children: [
               s.type,
               " \xB7 ",
               dt(s.requestedAt)
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Status, { s: s.status }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "right num", children: rupees(s.chargedAmount) })
-        ] }, s.id)) }) }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "faint", children: "Koi session nahi" })
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Status, { s: s.status }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { className: "right num", children: rupees(s.chargedAmount) })
+        ] }, s.id)) }) }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "faint", children: "Koi session nahi" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "card", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("h3", { style: { marginBottom: 10 }, children: "Wallet hisaab" }),
-        u.transactions.length ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("tbody", { children: u.transactions.map((t) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("td", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("h3", { style: { marginBottom: 10 }, children: "Wallet hisaab" }),
+        u.transactions.length ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("tbody", { children: u.transactions.map((t) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("td", { children: [
             t.type,
-            /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "faint", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "faint", children: [
               t.note,
               " \xB7 ",
               dt(t.createdAt)
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("td", { className: "right num", style: { color: t.amount > 0 ? "var(--good)" : "var(--bad)" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("td", { className: "right num", style: { color: t.amount > 0 ? "var(--good)" : "var(--bad)" }, children: [
             t.amount > 0 ? "+" : "\u2212",
             rupees(Math.abs(t.amount))
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("td", { className: "right num faint", children: rupees(t.balanceAfter) })
-        ] }, t.id)) }) }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "faint", children: "Koi entry nahi" })
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { className: "right num faint", children: rupees(t.balanceAfter) })
+        ] }, t.id)) }) }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "faint", children: "Koi entry nahi" })
       ] })
     ] }),
-    dialog === "block" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+    dialog === "block" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
       ReasonDialog,
       {
         title: "User block karein",
@@ -26331,7 +26419,7 @@ function UserDetail() {
         }
       }
     ) : null,
-    dialog === "adjust" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(AdjustDialog, { userId: id, onClose: () => setDialog(null), onDone: refresh2 }) : null
+    dialog === "adjust" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(AdjustDialog, { userId: id, onClose: () => setDialog(null), onDone: refresh2 }) : null
   ] });
 }
 function AdjustDialog({ userId, onClose, onDone }) {
@@ -26340,8 +26428,8 @@ function AdjustDialog({ userId, onClose, onDone }) {
   const [note, setNote] = (0, import_react9.useState)("");
   const [err, setErr] = (0, import_react9.useState)(null);
   const [busy, setBusy] = (0, import_react9.useState)(false);
-  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Modal, { title: "Wallet adjust", onClose, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Modal, { title: "Wallet adjust", onClose, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
       Tabs,
       {
         value: kind,
@@ -26352,18 +26440,18 @@ function AdjustDialog({ userId, onClose, onDone }) {
         ]
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { htmlFor: "amt", children: "Raqam (\u20B9)" }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("input", { id: "amt", className: "input", inputMode: "decimal", value: amt, onChange: (e) => setAmt(e.target.value.replace(/[^\d.]/g, "")) })
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "field", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("label", { htmlFor: "amt", children: "Raqam (\u20B9)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("input", { id: "amt", className: "input", inputMode: "decimal", value: amt, onChange: (e) => setAmt(e.target.value.replace(/[^\d.]/g, "")) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "field", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("label", { htmlFor: "note", children: "Wajah (user ko dikhegi)" }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("textarea", { id: "note", className: "input", value: note, onChange: (e) => setNote(e.target.value), maxLength: 300 })
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "field", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("label", { htmlFor: "note", children: "Wajah (user ko dikhegi)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("textarea", { id: "note", className: "input", value: note, onChange: (e) => setNote(e.target.value), maxLength: 300 })
     ] }),
-    err ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "error", children: err }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { className: "btn ghost", onClick: onClose, children: "Cancel" }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+    err ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "error", children: err }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "row", style: { justifyContent: "flex-end" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { className: "btn ghost", onClick: onClose, children: "Cancel" }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
         "button",
         {
           className: "btn",
@@ -26391,7 +26479,7 @@ function AdjustDialog({ userId, onClose, onDone }) {
 
 // src/pages/Vendors.tsx
 var import_react10 = __toESM(require_react(), 1);
-var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
 function Vendors() {
   const [sp, setSp] = useSearchParams();
   const status = sp.get("status") ?? "PENDING";
@@ -26403,10 +26491,10 @@ function Vendors() {
     queryFn: () => api("/admin/vendors", { query: { status, search: search || void 0, page, limit: 20 } })
   });
   (0, import_react10.useEffect)(() => setPage(1), [status, search]);
-  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(PageHead, { title: "Vendors", sub: "Listeners aur experts: approval, suspend, profile jaanch" }),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "filters", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(import_jsx_runtime14.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(PageHead, { title: "Vendors", sub: "Listeners aur experts: approval, suspend, profile jaanch" }),
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "filters", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
         Tabs,
         {
           value: status,
@@ -26420,38 +26508,38 @@ function Vendors() {
           ]
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("input", { className: "input", placeholder: "Naam ya phone khojein", value: search, onChange: (e) => setSearch(e.target.value), "aria-label": "Khojein" })
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("input", { className: "input", placeholder: "Naam ya phone khojein", value: search, onChange: (e) => setSearch(e.target.value), "aria-label": "Khojein" })
     ] }),
-    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Empty, { text: "Is list mein koi vendor nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("table", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { children: "Vendor" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { children: "Phone" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { children: "Status" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { className: "right", children: "Rating" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { className: "right", children: "Minutes" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("th", { children: status === "PENDING" ? "Bheja" : "Joda" })
+    q.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Loading, {}) : q.error ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(ErrorBox, { e: q.error }) : !q.data?.items.length ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Empty, { text: "Is list mein koi vendor nahi" }) : /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(import_jsx_runtime14.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "table-wrap", children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("table", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("th", { children: "Vendor" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("th", { children: "Phone" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("th", { children: "Status" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("th", { className: "right", children: "Rating" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("th", { className: "right", children: "Minutes" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("th", { children: status === "PENDING" ? "Bheja" : "Joda" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("tbody", { children: q.data.items.map((v) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("tr", { className: "click", onClick: () => nav(`/vendors/${v.id}`), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "row", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Avatar, { name: v.displayName || "V", src: v.avatarUrl }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { style: { fontWeight: 600 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("tbody", { children: q.data.items.map((v) => /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("tr", { className: "click", onClick: () => nav(`/vendors/${v.id}`), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Avatar, { name: v.displayName || "V", src: v.avatarUrl }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { style: { fontWeight: 600 }, children: [
                 v.displayName || "(naam nahi)",
                 " ",
-                v.isOnline ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: "badge b-good", children: "Online" }) : null
+                v.isOnline ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: "badge b-good", children: "Online" }) : null
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "faint", children: v.headline })
+              /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "faint", children: v.headline })
             ] })
           ] }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { className: "mono", children: v.phone }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Status, { s: v.status }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { className: "right num", children: v.ratingCount ? `${v.ratingAvg.toFixed(1)} (${v.ratingCount})` : "\u2014" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { className: "right num", children: v.totalMinutes }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { children: d(status === "PENDING" ? v.submittedAt : v.createdAt) })
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { className: "mono", children: v.phone }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Status, { s: v.status }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { className: "right num", children: v.ratingCount ? `${v.ratingAvg.toFixed(1)} (${v.ratingCount})` : "\u2014" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { className: "right num", children: v.totalMinutes }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { children: d(status === "PENDING" ? v.submittedAt : v.createdAt) })
         ] }, v.id)) })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Pager, { page, setPage, hasMore: page * 20 < q.data.total })
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Pager, { page, setPage, hasMore: page * 20 < q.data.total })
     ] })
   ] });
 }
@@ -26469,8 +26557,8 @@ function VendorDetail() {
     },
     [kycUrl]
   );
-  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Loading, {});
-  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(ErrorBox, { e: q.error });
+  if (q.isLoading) return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Loading, {});
+  if (q.error || !q.data) return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(ErrorBox, { e: q.error });
   const v = q.data;
   const refresh2 = () => {
     qc2.invalidateQueries({ queryKey: ["vendor", id] });
@@ -26498,26 +26586,26 @@ function VendorDetail() {
       setErr(e);
     }
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(PageHead, { title: v.displayName || "Vendor", sub: v.headline, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Link, { to: "/vendors", className: "btn ghost", children: "\u2190 Vendors" }),
-      v.status === "PENDING" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { className: "btn danger", disabled: busy, onClick: () => setDialog("reject"), children: "Reject" }),
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { className: "btn good", disabled: busy, onClick: () => act("approve"), children: "Approve" })
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(import_jsx_runtime14.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(PageHead, { title: v.displayName || "Vendor", sub: v.headline, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Link, { to: "/vendors", className: "btn ghost", children: "\u2190 Vendors" }),
+      v.status === "PENDING" ? /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(import_jsx_runtime14.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { className: "btn danger", disabled: busy, onClick: () => setDialog("reject"), children: "Reject" }),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { className: "btn good", disabled: busy, onClick: () => act("approve"), children: "Approve" })
       ] }) : null,
-      v.status === "APPROVED" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { className: "btn danger", disabled: busy, onClick: () => setDialog("suspend"), children: "Suspend" }) : null,
-      v.status === "SUSPENDED" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { className: "btn", disabled: busy, onClick: () => act("reinstate"), children: "Phir se chalu karein" }) : null
+      v.status === "APPROVED" ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { className: "btn danger", disabled: busy, onClick: () => setDialog("suspend"), children: "Suspend" }) : null,
+      v.status === "SUSPENDED" ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { className: "btn", disabled: busy, onClick: () => act("reinstate"), children: "Phir se chalu karein" }) : null
     ] }),
-    err ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(ErrorBox, { e: err }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "grid g2", style: { alignItems: "start", marginTop: 12 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: "stack", children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "row", style: { marginBottom: 14 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { style: { transform: "scale(1.6)", margin: "0 14px 0 8px" }, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Avatar, { name: v.displayName || "V", src: v.avatarUrl }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Status, { s: v.status }),
+    err ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(ErrorBox, { e: err }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "grid g2", style: { alignItems: "start", marginTop: 12 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "stack", children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "row", style: { marginBottom: 14 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { style: { transform: "scale(1.6)", margin: "0 14px 0 8px" }, children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Avatar, { name: v.displayName || "V", src: v.avatarUrl }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Status, { s: v.status }),
             " ",
-            v.isOnline ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: "badge b-good", children: "Online" }) : null,
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "faint", style: { marginTop: 4 }, children: [
+            v.isOnline ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: "badge b-good", children: "Online" }) : null,
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "faint", style: { marginTop: 4 }, children: [
               "Bheja: ",
               dt(v.submittedAt),
               " ",
@@ -26525,28 +26613,28 @@ function VendorDetail() {
             ] })
           ] })
         ] }),
-        v.rejectionReason ? /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "notice", style: { marginBottom: 12 }, children: [
+        v.rejectionReason ? /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "notice", style: { marginBottom: 12 }, children: [
           "Pichhla sandesh: ",
           v.rejectionReason
         ] }) : null,
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("dl", { className: "kv", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Phone" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dd", { className: "mono", children: v.phone }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Gender / Anubhav" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("dd", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("dl", { className: "kv", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Phone" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dd", { className: "mono", children: v.phone }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Gender / Anubhav" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("dd", { children: [
             v.gender ?? "\u2014",
             " \xB7 ",
             v.experienceYears,
             " saal"
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Categories" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dd", { children: v.categories.map((c) => c.name).join(", ") || "\u2014" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Bhashayein" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dd", { children: v.languages.join(", ") || "\u2014" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Skills" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dd", { children: v.tags.join(", ") || "\u2014" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Rate (per min)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("dd", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Categories" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dd", { children: v.categories.map((c) => c.name).join(", ") || "\u2014" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Bhashayein" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dd", { children: v.languages.join(", ") || "\u2014" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Skills" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dd", { children: v.tags.join(", ") || "\u2014" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Rate (per min)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("dd", { children: [
             "Chat ",
             rupees(v.chatRatePerMin),
             v.chatEnabled ? "" : " (band)",
@@ -26557,52 +26645,52 @@ function VendorDetail() {
             rupees(v.videoRatePerMin),
             v.videoEnabled ? "" : " (band)"
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Parichay" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dd", { style: { whiteSpace: "pre-wrap" }, children: v.bio || "\u2014" })
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Parichay" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dd", { style: { whiteSpace: "pre-wrap" }, children: v.bio || "\u2014" })
         ] })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "stack", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card-head", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("h3", { children: "ID verification" }),
-            v.kycUploadId ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { className: "btn ghost sm", onClick: viewKyc, children: "Document dekhein" }) : null
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "stack", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "card-head", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("h3", { children: "ID verification" }),
+            v.kycUploadId ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { className: "btn ghost sm", onClick: viewKyc, children: "Document dekhein" }) : null
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "muted", style: { margin: 0 }, children: v.kycDocType ? `Type: ${v.kycDocType}` : "Document nahi diya" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "faint", children: "Document dekhna audit log mein darj hota hai." }),
-          kycUrl ? kycUrl.pdf ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("iframe", { title: "KYC", src: kycUrl.url, style: { width: "100%", height: 360, border: "1px solid var(--border)", borderRadius: 10 } }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("img", { src: kycUrl.url, alt: "ID document", style: { maxWidth: "100%", borderRadius: 10, border: "1px solid var(--border)" } }) : null
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "muted", style: { margin: 0 }, children: v.kycDocType ? `Type: ${v.kycDocType}` : "Document nahi diya" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "faint", children: "Document dekhna audit log mein darj hota hai." }),
+          kycUrl ? kycUrl.pdf ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("iframe", { title: "KYC", src: kycUrl.url, style: { width: "100%", height: 360, border: "1px solid var(--border)", borderRadius: 10 } }) : /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("img", { src: kycUrl.url, alt: "ID document", style: { maxWidth: "100%", borderRadius: 10, border: "1px solid var(--border)" } }) : null
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("h3", { style: { marginBottom: 10 }, children: "Kamai & payout" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("dl", { className: "kv", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Wallet balance" }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dd", { className: "num", children: rupees(v.walletBalance) }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Rating" }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dd", { children: v.ratingCount ? `${v.ratingAvg.toFixed(1)} (${v.ratingCount} reviews)` : "\u2014" }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Sessions / Minutes" }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("dd", { className: "num", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("h3", { style: { marginBottom: 10 }, children: "Kamai & payout" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("dl", { className: "kv", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Wallet balance" }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dd", { className: "num", children: rupees(v.walletBalance) }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Rating" }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dd", { children: v.ratingCount ? `${v.ratingAvg.toFixed(1)} (${v.ratingCount} reviews)` : "\u2014" }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Sessions / Minutes" }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("dd", { className: "num", children: [
               v.totalSessions,
               " / ",
               v.totalMinutes
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dt", { children: "Payout" }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("dd", { children: v.payout ? v.payout.method === "UPI" ? `UPI: ${v.payout.upiId}` : `${v.payout.accountHolder} \xB7 A/c \u2022\u2022\u2022\u2022${v.payout.accountLast4} \xB7 ${v.payout.ifsc}` : "Nahi joda" })
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { children: "Payout" }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dd", { children: v.payout ? v.payout.method === "UPI" ? `UPI: ${v.payout.upiId}` : `${v.payout.accountHolder} \xB7 A/c \u2022\u2022\u2022\u2022${v.payout.accountLast4} \xB7 ${v.payout.ifsc}` : "Nahi joda" })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "card-head", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("h3", { children: "Haal ke sessions" }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Link, { to: `/sessions?vendorId=${v.id}`, children: "Sab \u2192" })
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "card-head", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("h3", { children: "Haal ke sessions" }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Link, { to: `/sessions?vendorId=${v.id}`, children: "Sab \u2192" })
           ] }),
-          v.recentSessions.length ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("tbody", { children: v.recentSessions.map((s) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("tr", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Link, { to: `/sessions/${s.id}`, children: s.type }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Status, { s: s.status }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { className: "num", children: mins(s.billedSeconds) }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("td", { className: "right num", children: rupees(s.chargedAmount) })
-          ] }, s.id)) }) }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "faint", children: "Abhi koi session nahi" })
+          v.recentSessions.length ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("table", { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("tbody", { children: v.recentSessions.map((s) => /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("tr", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Link, { to: `/sessions/${s.id}`, children: s.type }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Status, { s: s.status }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { className: "num", children: mins(s.billedSeconds) }),
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("td", { className: "right num", children: rupees(s.chargedAmount) })
+          ] }, s.id)) }) }) : /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "faint", children: "Abhi koi session nahi" })
         ] })
       ] })
     ] }),
-    dialog === "reject" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+    dialog === "reject" ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
       ReasonDialog,
       {
         title: "Profile reject karein",
@@ -26616,7 +26704,7 @@ function VendorDetail() {
         }
       }
     ) : null,
-    dialog === "suspend" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+    dialog === "suspend" ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
       ReasonDialog,
       {
         title: "Vendor suspend karein",
@@ -26634,7 +26722,7 @@ function VendorDetail() {
 }
 
 // src/main.tsx
-var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
 var qc = new QueryClient({
   defaultOptions: { queries: { staleTime: 15e3, retry: (n, e) => !(e instanceof ApiError && e.status >= 400 && e.status < 500) && n < 2 } }
 });
@@ -26642,31 +26730,31 @@ function App() {
   const loggedIn = (0, import_react11.useSyncExternalStore)(auth.subscribe, auth.isLoggedIn);
   if (!loggedIn) {
     qc.clear();
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Login, {});
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Login, {});
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Routes, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Route, { element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Layout, {}), children: [
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { index: true, element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dashboard, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "vendors", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Vendors, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "vendors/:id", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(VendorDetail, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "users", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Users, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "users/:id", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(UserDetail, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "sessions", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Sessions, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "sessions/:id", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(SessionDetail, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "payments", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Payments, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "withdrawals", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Withdrawals, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "reports", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Reports, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "tickets", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Tickets, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "tickets/:id", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(TicketDetail, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "reviews", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Reviews, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "catalog", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Catalog, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "gifts", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Gifts, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "settings", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Settings, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "audit", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Audit, {}) }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Route, { path: "*", element: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Navigate, { to: "/", replace: true }) })
+  return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Routes, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Route, { element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Layout, {}), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { index: true, element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dashboard, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "vendors", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Vendors, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "vendors/:id", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(VendorDetail, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "users", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Users, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "users/:id", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(UserDetail, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "sessions", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Sessions, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "sessions/:id", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(SessionDetail, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "payments", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Payments, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "withdrawals", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Withdrawals, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "reports", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Reports, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "tickets", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Tickets, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "tickets/:id", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(TicketDetail, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "reviews", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Reviews, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "catalog", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Catalog, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "gifts", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Gifts, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "settings", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Settings, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "audit", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Audit, {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Route, { path: "*", element: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Navigate, { to: "/", replace: true }) })
   ] }) });
 }
 (0, import_client.createRoot)(document.getElementById("root")).render(
-  /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(import_react11.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(QueryClientProvider, { client: qc, children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(BrowserRouter, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(App, {}) }) }) })
+  /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(import_react11.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(QueryClientProvider, { client: qc, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(BrowserRouter, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(App, {}) }) }) })
 );
 /*! Bundled license information:
 

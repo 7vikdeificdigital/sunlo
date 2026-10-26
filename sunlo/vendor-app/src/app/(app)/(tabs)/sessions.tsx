@@ -6,6 +6,7 @@ import { Empty, Loader, Row, Screen, Text } from '@/components/ui';
 import { durationText, formatDateTime, rupees } from '@/lib/format';
 import { useVendorSessions } from '@/lib/queries';
 import type { Session } from '@/lib/types';
+import { GiftsReceivedCard } from '@/components/GiftsReceivedCard';
 import { colors, font, radius, shadow, space } from '@/theme';
 
 const STATUS: Record<Session['status'], { label: string; color: string }> = {
@@ -32,6 +33,7 @@ export default function Sessions() {
           keyExtractor={(s) => s.id}
           refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={() => q.refetch()} tintColor={colors.primary} />}
           contentContainerStyle={{ paddingHorizontal: space.lg, gap: space.sm, paddingBottom: space.xl }}
+          ListHeaderComponent={<View style={{ marginBottom: space.sm }}><GiftsReceivedCard /></View>}
           ListEmptyComponent={<Empty icon="chatbubbles-outline" title="Abhi tak koi session nahi" text="Online rahein, requests jald aayengi" />}
           renderItem={({ item }) => {
             const st = STATUS[item.status];
