@@ -52,13 +52,13 @@ async function myVendor(vendorUserId: string) {
 
 // ---------------- Host ----------------
 
-export async function createRoom(vendorUserId: string, input: { title: string; type: RoomType; ratePerMin: number }) {
+export async function createRoom(vendorUserId: string, input: { title: string; type: RoomType }) {
   const v = await myVendor(vendorUserId);
   const st = await getSettings();
   if (!v.isOnline) throw conflict('VENDOR_OFFLINE', 'Room shuru karne ke liye pehle Online ho jayein');
-  if (input.ratePerMin !== 0 && (input.ratePerMin < st.minRatePerMinPaise || input.ratePerMin > st.maxRatePerMinPaise)) {
-    throw badRequest('BAD_RATE', 'Rate allowed seema se bahar hai (ya 0 rakhein, free ke liye)');
-  }
+  // Room ka rate wahi jo vendor 1:1 baat ke liye leta hai (Voice room = call rate, Video room = video rate); room banate waqt tay
+  const [rates] = await db.select({ call: vendors.callRatePerMin, video: vendors.videoRatePerMin }).from(vendors).where(eq(vendors.id, v.id)).limit(1);
+  const ratePerMin = (input.type === 'AUDIO' ? rates?.call : rates?.video) ?? 0;
   const [busy] = await db
     .select({ id: consultSessions.id })
     .from(consultSessions)
@@ -66,7 +66,7 @@ export async function createRoom(vendorUserId: string, input: { title: string; t
     .limit(1);
   if (busy) throw conflict('VENDOR_BUSY', 'Pehle chal raha session ya request khatam karein');
   try {
-    const [row] = await db.insert(rooms).values({ hostVendorId: v.id, title: input.title, type: input.type, ratePerMin: input.ratePerMin, commissionPct: st.commissionPct }).returning();
+    const [row] = await db.insert(rooms).values({ hostVendorId: v.id, title: input.title, type: input.type, ratePerMin, commissionPct: st.commissionPct }).returning();
     return row;
   } catch (e) {
     if (isUnique(e, 'rooms_one_live_per_host_uq')) throw conflict('ROOM_ALREADY_LIVE', 'Aapka room pehle se live hai');

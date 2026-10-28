@@ -15,7 +15,7 @@ const REASONS = [
 ] as const;
 
 /** Vendor ki shikayat: seedha admin panel mein jaati hai */
-export function ReportSheet({ vendorId, sessionId, onClose }: { vendorId: string; sessionId?: string; onClose: () => void }) {
+export function ReportSheet({ vendorId, sessionId, context, onClose }: { vendorId: string; sessionId?: string; context?: string; onClose: () => void }) {
   const insets = useSafeAreaInsets();
   const [reason, setReason] = useState<(typeof REASONS)[number]['v'] | null>(null);
   const [details, setDetails] = useState('');
@@ -27,7 +27,7 @@ export function ReportSheet({ vendorId, sessionId, onClose }: { vendorId: string
     setState('saving');
     setError(null);
     try {
-      await api('/reports', { method: 'POST', body: { vendorId, sessionId, reason, details: details.trim() || undefined } });
+      await api('/reports', { method: 'POST', body: { vendorId, sessionId, reason, details: [context, details.trim()].filter(Boolean).join(' · ') || undefined } });
       setState('done');
     } catch (e) {
       setError(errorMessage(e));

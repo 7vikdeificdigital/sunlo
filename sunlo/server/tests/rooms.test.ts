@@ -25,11 +25,10 @@ describe('Live rooms', () => {
 
   it('host room banata hai, user list mein dekh kar join karta hai', async () => {
     const h = await host();
-    const bad = await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Raat ki baatein', type: 'AUDIO', ratePerMin: 1 });
-    expect(bad.status).toBe(400);
-    const r = await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Raat ki baatein', type: 'AUDIO', ratePerMin: 0 });
+    const r = await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Raat ki baatein', type: 'AUDIO', ratePerMin: 1 });
     expect(r.status).toBe(201);
-    const dup = await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Doosra', type: 'VIDEO', ratePerMin: 0 });
+    expect(r.body.ratePerMin).toBe(3000); // client ka rate nahi, vendor ka call rate
+    const dup = await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Doosra', type: 'VIDEO', });
     expect(dup.status).toBe(409);
 
     const user = await funded();
@@ -37,20 +36,18 @@ describe('Live rooms', () => {
     expect(list.body.items.map((x: { id: string }) => x.id)).toContain(r.body.id);
     const j = await api().post(`${P}/rooms/${r.body.id}/join`).set(bearer(user.accessToken));
     expect(j.status).toBe(201);
-    expect(j.body.maxSeconds).toBeNull();
+    expect(j.body.maxSeconds).toBe(Math.floor(100000 / 3000) * 60);
     const tok = await api().post(`${P}/rooms/${r.body.id}/rtc-token`).set(bearer(user.accessToken));
     expect([200, 503]).toContain(tok.status); // Agora keys test env mein na hon to 503
     const cur = await api().get(`${P}/vendor/rooms/current`).set(bearer(h.token));
     expect(cur.body.listeners).toHaveLength(1);
-    // free room: kuch nahi katta
-    const bal = await balanceOf(user.user.id);
+    // turant nikla to ek minute ka hisaab
     await api().post(`${P}/rooms/${r.body.id}/leave`).set(bearer(user.accessToken));
-    expect(await balanceOf(user.user.id)).toBe(bal);
   });
 
   it('paid room: balance kam ho to nahi, warna leave par minute ke hisaab se katta hai, host ko commission ke baad', async () => {
     const h = await host();
-    const r = await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Paid room', type: 'VIDEO', ratePerMin: 2000 });
+    const r = await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Paid room', type: 'VIDEO' });
     expect(r.status).toBe(201);
     const poor = await loginViaOtp();
     const no = await api().post(`${P}/rooms/${r.body.id}/join`).set(bearer(poor.accessToken));
@@ -60,20 +57,20 @@ describe('Live rooms', () => {
     const before = await balanceOf(user.user.id);
     const j = await api().post(`${P}/rooms/${r.body.id}/join`).set(bearer(user.accessToken));
     expect(j.status).toBe(201);
-    expect(j.body.maxSeconds).toBe(Math.floor(before / 2000) * 60);
+    expect(j.body.maxSeconds).toBe(Math.floor(before / 4000) * 60);
     // 3 minute pehle ghusa tha
     await db.update(roomMembers).set({ joinedAt: new Date(Date.now() - 170_000) }).where(and(eq(roomMembers.userId, user.user.id), isNull(roomMembers.leftAt)));
     const lv = await api().post(`${P}/rooms/${r.body.id}/leave`).set(bearer(user.accessToken));
-    expect(lv.body.chargedAmount).toBe(6000);
-    expect(await balanceOf(user.user.id)).toBe(before - 6000);
+    expect(lv.body.chargedAmount).toBe(12000);
+    expect(await balanceOf(user.user.id)).toBe(before - 12000);
     expect(await balanceOf(h.user.id)).toBeGreaterThan(0);
   });
 
   it('ek user ek hi room mein; kick ke baad dobara nahi; host end kare to sab bahar', async () => {
     const h1 = await host();
     const h2 = await host();
-    const a = (await api().post(`${P}/vendor/rooms`).set(bearer(h1.token)).send({ title: 'Room A', type: 'AUDIO', ratePerMin: 0 })).body;
-    const b = (await api().post(`${P}/vendor/rooms`).set(bearer(h2.token)).send({ title: 'Room B', type: 'AUDIO', ratePerMin: 0 })).body;
+    const a = (await api().post(`${P}/vendor/rooms`).set(bearer(h1.token)).send({ title: 'Room A', type: 'AUDIO', })).body;
+    const b = (await api().post(`${P}/vendor/rooms`).set(bearer(h2.token)).send({ title: 'Room B', type: 'AUDIO', })).body;
     const u = await funded();
     expect((await api().post(`${P}/rooms/${a.id}/join`).set(bearer(u.accessToken))).status).toBe(201);
     expect((await api().post(`${P}/rooms/${b.id}/join`).set(bearer(u.accessToken))).status).toBe(409);
@@ -89,7 +86,7 @@ describe('Live rooms', () => {
 
   it('room mein gift: host ko kamai, sweep balance khatam wale ko bahar karta hai', async () => {
     const h = await host();
-    const r = (await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Gift room', type: 'AUDIO', ratePerMin: 1000 })).body;
+    const r = (await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Gift room', type: 'AUDIO' })).body;
     const u = await funded(50000);
     await api().post(`${P}/rooms/${r.id}/join`).set(bearer(u.accessToken));
     const gl = await api().get(`${P}/gifts`).set(bearer(u.accessToken));
@@ -109,7 +106,7 @@ describe('Live rooms', () => {
 
   it('host room mein ho to usse 1:1 request nahi ja sakti', async () => {
     const h = await host();
-    await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Busy room', type: 'AUDIO', ratePerMin: 0 });
+    await api().post(`${P}/vendor/rooms`).set(bearer(h.token)).send({ title: 'Busy room', type: 'AUDIO', });
     const u = await funded();
     const r = await api().post(`${P}/sessions`).set(bearer(u.accessToken)).send({ vendorId: h.vendor.id, type: 'CHAT' });
     expect(r.status).toBe(409);

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { secureStorage } from './storage';
+import { useTerms } from './terms';
 import type { User } from './types';
 
 const K_ACCESS = 'aw.access';
@@ -32,6 +33,7 @@ export const useAuth = create<AuthState>((set) => ({
   setUser: (user) => set({ user }),
   signOut: async () => {
     await Promise.all([secureStorage.remove(K_ACCESS), secureStorage.remove(K_REFRESH)]);
+    await useTerms.getState().reset();
     set({ accessToken: null, refreshToken: null, user: null, status: 'signedOut' });
   },
 }));

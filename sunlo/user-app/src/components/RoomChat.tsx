@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import { FlatList, Pressable, TextInput, View } from 'react-native';
 import type { RoomChatMsg } from '@/lib/useRoom';
@@ -31,14 +32,23 @@ export function RoomChat({ messages, onSend, placeholder = 'Kuch kahein...', rig
         keyExtractor={(m) => m.id}
         style={{ maxHeight: 180, marginRight: rightSpace }}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
+        renderItem={({ item }) =>
+          item.gift ? (
+            <LinearGradient colors={item.gift.coins >= 500 ? ['#FF5E7E', '#FF9A3D'] : ['#FFC857', '#FF9A3D']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ alignSelf: 'flex-start', maxWidth: '96%', flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 7, marginTop: 6 }}>
+              <Text style={{ fontSize: 20 }}>{item.gift.icon}</Text>
+              <Text style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 13, color: '#2A1670' }}>
+                {item.name} gifted {item.gift.name} · {item.gift.coins} coins
+              </Text>
+            </LinearGradient>
+          ) : (
           <View style={{ alignSelf: 'flex-start', maxWidth: '92%', backgroundColor: 'rgba(0,0,0,0.38)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5, marginTop: 4 }}>
             <Text style={{ fontFamily: font.regular, fontSize: 13, color: colors.white }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 13, color: item.host ? '#FFC857' : '#B8AFFF' }}>{item.host ? `${item.name} (host) ` : `${item.name} `}</Text>
               {item.body}
             </Text>
           </View>
-        )}
+          )
+        }
       />
       {err ? <Text style={{ color: '#FFB4B4', fontSize: 11.5 }}>{err}</Text> : null}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

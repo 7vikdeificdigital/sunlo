@@ -10,6 +10,7 @@ interface TermsState {
   accepted: boolean;
   hydrate: () => Promise<void>;
   accept: () => Promise<void>;
+  reset: () => Promise<void>;
 }
 
 export const useTerms = create<TermsState>((set) => ({
@@ -31,5 +32,14 @@ export const useTerms = create<TermsState>((set) => ({
       /* storage na chale to bhi is session mein aage badhne dein */
     }
     set({ accepted: true });
+  },
+  /** Logout par: agli baar login se pehle Get Started + Terms (tick ke saath) dobara */
+  reset: async () => {
+    try {
+      await secureStorage.remove(KEY);
+    } catch {
+      /* ignore */
+    }
+    set({ accepted: false });
   },
 }));

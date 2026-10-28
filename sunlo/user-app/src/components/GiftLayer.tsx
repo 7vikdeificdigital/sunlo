@@ -185,6 +185,11 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
       const k = `${e.sessionId ?? e.roomId}:${e.giftId}:${Math.floor(Date.now() / 2000)}`; // session room + user room se double event na chale
       if (seen.has(k)) return;
       seen.add(k);
+      if (e.roomId) {
+        // Room ke gifts chat mein superchat ki tarah dikhte hain, bade animation nahi
+        void qc.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'gifts' && q.queryKey[0] !== 'session' && q.queryKey[0] !== 'room' });
+        return;
+      }
       push({
         icon: e.icon,
         mediaUrl: full(e.svgaUrl),

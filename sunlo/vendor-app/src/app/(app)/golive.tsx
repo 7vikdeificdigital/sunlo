@@ -14,23 +14,20 @@ export default function GoLive() {
   const qc = useQueryClient();
   const [title, setTitle] = useState('');
   const [type, setType] = useState<'AUDIO' | 'VIDEO'>('AUDIO');
-  const [rate, setRate] = useState('0');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const v = me.data;
   if (!v) return <Loader />;
-  const { minRatePerMinPaise: min, maxRatePerMinPaise: max, commissionPct } = v.limits;
-  const paise = Math.round((Number(rate) || 0) * 100);
-  const earnPct = 100 - commissionPct;
+  const paise = type === 'AUDIO' ? v.callRatePerMin : v.videoRatePerMin;
+  const earnPct = 100 - v.limits.commissionPct;
 
   async function start() {
     setError(null);
     if (title.trim().length < 3) return setError('Room ka naam kam se kam 3 akshar ka rakhein');
-    if (paise !== 0 && (paise < min || paise > max)) return setError(`Rate ${rupees(min)} se ${rupees(max)} ke beech rakhein, ya 0 (free)`);
     if (!v!.isOnline) return setError('Pehle Home par jaakar Online ho jayein');
     setBusy(true);
     try {
-      const r = await api<{ id: string }>('/vendor/rooms', { method: 'POST', body: { title: title.trim(), type, ratePerMin: paise } });
+      const r = await api<{ id: string }>('/vendor/rooms', { method: 'POST', body: { title: title.trim(), type } });
       await qc.invalidateQueries({ queryKey: ['vroom'] });
       router.replace(`/room/${r.id}`);
     } catch (e) {
@@ -51,19 +48,12 @@ export default function GoLive() {
           <Segmented options={[{ value: 'AUDIO', label: 'Voice room' }, { value: 'VIDEO', label: 'Video room' }]} value={type} onChange={setType} />
         </View>
         <Card style={{ gap: space.sm }}>
-          <Input
-            label="Entry rate per minute (0 = free)"
-            value={rate}
-            onChangeText={(t) => setRate(t.replace(/[^\d.]/g, '').slice(0, 6))}
-            keyboardType="decimal-pad"
-            left={<Text variant="bodyStrong">₹</Text>}
-            accessibilityLabel="Room rate"
-          />
+          <Text variant="label">Entry rate (aapke {type === 'AUDIO' ? 'voice call' : 'video call'} rate ke barabar)</Text>
+          <Text style={{ fontFamily: 'Poppins_700Bold', fontSize: 24 }}>{rupees(paise)}/min</Text>
           <Text variant="caption">
-            {paise === 0
-              ? 'Free room: kamai sirf gifts se (gift ka kuch hissa aapko milta hai).'
-              : `Har sunne wale se ${rupees(paise)}/min. Aapko har rupaye mein ${earnPct}% milega, plus gifts alag.`}
+            Room mein jo bhi aayega usse yahi rate lagega, aur jab tak room live hai yeh badlega nahi. Aapko har rupaye mein {earnPct}% milega, plus gifts alag. Rate badalna ho to Rates mein jaakar badlein, phir room shuru karein.
           </Text>
+          <Text variant="caption" color={colors.primary} onPress={() => router.push('/rates')}>Rate badlein</Text>
         </Card>
         {error ? <Text variant="small" color={colors.danger}>{error}</Text> : null}
         <Button title="Live jayein" icon="radio" loading={busy} onPress={() => void start()} />

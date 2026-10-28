@@ -22,7 +22,6 @@ export const roomsRouter = Router();
 const createBody = z.object({
   title: z.string().trim().min(3).max(60),
   type: z.enum(['AUDIO', 'VIDEO']),
-  ratePerMin: z.number().int().min(0).max(10_000_000).default(0),
 });
 
 // ---- Host (vendor app) ----
@@ -114,11 +113,12 @@ roomsRouter.post('/rooms/:id/gifts', requireRole('USER'), async (req, res) => {
       if (newMax !== m.maxSeconds) await tx.update(roomMembers).set({ maxSeconds: newMax }).where(eq(roomMembers.id, m.id));
     }
     await tx.update(rooms).set({ totalEarned: sql`${rooms.totalEarned} + ${earning}` }).where(eq(rooms.id, id));
-    return { g, hostUserId: h?.userId ?? null, joinedAt: m.joinedAt, newMax };
+    return { g, sendId: send.id, hostUserId: h?.userId ?? null, joinedAt: m.joinedAt, newMax };
   });
 
   const [u] = await db.select({ n: users.name }).from(users).where(eq(users.id, userId)).limit(1);
   const payload = {
+    id: out.sendId,
     roomId: id,
     giftId: out.g.id,
     name: out.g.name,

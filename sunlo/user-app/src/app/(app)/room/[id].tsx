@@ -5,13 +5,14 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
+import { ReportSheet } from '@/components/ReportSheet';
 import { Coin, CoinPrice } from '@/components/Coin';
 import { RoomChat } from '@/components/RoomChat';
 import { RoomView } from '@/components/RoomView';
 import { Button, ErrorBox, Header, Loader, Screen, Text } from '@/components/ui';
 import { api, ApiError, errorMessage } from '@/lib/api';
 import { mmss } from '@/lib/format';
-import { qk } from '@/lib/queries';
+import { qk, useMe } from '@/lib/queries';
 import type { LiveRoom } from '@/lib/types';
 import { useRoomLive } from '@/lib/useRoom';
 import { useRemaining } from '@/lib/useLiveSession';
@@ -30,6 +31,9 @@ export default function RoomScreen() {
   const [err, setErr] = useState<{ msg: string; poor?: boolean } | null>(null);
   const [over, setOver] = useState<string | null>(null);
   const [hostLive, setHostLive] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const me = useMe();
+  const balance = me.data?.walletBalance ?? 0;
 
   const refreshMoney = useCallback(() => {
     void qc.invalidateQueries({ queryKey: qk.me });
@@ -126,7 +130,26 @@ export default function RoomScreen() {
           ) : (
             <Text style={{ fontFamily: font.semibold, fontSize: 16, color: colors.success }}>Free room</Text>
           )}
-          {d.ratePerMin > 0 ? <Text variant="small" style={{ textAlign: 'center' }}>Paisa sirf jitni der room mein rahenge utne minute ka katega. Gifts alag se bhej sakte hain.</Text> : null}
+          <View style={{ alignSelf: 'stretch', backgroundColor: colors.surface, borderRadius: radius.lg, padding: space.lg, gap: 9 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 14 }}>Room kaise kaam karta hai</Text>
+            {[
+              [d.ratePerMin > 0 ? 'cash-outline' : 'gift-outline', d.ratePerMin > 0 ? `Andar jaate hi ${Math.round(d.ratePerMin / 100)} coins/min shuru. Yeh wahi rate hai jo host ${video ? 'video' : 'voice'} baat ke liye leta hai.` : 'Is room mein aana free hai.'],
+              ['time-outline', 'Paisa sirf jitni der room mein rahe utne minute ka katta hai. Bahar aate hi katna band.'],
+              [video ? 'videocam-outline' : 'mic-outline', `Host ${video ? 'live video' : 'bolta hai'} aur aap sunte${video ? '/dekhte' : ''} hain. Aap chat kar sakte hain aur gift bhej sakte hain.`],
+              ['gift-outline', 'Gift bhejne par aapka naam chat mein highlight hota hai. Gift ke coins alag se katte hain.'],
+              ['flag-outline', 'Kuch galat lage to room ke andar upar wale flag se report kar sakte hain.'],
+            ].map(([ic, t]) => (
+              <View key={t} style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+                <Ionicons name={ic as keyof typeof Ionicons.glyphMap} size={17} color={colors.primary} style={{ marginTop: 1 }} />
+                <Text variant="small" style={{ flex: 1 }}>{t}</Text>
+              </View>
+            ))}
+          </View>
+          {d.ratePerMin > 0 ? (
+            <Text variant="small" style={{ textAlign: 'center', color: balance >= d.ratePerMin * 2 ? colors.textMuted : colors.danger }}>
+              Aapka balance {Math.round(balance / 100)} coins · lagbhag {Math.floor(balance / d.ratePerMin)} minute chalega
+            </Text>
+          ) : null}
           {err ? <Text variant="small" color={colors.danger} style={{ textAlign: 'center' }}>{err.msg}</Text> : null}
         </View>
         <View style={{ padding: space.xl, gap: space.sm }}>
@@ -166,6 +189,9 @@ export default function RoomScreen() {
               <Ionicons name="people" size={14} color={colors.white} />
               <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: colors.white }}>{live.listeners ?? d.listeners}</Text>
             </View>
+            <Pressable onPress={() => setReporting(true)} accessibilityLabel="Report karein" style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.4)' }}>
+              <Ionicons name="flag-outline" size={19} color={colors.white} />
+            </Pressable>
           </View>
           {remaining !== null && !over ? (
             <Pressable onPress={() => low && router.push('/wallet')} style={{ alignSelf: 'center', marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: low ? 'rgba(214,69,69,0.85)' : 'rgba(0,0,0,0.4)', borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 5 }}>
@@ -201,6 +227,7 @@ export default function RoomScreen() {
           ) : null}
         </KeyboardAvoidingView>
       </Screen>
+      {reporting ? <ReportSheet vendorId={d.host.id} context={`Room: ${d.title}`} onClose={() => setReporting(false)} /> : null}
     </LinearGradient>
   );
 }
