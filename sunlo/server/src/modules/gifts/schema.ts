@@ -31,7 +31,8 @@ export const giftSends = pgTable(
   'gift_sends',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    sessionId: uuid('session_id').notNull(),
+    sessionId: uuid('session_id'), // 1:1 session ka gift; room ka ho to null
+    roomId: uuid('room_id'),
     userId: uuid('user_id').notNull(),
     vendorId: uuid('vendor_id').notNull(),
     giftId: uuid('gift_id').notNull(),

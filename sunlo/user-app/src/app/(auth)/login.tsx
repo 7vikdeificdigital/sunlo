@@ -36,8 +36,8 @@ export default function Login() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <LinearGradient colors={[...gradient]} style={{ paddingTop: 48, paddingBottom: 56, alignItems: 'center', borderBottomLeftRadius: 36, borderBottomRightRadius: 36 }}>
-            <View style={{ width: 92, height: 92, borderRadius: 28, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' }}>
-              <LogoMark size={66} />
+            <View style={{ width: 92, height: 92, borderRadius: 28, backgroundColor: '#0A0618', alignItems: 'center', justifyContent: 'center' }}>
+              <LogoMark size={64} />
             </View>
             <Text style={{ fontFamily: font.bold, fontSize: 28, color: colors.white, marginTop: 14 }}>{brand.name}</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 14, color: 'rgba(255,255,255,0.92)', marginTop: 2 }}>Baat karo, halka mehsoos karo</Text>

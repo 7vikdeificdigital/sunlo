@@ -87,6 +87,8 @@ export async function requestSession(
     .where(and(eq(consultSessions.vendorId, a.id), eq(consultSessions.status, 'ACTIVE')))
     .limit(1);
   if (busy) throw conflict('VENDOR_BUSY', 'Yeh abhi doosre session mein hain');
+  const live = await db.execute(sql`select 1 from rooms where host_vendor_id = ${a.id} and status = 'LIVE' limit 1`);
+  if (live.rows.length) throw conflict('VENDOR_BUSY', 'Yeh abhi live room mein hain');
 
   const rate = input.type === 'CHAT' ? a.chatRatePerMin : input.type === 'AUDIO' ? a.callRatePerMin : a.videoRatePerMin;
   const required = rate * s.minSessionMinutes;

@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { LogoMark } from '@/components/Logo';
 import { Button, Screen, Text } from '@/components/ui';
 import { colors, font, gradient, radius, shadow, space } from '@/theme';
 
@@ -69,8 +70,8 @@ export default function Welcome() {
             <View style={{ width: 250, height: 250, alignItems: 'center', justifyContent: 'center' }}>
               <View style={{ position: 'absolute', width: 250, height: 250, borderRadius: 125, backgroundColor: colors.primarySoft }} />
               <View style={{ position: 'absolute', width: 190, height: 190, borderRadius: 95, backgroundColor: colors.primaryTint, opacity: 0.55 }} />
-              <LinearGradient colors={[...gradient]} style={[{ width: 124, height: 124, borderRadius: 62, alignItems: 'center', justifyContent: 'center' }, shadow.raised]}>
-                <Ionicons name={s.icon} size={60} color={colors.white} />
+              <LinearGradient colors={s.icon === 'ear' ? ['#1B1442', '#0A0618'] : [...gradient]} style={[{ width: 124, height: 124, borderRadius: 62, alignItems: 'center', justifyContent: 'center' }, shadow.raised]}>
+                {s.icon === 'ear' ? <LogoMark size={76} /> : <Ionicons name={s.icon} size={60} color={colors.white} />}
               </LinearGradient>
               <View style={[{ position: 'absolute', top: 18, right: -2, flexDirection: 'row', gap: 6, alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 7 }, shadow.card]}>
                 <Ionicons name={s.chips[0]!.i} size={15} color={colors.primary} />

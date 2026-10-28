@@ -8,6 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { Card, IconButton, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
 import { formatTime, perMin, rupees } from '@/lib/format';
+import { useHostRoom } from '@/lib/rooms';
 import { qk, useEarnings, useNotifications, usePending, useVendorMe } from '@/lib/queries';
 import { colors, font, gradient, radius, shadow, space } from '@/theme';
 
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const earn = useEarnings();
   const pending = usePending(true);
   const notif = useNotifications();
+  const hostRoom = useHostRoom(10_000);
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const v = me.data;
@@ -109,6 +111,29 @@ export default function Dashboard() {
             <Ionicons name="chevron-forward" size={18} color={colors.success} />
           </Pressable>
         ) : null}
+
+        {/* Live room */}
+        {hostRoom.data?.room ? (
+          <Pressable onPress={() => router.push(`/room/${hostRoom.data!.room!.id}`)} style={{ backgroundColor: '#FDECEC', borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+            <Ionicons name="radio" size={22} color="#D64545" />
+            <View style={{ flex: 1 }}>
+              <Text variant="title">Aapka room live hai</Text>
+              <Text variant="small">{hostRoom.data.room.title} · {hostRoom.data.listeners.length} sun rahe hain · wapas jaane ke liye tap karein</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#D64545" />
+          </Pressable>
+        ) : (
+          <Pressable onPress={() => router.push('/golive')} style={{ borderRadius: radius.lg, overflow: 'hidden', ...shadow.card }}>
+            <LinearGradient colors={['#8B6CFF', '#F2559F']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: space.lg, flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+              <Ionicons name="radio" size={26} color="#fff" />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: font.bold, fontSize: 16, color: '#fff' }}>Live room shuru karein</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: 'rgba(255,255,255,0.92)' }}>Voice ya video room, bahut se users ek saath. Entry rate aap tay karein.</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+        )}
 
         {/* Stats */}
         <Row gap={space.md}>

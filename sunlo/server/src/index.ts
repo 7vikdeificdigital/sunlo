@@ -4,6 +4,7 @@ import { env } from './config/env';
 import { pool } from './db/client';
 import { logger } from './lib/logger';
 import { setIo } from './lib/realtime';
+import { sweepRooms } from './modules/rooms/service';
 import { sweepSessions } from './modules/sessions/service';
 import { attachSocket } from './modules/sessions/socket';
 
@@ -18,6 +19,7 @@ const ticker = setInterval(async () => {
   sweeping = true;
   try {
     await sweepSessions();
+    await sweepRooms();
   } catch (err) {
     logger.error({ err }, 'session sweep failed');
   } finally {
@@ -25,7 +27,7 @@ const ticker = setInterval(async () => {
   }
 }, 5000);
 
-server.listen(env.PORT, () => logger.info(`Bondty API chalu: http://localhost:${env.PORT}/api/v1`));
+server.listen(env.PORT, () => logger.info(`Sunlo API chalu: http://localhost:${env.PORT}/api/v1`));
 
 async function shutdown(sig: string) {
   logger.info(`${sig} mila, server band ho raha hai`);

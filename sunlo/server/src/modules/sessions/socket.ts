@@ -6,11 +6,12 @@ import { chatMessages } from '../../db/schema';
 import { filterMessage } from '../../lib/contentFilter';
 import { HttpError } from '../../lib/errors';
 import { logger } from '../../lib/logger';
-import { emitToSession, sessionRoom, setIo, userRoom } from '../../lib/realtime';
+import { emitToRoom, emitToSession, roomChannel, sessionRoom, setIo, userRoom } from '../../lib/realtime';
+import { isRoomParticipant } from '../rooms/service';
 import { getSettings } from '../../lib/settings';
 import { verifyAccessToken, type AuthUser } from '../../middleware/auth';
 import { eq } from 'drizzle-orm';
-import { vendors } from '../../db/schema';
+import { users, vendors } from '../../db/schema';
 import { getParticipantSession } from './service';
 
 /** Vendor ka app band/internet gaya: 60 sec baad apne aap offline (taaki users offline vendor ko request na bhejein) */
@@ -111,6 +112,45 @@ export function attachSocket(server: HttpServer, corsOrigins: string[] | true) {
         const out = { id: msg.id, sessionId: msg.sessionId, senderId: msg.senderId, body: msg.body, createdAt: msg.createdAt, clientId: input.clientId };
         emitToSession(session.id, 'chat:message', out);
         ack?.({ ok: true, message: out, masked: filtered.flagged });
+      } catch (e) {
+        fail(ack, e instanceof z.ZodError ? new HttpError(400, 'BAD', 'Galat message') : e);
+      }
+    });
+
+    // ---- Live rooms ----
+    socket.on('room:join', async (raw: unknown, ack?: Ack) => {
+      try {
+        const { roomId } = z.object({ roomId: z.string().uuid() }).parse(raw);
+        const p = await isRoomParticipant(auth.id, roomId);
+        if (!p || !p.live) throw new HttpError(403, 'FORBIDDEN', 'Aap is room mein nahi hain');
+        await socket.join(roomChannel(roomId));
+        (socket.data.rooms ??= new Set<string>()).add(roomId);
+        ack?.({ ok: true });
+      } catch (e) {
+        fail(ack, e instanceof z.ZodError ? new HttpError(400, 'BAD', 'Galat request') : e);
+      }
+    });
+
+    socket.on('room:chat', async (raw: unknown, ack?: Ack) => {
+      try {
+        const b = socket.data.bucket as { tokens: number; at: number };
+        b.tokens = Math.min(10, b.tokens + (Date.now() - b.at) / 1000);
+        b.at = Date.now();
+        if (b.tokens < 1) throw new HttpError(429, 'SLOW_DOWN', 'Thoda dheere');
+        b.tokens -= 1;
+        const input = z.object({ roomId: z.string().uuid(), body: z.string().trim().min(1).max(300) }).parse(raw);
+        if (!(socket.data.rooms as Set<string> | undefined)?.has(input.roomId)) throw new HttpError(403, 'FORBIDDEN', 'Pehle room join karein');
+        const p = await isRoomParticipant(auth.id, input.roomId);
+        if (!p || !p.live) throw new HttpError(409, 'ROOM_ENDED', 'Room khatam ho chuka hai');
+        const s = await getSettings();
+        const filtered = s.maskContactInfoInChat ? await filterMessage(input.body) : { body: input.body, flagged: false };
+        if (!socket.data.name) {
+          const [u] = await db.select({ n: users.name }).from(users).where(eq(users.id, auth.id)).limit(1);
+          socket.data.name = u?.n?.split(' ')[0] || (p.host ? 'Host' : 'User');
+        }
+        const out = { roomId: input.roomId, userId: auth.id, name: socket.data.name as string, host: p.host, body: filtered.body, at: Date.now() };
+        emitToRoom(input.roomId, 'room:chat', out);
+        ack?.({ ok: true });
       } catch (e) {
         fail(ack, e instanceof z.ZodError ? new HttpError(400, 'BAD', 'Galat message') : e);
       }

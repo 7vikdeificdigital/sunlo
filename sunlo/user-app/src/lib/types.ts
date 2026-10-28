@@ -115,3 +115,15 @@ export interface Helpline {
   phone: string;
   note: string;
 }
+
+export interface LiveRoom {
+  id: string;
+  title: string;
+  type: 'AUDIO' | 'VIDEO';
+  ratePerMin: number;
+  maxListeners: number;
+  status: string;
+  startedAt: string;
+  listeners: number;
+  host: { id: string; displayName: string; avatarUrl: string | null; language: string | null };
+}

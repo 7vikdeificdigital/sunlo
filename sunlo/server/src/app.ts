@@ -10,6 +10,8 @@ import { apiLimiter } from './middleware/rateLimit';
 import { adminRouter } from './modules/admin/routes';
 import { authPrivate, authPublic } from './modules/auth/routes';
 import { giftsPrivate, giftsPublic } from './modules/gifts/routes';
+import { roomsRouter } from './modules/rooms/routes';
+import { randomRouter } from './modules/random/routes';
 import { miscPrivate, miscPublic } from './modules/misc/routes';
 import { sessionsRouter, vendorSessionsRouter } from './modules/sessions/routes';
 import { filesPublic, uploadsRouter } from './modules/uploads/routes';
@@ -40,6 +42,8 @@ export const privateRouters = [
   vendorSelfRouter,
   adminRouter,
   giftsPrivate,
+  randomRouter,
+  roomsRouter,
 ];
 
 export const corsOrigins = (): string[] | true =>

@@ -15,7 +15,7 @@ import { WebmView } from './WebmView';
 
 type Media = 'svga' | 'webm' | null;
 type Gift = { id: string; name: string; icon: string; price: number; svgaUrl: string | null; mediaType: Media; thumbUrl: string | null };
-type GiftEvent = Gift & { sessionId: string; giftId?: string; from: string };
+type GiftEvent = Gift & { sessionId?: string; roomId?: string; giftId?: string; from: string };
 type Anim = { key: number; icon: string; title: string; sub: string | null; coins: number | null; mediaUrl: string | null; mediaType: Media; thumbUrl: string | null; big: boolean; epic: boolean; small: boolean };
 type SessionLite = { status?: string; acceptedAt?: string | null };
 
@@ -26,6 +26,12 @@ const full = (u: string | null) => (u ? `${API_URL}${u}` : null);
 /** /call/<id> ya /session/<id> screen par ho to session id */
 function sessionIdFrom(path: string): string | null {
   const m = path.match(/\/(?:call|session)\/([0-9a-f-]{36})/i);
+  return m ? m[1]! : null;
+}
+
+/** /room/<id> screen par ho to room id (live room) */
+function roomIdFrom(path: string): string | null {
+  const m = path.match(/\/room\/([0-9a-f-]{36})/i);
   return m ? m[1]! : null;
 }
 
@@ -156,6 +162,7 @@ function Overlay({ anim, onDone, top }: { anim: Anim; onDone: () => void; top: n
 export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
   const path = usePathname();
   const sid = sessionIdFrom(path);
+  const rid = roomIdFrom(path);
   const qc = useQueryClient();
   const insets = useSafeAreaInsets();
   const [queue, setQueue] = useState<Anim[]>([]);
@@ -174,7 +181,7 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
     const s = getSocket();
     const seen = new Set<string>();
     const on = (e: GiftEvent) => {
-      const k = `${e.sessionId}:${e.giftId}:${Math.floor(Date.now() / 2000)}`; // session room + user room se double event na chale
+      const k = `${e.sessionId ?? e.roomId}:${e.giftId}:${Math.floor(Date.now() / 2000)}`; // session room + user room se double event na chale
       if (seen.has(k)) return;
       seen.add(k);
       push({
@@ -215,11 +222,11 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
     return () => clearInterval(t);
   }, [sid, qc, push]);
 
-  const gifts = useQuery({ queryKey: ['gifts'], queryFn: () => api<{ items: Gift[] }>('/gifts'), enabled: role === 'user' && !!sid, staleTime: 60_000 });
+  const gifts = useQuery({ queryKey: ['gifts'], queryFn: () => api<{ items: Gift[] }>('/gifts'), enabled: role === 'user' && (!!sid || !!rid), staleTime: 60_000 });
   // Session query ko subscribe karte hain, taaki ACTIVE hote hi button dikhe (cache badalne par re-render)
   const sessionQ = useQuery({ queryKey: ['session', sid ?? 'none'], queryFn: () => api<SessionLite>(`/sessions/${sid}`), enabled: !!sid, staleTime: 5000 });
   const session = sid ? sessionQ.data : undefined;
-  const canGift = role === 'user' && !!sid && session?.status === 'ACTIVE';
+  const canGift = role === 'user' && ((!!sid && session?.status === 'ACTIVE') || !!rid);
 
   useEffect(() => {
     if (!canGift) return;
@@ -240,11 +247,11 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
   const pickedGift = gifts.data?.items.find((g) => g.id === picked) ?? null;
 
   async function send() {
-    if (!sid || sending || !pickedGift) return;
+    if ((!sid && !rid) || sending || !pickedGift) return;
     setSending(true);
     setMsg(null);
     try {
-      await api(`/sessions/${sid}/gifts`, { method: 'POST', body: { giftId: pickedGift.id } });
+      await api(rid ? `/rooms/${rid}/gifts` : `/sessions/${sid}/gifts`, { method: 'POST', body: { giftId: pickedGift.id } });
       setSheet(false);
       setPicked(null);
     } catch (e) {

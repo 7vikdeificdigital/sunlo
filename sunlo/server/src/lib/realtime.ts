@@ -17,3 +17,8 @@ export function emitToUser(userId: string, event: string, payload: unknown) {
 export function emitToSession(sessionId: string, event: string, payload: unknown) {
   io?.to(sessionRoom(sessionId)).emit(event, payload);
 }
+
+export const roomChannel = (roomId: string) => `room:${roomId}`;
+export function emitToRoom(roomId: string, event: string, payload: unknown) {
+  io?.to(roomChannel(roomId)).emit(event, payload);
+}

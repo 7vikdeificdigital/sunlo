@@ -12,22 +12,22 @@
     {
       "idx": 1,
       "version": "7",
-      "when": 1792737051970,
-      "tag": "0001_upload_data",
+      "when": 1792993475242,
+      "tag": "0002_gifts",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1792995096255,
-      "tag": "0002_gifts",
+      "when": 1792998115656,
+      "tag": "0003_gift_media",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1792998488621,
-      "tag": "0003_gift_media",
+      "when": 1793200000000,
+      "tag": "0004_rooms",
       "breakpoints": true
     }
   ]

@@ -8,7 +8,7 @@ const icon =
   (on: IconName, off: IconName) =>
   ({ color, focused }: { color: ColorValue; focused: boolean }) => <Ionicons name={focused ? on : off} size={23} color={color} />;
 
-/** 5 tab: Home, Chat, Call, History, Account */
+/** 6 tab: Home, Connect (random), Chat, Call, History, Account */
 export default function TabLayout() {
   return (
     <Tabs
@@ -22,6 +22,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: icon('home', 'home-outline') }} />
+      <Tabs.Screen name="connect" options={{ title: 'Connect', tabBarIcon: icon('flash', 'flash-outline') }} />
       <Tabs.Screen name="chat" options={{ title: 'Chat', tabBarIcon: icon('chatbubbles', 'chatbubbles-outline') }} />
       <Tabs.Screen name="call" options={{ title: 'Call', tabBarIcon: icon('call', 'call-outline') }} />
       <Tabs.Screen name="history" options={{ title: 'History', tabBarIcon: icon('time', 'time-outline') }} />

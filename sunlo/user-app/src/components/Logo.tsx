@@ -1,29 +1,32 @@
-import Svg, { Path } from 'react-native-svg';
-import { View } from 'react-native';
+import { Image, View } from 'react-native';
 import { brand, colors, font } from '@/theme';
 import { Text } from './ui';
 
-const TOP = 'M75 65H330A103 103 0 0 1 433 168V200C433 255 410 290 380 300H75Z M229 143H268A57 57 0 0 1 268 258H229A57 57 0 0 1 229 143Z';
-const BOT = 'M75 300H372A130 130 0 0 1 502 430V470C502 520 478 565 437 600L555 692L350 635H75Z M242 392H305A70 70 0 0 1 305 540H242A70 70 0 0 1 242 392Z';
+// Bondty ka asli mark (transparent PNG): b + dil + do dots
+const MARK = require('../assets/bondty-mark.png');
+const RATIO = 392 / 420;
 
-/** Bondty ka mark: upar violet B, neeche coral bubble-B (tail ke saath) */
 export function LogoMark({ size = 64 }: { size?: number }) {
+  return <Image source={MARK} style={{ width: size * RATIO, height: size }} resizeMode="contain" accessibilityLabel={brand.short} />;
+}
+
+/** Wordmark: "bond" + gulabi "ty" (logo jaisa) */
+export function Wordmark({ size = 28, light = false }: { size?: number; light?: boolean }) {
   return (
-    <Svg width={size} height={size} viewBox="-15 48 660 660">
-      <Path d={TOP} fill={colors.primary} fillRule="evenodd" />
-      <Path d={BOT} fill={colors.accent} fillRule="evenodd" />
-    </Svg>
+    <Text style={{ fontFamily: font.bold, fontSize: size, letterSpacing: -0.5, color: light ? colors.white : colors.text }}>
+      bond<Text style={{ fontFamily: font.bold, fontSize: size, color: colors.accent }}>ty</Text>
+    </Text>
   );
 }
 
-/** Mark + naam + (optional) tagline */
+/** Mark + wordmark (+ tagline) */
 export function Logo({ size = 56, light = false, tagline = false }: { size?: number; light?: boolean; tagline?: boolean }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: size * 0.22 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: size * 0.2 }}>
       <LogoMark size={size} />
       <View>
-        <Text style={{ fontFamily: font.bold, fontSize: size * 0.62, lineHeight: size * 0.8, letterSpacing: -0.8, color: light ? colors.white : colors.text }}>{brand.short}</Text>
-        {tagline ? <Text style={{ fontFamily: font.regular, fontSize: size * 0.24, color: light ? 'rgba(255,255,255,0.75)' : colors.textMuted }}>{brand.tagline}</Text> : null}
+        <Wordmark size={size * 0.56} light={light} />
+        {tagline ? <Text style={{ fontFamily: font.regular, fontSize: size * 0.22, color: light ? 'rgba(255,255,255,0.75)' : colors.textMuted }}>{brand.tagline}</Text> : null}
       </View>
     </View>
   );
