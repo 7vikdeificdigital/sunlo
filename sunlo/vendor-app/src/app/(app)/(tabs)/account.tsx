@@ -89,7 +89,7 @@ export default function Account() {
           </Pressable>
         </Card>
         <Text variant="caption" style={{ textAlign: 'center' }}>
-          Sunlo Partner v1.0.0
+          Bondty Partner v1.0.0
         </Text>
       </ScrollView>
     </Screen>

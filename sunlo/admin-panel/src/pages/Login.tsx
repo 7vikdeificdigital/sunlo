@@ -28,7 +28,7 @@ export function Login() {
           <span className="brand-dot" style={{ color: '#fff' }}>
             S
           </span>
-          Sunlo Admin
+          Bondty Admin
         </div>
         <div className="field">
           <label htmlFor="email">Email</label>

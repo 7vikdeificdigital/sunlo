@@ -42,10 +42,10 @@ export default function Help() {
         <Card style={{ gap: 8 }}>
           <Row gap={8}>
             <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} />
-            <Text variant="title">Sunlo ke baare mein</Text>
+            <Text variant="title">Bondty ke baare mein</Text>
           </Row>
           <Text variant="small">
-            Sunlo par Listeners aapki baat sunne aur saath dene ke liye hain; woh doctor, psychiatrist ya therapist nahi hain aur ilaaj ya dawa ki salah nahi dete. Experts apne field (career, legal, finance...) mein salah dete hain.
+            Bondty par Listeners aapki baat sunne aur saath dene ke liye hain; woh doctor, psychiatrist ya therapist nahi hain aur ilaaj ya dawa ki salah nahi dete. Experts apne field (career, legal, finance...) mein salah dete hain.
           </Text>
           <Pressable onPress={() => router.push('/support')}>
             <Text variant="label" color={colors.primaryDark}>

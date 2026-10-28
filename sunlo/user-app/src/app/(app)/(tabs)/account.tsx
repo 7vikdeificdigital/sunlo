@@ -45,7 +45,7 @@ export default function Account() {
     {
       icon: 'gift-outline',
       label: 'Refer karein',
-      onPress: () => Share.share({ message: `Sunlo app par trained listeners aur experts se private baat karein. Mera referral code: ${u?.referralCode}` }).catch(() => undefined),
+      onPress: () => Share.share({ message: `Bondty app par trained listeners aur experts se private baat karein. Mera referral code: ${u?.referralCode}` }).catch(() => undefined),
     },
   ];
 
@@ -125,7 +125,7 @@ export default function Account() {
           </Pressable>
         </Card>
         <Text variant="caption" style={{ textAlign: 'center' }}>
-          Sunlo v1.0.0
+          Bondty v1.0.0
         </Text>
       </ScrollView>
     </Screen>

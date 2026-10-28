@@ -25,7 +25,7 @@ const ticker = setInterval(async () => {
   }
 }, 5000);
 
-server.listen(env.PORT, () => logger.info(`Sunlo API chalu: http://localhost:${env.PORT}/api/v1`));
+server.listen(env.PORT, () => logger.info(`Bondty API chalu: http://localhost:${env.PORT}/api/v1`));
 
 async function shutdown(sig: string) {
   logger.info(`${sig} mila, server band ho raha hai`);

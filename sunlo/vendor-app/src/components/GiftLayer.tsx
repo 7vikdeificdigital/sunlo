@@ -104,26 +104,30 @@ function Overlay({ anim, onDone, top }: { anim: Anim; onDone: () => void; top: n
     if (anim.big) Vibration.vibrate(anim.epic ? [0, 40, 60, 40] : 30);
     return () => pulse.stopAnimation();
   }, [fade, slide, pulse, anim.big, anim.epic]);
+  // Media (WebM/SVGA) na chale to banner ke saath emoji animation, poora overlay na hate
+  const [failed, setFailed] = useState(false);
+  const onFail = useCallback(() => setFailed(true), []);
+  const mediaUrl = failed ? null : anim.mediaUrl;
   const glowScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1.08] });
   return (
     <View pointerEvents="none" style={[StyleSheet.absoluteFill, { zIndex: 50 }]}>
       {anim.big && !anim.small ? (
-        <Animated.View style={[StyleSheet.absoluteFill, { opacity: fade, backgroundColor: 'rgba(4,14,13,0.45)', alignItems: 'center', justifyContent: 'center' }]}>
-          <Animated.View style={{ width: 380, height: 380, borderRadius: 190, backgroundColor: 'rgba(21,192,174,0.14)', transform: [{ scale: glowScale }], alignItems: 'center', justifyContent: 'center' }}>
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: fade, backgroundColor: 'rgba(18,12,56,0.5)', alignItems: 'center', justifyContent: 'center' }]}>
+          <Animated.View style={{ width: 380, height: 380, borderRadius: 190, backgroundColor: 'rgba(122,107,255,0.18)', transform: [{ scale: glowScale }], alignItems: 'center', justifyContent: 'center' }}>
             <View style={{ width: 270, height: 270, borderRadius: 135, backgroundColor: 'rgba(255,122,89,0.14)' }} />
           </Animated.View>
         </Animated.View>
       ) : null}
 
-      <View pointerEvents="none" style={anim.small && anim.mediaUrl ? { position: 'absolute', alignSelf: 'center', bottom: 150, width: '52%', aspectRatio: 9 / 16 } : StyleSheet.absoluteFill}>
-        {anim.mediaUrl && anim.mediaType === 'webm' ? <WebmView url={anim.mediaUrl} onDone={onDone} /> : null}
-        {anim.mediaUrl && anim.mediaType === 'svga' ? <SvgaView url={anim.mediaUrl} onDone={onDone} /> : null}
+      <View pointerEvents="none" style={anim.small && mediaUrl ? { position: 'absolute', alignSelf: 'center', bottom: 150, width: '52%', aspectRatio: 9 / 16 } : StyleSheet.absoluteFill}>
+        {mediaUrl && anim.mediaType === 'webm' ? <WebmView url={mediaUrl} onDone={onDone} onFail={onFail} /> : null}
+        {mediaUrl && anim.mediaType === 'svga' ? <SvgaView url={mediaUrl} onDone={onDone} onFail={onFail} /> : null}
       </View>
-      {!anim.mediaUrl ? <EmojiBurst anim={anim} onDone={onDone} /> : null}
+      {!mediaUrl ? <EmojiBurst anim={anim} onDone={onDone} /> : null}
       {anim.epic ? <Sparkles /> : null}
 
       <Animated.View style={{ position: 'absolute', top, left: 16, right: 16, alignItems: 'center', opacity: fade, transform: [{ translateY: slide }] }}>
-        <LinearGradient colors={['rgba(14,36,33,0.94)', 'rgba(24,70,64,0.94)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingLeft: 8, paddingRight: 18, borderRadius: 32, borderWidth: 1, borderColor: 'rgba(94,230,210,0.45)' }}>
+        <LinearGradient colors={['rgba(36,26,102,0.94)', 'rgba(75,58,230,0.94)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingLeft: 8, paddingRight: 18, borderRadius: 32, borderWidth: 1, borderColor: 'rgba(184,175,255,0.5)' }}>
           <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             {anim.thumbUrl ? <Image source={{ uri: anim.thumbUrl }} style={{ width: 40, height: 40 }} resizeMode="contain" /> : <Text style={{ fontSize: 24 }}>{anim.icon}</Text>}
           </View>
@@ -132,7 +136,7 @@ function Overlay({ anim, onDone, top }: { anim: Anim; onDone: () => void; top: n
             {anim.coins !== null ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                 <Coin size={13} />
-                <Text style={{ color: '#7FE9D8', fontSize: 11.5 }}>{anim.coins.toLocaleString('en-IN')} {anim.sub}</Text>
+                <Text style={{ color: '#CFC8FF', fontSize: 11.5 }}>{anim.coins.toLocaleString('en-IN')} {anim.sub}</Text>
               </View>
             ) : null}
           </View>
@@ -224,6 +228,15 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
     return () => l.stop();
   }, [canGift, btnPulse]);
 
+  // Session khatam ho gaya to chalta hua/baaki animation aur sheet band (screen kabhi na atke)
+  const ended = !!sid && !!session?.status && session.status !== 'ACTIVE' && session.status !== 'REQUESTED';
+  useEffect(() => {
+    if (ended) {
+      setQueue([]);
+      setSheet(false);
+    }
+  }, [ended]);
+
   const pickedGift = gifts.data?.items.find((g) => g.id === picked) ?? null;
 
   async function send() {
@@ -267,13 +280,13 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
       <Modal visible={sheet} transparent animationType="slide" onRequestClose={() => setSheet(false)} statusBarTranslucent>
         <Pressable onPress={() => setSheet(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' }}>
           <Pressable onPress={() => undefined}>
-            <LinearGradient colors={['#12302C', '#0A1B19']} style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingTop: 10, paddingHorizontal: 16, paddingBottom: 16 + insets.bottom, borderTopWidth: 1, borderColor: 'rgba(94,230,210,0.25)' }}>
+            <LinearGradient colors={['#241A66', '#140E3A']} style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingTop: 10, paddingHorizontal: 16, paddingBottom: 16 + insets.bottom, borderTopWidth: 1, borderColor: 'rgba(184,175,255,0.3)' }}>
               <View style={{ alignSelf: 'center', width: 42, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.25)', marginBottom: 12 }} />
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <Ionicons name="gift" size={20} color="#FF9A6B" />
                 <Text style={{ color: colors.white, fontSize: 18 }}>Gift bhejein</Text>
               </View>
-              <Text style={{ color: '#8FB1AC', fontSize: 12.5, marginBottom: 12 }}>Aapke wallet se coins katenge. Jo gift chuna hai, wahi neeche button par dikhega.</Text>
+              <Text style={{ color: '#B9B3E8', fontSize: 12.5, marginBottom: 12 }}>Aapke wallet se coins katenge. Jo gift chuna hai, wahi neeche button par dikhega.</Text>
               {msg ? (
                 <View style={{ backgroundColor: 'rgba(214,69,69,0.18)', borderRadius: 12, padding: 10, marginBottom: 10 }}>
                   <Text style={{ color: '#FF9C9C', fontSize: 12.5 }}>{msg}</Text>
@@ -293,21 +306,21 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
                         paddingTop: 10,
                         paddingBottom: 8,
                         borderRadius: 18,
-                        backgroundColor: on ? 'rgba(21,192,174,0.20)' : 'rgba(255,255,255,0.05)',
+                        backgroundColor: on ? 'rgba(122,107,255,0.28)' : 'rgba(255,255,255,0.05)',
                         borderWidth: 1.5,
-                        borderColor: on ? '#5EE6D2' : 'rgba(255,255,255,0.08)',
+                        borderColor: on ? '#B8AFFF' : 'rgba(255,255,255,0.08)',
                       }}
                     >
                       {g.thumbUrl ? <Image source={{ uri: full(g.thumbUrl)! }} style={{ width: 62, height: 62 }} resizeMode="contain" /> : <Text style={{ fontSize: 40, height: 62, lineHeight: 62 }}>{g.icon}</Text>}
                       <Text style={{ color: colors.white, fontSize: 12.5 }} numberOfLines={1}>{g.name}</Text>
-                      <View style={{ paddingHorizontal: 9, paddingVertical: 2, borderRadius: 10, backgroundColor: on ? '#5EE6D2' : 'rgba(255,200,87,0.16)' }}>
-                        <CoinPrice paise={g.price} size={11.5} color={on ? '#04201D' : '#FFC857'} />
+                      <View style={{ paddingHorizontal: 9, paddingVertical: 2, borderRadius: 10, backgroundColor: on ? '#B8AFFF' : 'rgba(255,200,87,0.16)' }}>
+                        <CoinPrice paise={g.price} size={11.5} color={on ? '#1A1340' : '#FFC857'} />
                       </View>
                     </Pressable>
                   );
                 })}
-                {gifts.isLoading ? <Text style={{ color: '#8FB1AC' }}>Gifts load ho rahe hain...</Text> : null}
-                {!gifts.isLoading && !gifts.data?.items.length ? <Text style={{ color: '#8FB1AC' }}>Abhi koi gift available nahi hai.</Text> : null}
+                {gifts.isLoading ? <Text style={{ color: '#B9B3E8' }}>Gifts load ho rahe hain...</Text> : null}
+                {!gifts.isLoading && !gifts.data?.items.length ? <Text style={{ color: '#B9B3E8' }}>Abhi koi gift available nahi hai.</Text> : null}
               </ScrollView>
               <Pressable onPress={send} disabled={!pickedGift || sending} style={{ marginTop: 12, opacity: !pickedGift || sending ? 0.5 : 1 }}>
                 <LinearGradient colors={['#FF9A6B', '#FF5E7E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 }}>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -13,8 +13,9 @@ function toBase64(buf: ArrayBuffer): string {
 const cache = new Map<string, string>();
 
 /** Transparent WebM (VP9 alpha) gift animation: poori screen par ek baar chalti hai, khatam hone par onDone */
-export function WebmView({ url, onDone }: { url: string; onDone: () => void }) {
+export function WebmView({ url, onDone, onFail }: { url: string; onDone: () => void; onFail: () => void }) {
   const [b64, setB64] = useState<string | null>(cache.get(url) ?? null);
+  const started = useRef(false);
 
   useEffect(() => {
     let dead = false;
@@ -28,17 +29,21 @@ export function WebmView({ url, onDone }: { url: string; onDone: () => void }) {
         cache.set(url, s);
         if (!dead) setB64(s);
       })
-      .catch(() => !dead && onDone());
+      .catch(() => !dead && onFail());
     return () => {
       dead = true;
     };
-  }, [url, onDone]);
+  }, [url, onFail]);
 
-  // Safety: atak jaye to 12 second baad hat jaye
+  // Safety: atak jaye to 8 second baad hat jaye; 5 second mein shuru na ho to emoji wala animation
   useEffect(() => {
-    const t = setTimeout(onDone, 12_000);
-    return () => clearTimeout(t);
-  }, [onDone]);
+    const t = setTimeout(onDone, 8_000);
+    const w = setTimeout(() => !started.current && onFail(), 5_000);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(w);
+    };
+  }, [onDone, onFail]);
 
   const html = useMemo(() => {
     if (!b64) return null;
@@ -69,9 +74,12 @@ var p=v.play();if(p&&p.catch)p.catch(function(){post('error')});
       mediaPlaybackRequiresUserAction={false}
       allowsInlineMediaPlayback
       onMessage={(e) => {
-        if (e.nativeEvent.data === 'done' || e.nativeEvent.data === 'error') onDone();
+        const m = e.nativeEvent.data;
+        if (m === 'started') started.current = true;
+        else if (m === 'done') onDone();
+        else if (m === 'error') onFail();
       }}
-      onError={onDone}
+      onError={onFail}
       backgroundColor="transparent"
       scrollEnabled={false}
     />

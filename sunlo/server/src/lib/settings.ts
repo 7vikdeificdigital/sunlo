@@ -6,7 +6,7 @@ import { settings } from '../db/schema';
  * Koi secret/API key yahan kabhi nahi rakhi jaati: woh sirf .env mein.
  */
 export const DEFAULT_SETTINGS = {
-  appName: 'Sunlo',
+  appName: 'Bondty',
   currency: 'INR',
   gstPct: 18, // recharge par GST
   giftCommissionPct: 30, // har gift mein platform ka hissa (%)

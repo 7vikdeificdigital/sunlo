@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Avatar } from '@/components/Avatar';
 import { CallView } from '@/components/CallView';
@@ -80,7 +80,12 @@ export default function CallScreen() {
           sessionId={s.id}
           video={s.type === 'VIDEO'}
           onEnd={async () => {
-            await api(`/sessions/${s.id}/end`, { method: 'POST' }).catch(() => undefined);
+            try {
+              await api(`/sessions/${s.id}/end`, { method: 'POST' });
+            } catch (e) {
+              Alert.alert('Call band nahi ho payi', errorMessage(e));
+              void q.refetch();
+            }
           }}
         />
       </Screen>

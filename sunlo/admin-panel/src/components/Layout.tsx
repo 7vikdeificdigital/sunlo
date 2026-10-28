@@ -55,11 +55,11 @@ export function Layout() {
         <button className="btn ghost sm" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }} onClick={() => setOpen(!open)} aria-label="Menu">
           ☰
         </button>
-        <b>Sunlo Admin</b>
+        <b>Bondty Admin</b>
       </div>
       <aside className={`side ${open ? 'open' : ''}`} onClick={() => setOpen(false)}>
         <div className="brand">
-          <span className="brand-dot">S</span> Sunlo Admin
+          <span className="brand-dot">B</span> Bondty Admin
         </div>
         <nav className="nav" aria-label="Admin menu">
           {NAV.map((g) => (

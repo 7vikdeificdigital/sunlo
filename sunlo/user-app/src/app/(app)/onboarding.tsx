@@ -20,7 +20,7 @@ export default function Onboarding() {
 
   async function save() {
     if (name.trim().length < 2) return setError('Apna naam likhein (koi bhi naam chalega)');
-    if (!adult) return setError('Sunlo sirf 18 saal ya usse bade logon ke liye hai');
+    if (!adult) return setError('Bondty sirf 18 saal ya usse bade logon ke liye hai');
     setSaving(true);
     setError(null);
     try {

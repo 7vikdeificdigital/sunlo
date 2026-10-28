@@ -1,0 +1,86 @@
+[
+  {
+    "file": "heart",
+    "name": "Dil",
+    "icon": "❤️",
+    "price": 1000,
+    "sortOrder": 1
+  },
+  {
+    "file": "chocolate",
+    "name": "Chocolate",
+    "icon": "🍫",
+    "price": 2000,
+    "sortOrder": 2
+  },
+  {
+    "file": "balloons",
+    "name": "Gubbare",
+    "icon": "🎈",
+    "price": 5000,
+    "sortOrder": 3
+  },
+  {
+    "file": "bouquet",
+    "name": "Guldasta",
+    "icon": "💐",
+    "price": 10000,
+    "sortOrder": 4
+  },
+  {
+    "file": "cake",
+    "name": "Cake",
+    "icon": "🎂",
+    "price": 15000,
+    "sortOrder": 5
+  },
+  {
+    "file": "cricket",
+    "name": "Cricket",
+    "icon": "🏏",
+    "price": 20000,
+    "sortOrder": 6
+  },
+  {
+    "file": "crystal",
+    "name": "Crystal Ball",
+    "icon": "🔮",
+    "price": 50000,
+    "sortOrder": 7
+  },
+  {
+    "file": "crown",
+    "name": "Crown",
+    "icon": "👑",
+    "price": 100000,
+    "sortOrder": 8
+  },
+  {
+    "file": "ring",
+    "name": "Heera Ring",
+    "icon": "💍",
+    "price": 200000,
+    "sortOrder": 9
+  },
+  {
+    "file": "chest",
+    "name": "Khazana",
+    "icon": "💰",
+    "price": 300000,
+    "sortOrder": 10
+  },
+  {
+    "file": "castle",
+    "name": "Mahal",
+    "icon": "🏰",
+    "price": 500000,
+    "sortOrder": 11
+  },
+  {
+    "file": "taj",
+    "name": "Taj Mahal",
+    "icon": "🕌",
+    "price": 1000000,
+    "sortOrder": 12
+  }
+]

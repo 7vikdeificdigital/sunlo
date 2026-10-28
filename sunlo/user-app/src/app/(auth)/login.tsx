@@ -3,10 +3,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
+import { LogoMark } from '@/components/Logo';
 import { Button, Input, Row, Screen, Text } from '@/components/ui';
 import { errorMessage } from '@/lib/api';
 import { sendLoginCode } from '@/lib/loginFlow';
-import { colors, font, gradient, radius, space } from '@/theme';
+import { brand, colors, font, gradient, radius, space } from '@/theme';
 
 export default function Login() {
   const [phone, setPhone] = useState('');
@@ -35,10 +36,10 @@ export default function Login() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <LinearGradient colors={[...gradient]} style={{ paddingTop: 48, paddingBottom: 56, alignItems: 'center', borderBottomLeftRadius: 36, borderBottomRightRadius: 36 }}>
-            <View style={{ width: 84, height: 84, borderRadius: 42, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' }}>
-              <Ionicons name="ear" size={44} color={colors.white} />
+            <View style={{ width: 92, height: 92, borderRadius: 28, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' }}>
+              <LogoMark size={66} />
             </View>
-            <Text style={{ fontFamily: font.bold, fontSize: 28, color: colors.white, marginTop: 14 }}>Sunlo</Text>
+            <Text style={{ fontFamily: font.bold, fontSize: 28, color: colors.white, marginTop: 14 }}>{brand.name}</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 14, color: 'rgba(255,255,255,0.92)', marginTop: 2 }}>Baat karo, halka mehsoos karo</Text>
           </LinearGradient>
 
@@ -86,7 +87,11 @@ export default function Login() {
               ))}
             </Row>
             <Text variant="caption" style={{ textAlign: 'center', marginTop: space.md }}>
-              Aage badhkar aap Terms of Use aur Privacy Policy se sahmat hote hain
+              Aage badhkar aap{' '}
+              <Text variant="caption" color={colors.primary} onPress={() => router.push('/terms')} style={{ fontFamily: font.semibold }}>
+                Terms of Use
+              </Text>{' '}
+              se sahmat hote hain
             </Text>
           </View>
         </ScrollView>

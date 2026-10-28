@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { JSZIP_LIB, SVGA_LIB } from './svgaLib';
@@ -20,8 +20,9 @@ function svgaPrefix(buf: ArrayBuffer): string {
 }
 
 /** Poori screen par ek baar SVGA animation chalata hai; khatam (ya error) par onDone */
-export function SvgaView({ url, onDone }: { url: string; onDone: () => void }) {
+export function SvgaView({ url, onDone, onFail }: { url: string; onDone: () => void; onFail: () => void }) {
   const [b64, setB64] = useState<string | null>(cache.get(url) ?? null);
+  const started = useRef(false);
 
   useEffect(() => {
     let dead = false;
@@ -33,17 +34,21 @@ export function SvgaView({ url, onDone }: { url: string; onDone: () => void }) {
         cache.set(url, s);
         if (!dead) setB64(s);
       })
-      .catch(() => !dead && onDone());
+      .catch(() => !dead && onFail());
     return () => {
       dead = true;
     };
-  }, [url, onDone]);
+  }, [url, onFail]);
 
-  // Safety: animation atak jaye to 12 second baad apne aap hat jaye
+  // Safety: atak jaye to 8 second baad hat jaye; 5 second mein shuru na ho to emoji wala animation
   useEffect(() => {
-    const t = setTimeout(onDone, 12_000);
-    return () => clearTimeout(t);
-  }, [onDone]);
+    const t = setTimeout(onDone, 8_000);
+    const w = setTimeout(() => !started.current && onFail(), 5_000);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(w);
+    };
+  }, [onDone, onFail]);
 
   const html = useMemo(() => {
     if (!b64) return null;
@@ -73,9 +78,12 @@ try{
       androidLayerType="hardware"
       javaScriptEnabled
       onMessage={(e) => {
-        if (e.nativeEvent.data === 'done' || e.nativeEvent.data === 'error') onDone();
+        const m = e.nativeEvent.data;
+        if (m === 'started') started.current = true;
+        else if (m === 'done') onDone();
+        else if (m === 'error') onFail();
       }}
-      onError={onDone}
+      onError={onFail}
       backgroundColor="transparent"
       scrollEnabled={false}
     />
