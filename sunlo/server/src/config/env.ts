@@ -79,8 +79,9 @@ if (isProd) {
       problems.push('MSG91_AUTH_KEY aur MSG91_TEMPLATE_ID zaroori hain');
   }
   if (env.PAYMENT_PROVIDER === 'mock') problems.push('PAYMENT_PROVIDER=mock production mein mana hai');
-  if (env.PAYMENT_PROVIDER === 'razorpay' && (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET || !env.RAZORPAY_WEBHOOK_SECRET))
-    problems.push('RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET zaroori hain');
+  // Webhook secret optional: uske bina bhi payment app se verify hokar credit hoti hai (signature + Razorpay se status check)
+  if (env.PAYMENT_PROVIDER === 'razorpay' && (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET))
+    problems.push('RAZORPAY_KEY_ID aur RAZORPAY_KEY_SECRET zaroori hain');
   if (!env.PAYOUT_ENC_KEY || Buffer.from(env.PAYOUT_ENC_KEY, 'base64').length !== 32)
     problems.push('PAYOUT_ENC_KEY (32 bytes base64) zaroori hai: openssl rand -base64 32');
   if (!env.CORS_ORIGINS) problems.push('CORS_ORIGINS set karein (admin panel/website ka domain)');
