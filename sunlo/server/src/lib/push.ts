@@ -16,11 +16,15 @@ export async function pushToUsers(userIds: string[], msg: Push): Promise<void> {
   try {
     const rows = await db.select({ token: deviceTokens.token }).from(deviceTokens).where(inArray(deviceTokens.userId, userIds)).limit(1000);
     const tokens = rows.map((r) => r.token);
-    if (!tokens.length) return;
+    if (!tokens.length) {
+      logger.info({ userIds: userIds.length }, 'push: is user ka koi device token registered nahi');
+      return;
+    }
     let messaging;
     try {
       messaging = getMessaging(getFirebaseApp());
     } catch {
+      logger.warn('push: Firebase service account set nahi (FIREBASE_SERVICE_ACCOUNT_BASE64)');
       return; // Firebase service account set nahi
     }
     for (let i = 0; i < tokens.length; i += 500) {
@@ -32,8 +36,10 @@ export async function pushToUsers(userIds: string[], msg: Push): Promise<void> {
         android: { priority: 'high', ttl: 60_000, notification: { sound: 'default' } },
       });
       const dead: string[] = [];
+      logger.info({ sent: res.successCount, failed: res.failureCount }, 'push: FCM result');
       res.responses.forEach((r, k) => {
         const code = r.error?.code;
+        if (code) logger.warn({ code }, 'push: FCM error');
         if (code === 'messaging/registration-token-not-registered' || code === 'messaging/invalid-registration-token') dead.push(chunk[k]!);
       });
       if (dead.length) await db.delete(deviceTokens).where(inArray(deviceTokens.token, dead));
