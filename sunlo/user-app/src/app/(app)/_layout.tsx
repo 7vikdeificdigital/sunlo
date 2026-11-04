@@ -4,6 +4,7 @@ import { Redirect, Stack, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { Loader, Screen } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { registerPush } from '@/lib/push';
 import { qk, useMe } from '@/lib/queries';
 import { disconnectSocket, getSocket } from '@/lib/socket';
 import type { Session } from '@/lib/types';
@@ -35,6 +36,19 @@ export default function AppLayout() {
   }, [token, qc]);
 
   useEffect(() => () => disconnectSocket(), []);
+
+  // Push notification (FCM): login ke baad token server ko
+  const signedIn = !!token;
+  useEffect(() => {
+    if (!signedIn) return;
+    let off: (() => void) | undefined;
+    let gone = false;
+    void registerPush().then((f) => (gone ? f() : (off = f)));
+    return () => {
+      gone = true;
+      off?.();
+    };
+  }, [signedIn]);
 
   if (me.isLoading) {
     return (

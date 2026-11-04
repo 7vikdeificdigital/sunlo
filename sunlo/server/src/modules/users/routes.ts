@@ -66,3 +66,11 @@ usersRouter.post('/me/devices', async (req, res) => {
     .onConflictDoUpdate({ target: deviceTokens.token, set: { userId: id, platform } });
   res.json({ ok: true });
 });
+
+/** Logout par: is phone par ab is user ki push na aaye */
+usersRouter.delete('/me/devices', async (req, res) => {
+  const id = authId(req);
+  const { token } = body(req, z.object({ token: z.string().min(10).max(4096) }));
+  await db.delete(deviceTokens).where(and(eq(deviceTokens.userId, id), eq(deviceTokens.token, token)));
+  res.json({ ok: true });
+});

@@ -108,6 +108,7 @@ export interface RechargePack {
   bonus: number;
   gstAmount: number;
   isPopular: boolean;
+  playProductId?: string;
 }
 
 export interface Helpline {

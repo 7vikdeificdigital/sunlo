@@ -1,13 +1,70 @@
 {
   "project_info": {
-    "project_number": "123456789012",
-    "project_id": "sunlo-placeholder",
-    "storage_bucket": "sunlo-placeholder.appspot.com"
+    "project_number": "780028416790",
+    "project_id": "sunloo-8babd",
+    "storage_bucket": "sunloo-8babd.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789012:android:bbbbbbbbbbbbbbbbbbbbbb",
+        "mobilesdk_app_id": "1:780028416790:android:aae2123052887b4b8bb637",
+        "android_client_info": {
+          "package_name": "com.bondty.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqXc2CzWacAh7VsXwGxDUrjhayIdJKVUA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780028416790:android:8d244e863f2afbc58bb637",
+        "android_client_info": {
+          "package_name": "com.bondty.partner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqXc2CzWacAh7VsXwGxDUrjhayIdJKVUA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780028416790:android:415ccb53c063c6fe8bb637",
+        "android_client_info": {
+          "package_name": "com.satvik.sunlo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqXc2CzWacAh7VsXwGxDUrjhayIdJKVUA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780028416790:android:a5e2aeb8eb0c97838bb637",
         "android_client_info": {
           "package_name": "com.satvik.sunlo.partner"
         }
@@ -15,7 +72,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyPLACEHOLDER000000000000000000000"
+          "current_key": "AIzaSyAqXc2CzWacAh7VsXwGxDUrjhayIdJKVUA"
         }
       ],
       "services": {

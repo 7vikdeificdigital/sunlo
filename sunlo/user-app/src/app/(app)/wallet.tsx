@@ -1,17 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, ErrorBox, Header, Input, Loader, Row, Screen, Text } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import { BILLING_MODE } from '@/lib/billing';
+import { buyCoins, recoverPurchases } from '@/lib/playBilling';
+import { qk } from '@/lib/queries';
 import { rupees } from '@/lib/format';
 import { useAppConfig, useWallet } from '@/lib/queries';
 import { colors, font, gradient, radius, shadow, space } from '@/theme';
 
 export default function Wallet() {
   const insets = useSafeAreaInsets();
+  const qc = useQueryClient();
+  const userId = useAuth((s) => s.user?.id);
+  const play = BILLING_MODE === 'play';
+  const [notice, setNotice] = useState<string | null>(null);
   const w = useWallet();
   const cfg = useAppConfig();
   const [packId, setPackId] = useState<string | null>(null);
@@ -28,10 +37,36 @@ export default function Wallet() {
   const gst = pack ? pack.gstAmount : Math.round((customPaise * gstPct) / 100);
   const valid = pack ? true : Number(custom) >= minRupees;
 
+  const refreshMoney = () => {
+    void qc.invalidateQueries({ queryKey: qk.me });
+    void qc.invalidateQueries({ queryKey: qk.wallet });
+    void qc.invalidateQueries({ queryKey: ['wallet', 'txns'] });
+  };
+
+  // Play build: pichli adhoori purchase (app band hui thi) ho to ab settle
+  useEffect(() => {
+    if (!play) return;
+    void recoverPurchases().then((n) => {
+      if (n > 0) {
+        setNotice('Pichla recharge poora ho gaya, coins wallet mein jod diye gaye.');
+        refreshMoney();
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [play]);
+
   async function proceed() {
     setLoading(true);
     setError(null);
+    setNotice(null);
     try {
+      if (play) {
+        if (!pack?.playProductId || !userId) throw new Error('Pehle ek pack chunein');
+        const r = await buyCoins(pack.playProductId, userId);
+        setNotice(r.status === 'PAID' ? 'Recharge safal! Coins wallet mein jod diye gaye.' : 'Payment pending hai. Poora hote hi coins jud jayenge.');
+        refreshMoney();
+        return;
+      }
       const r = await api<{ paymentId: string; checkoutPath: string }>('/wallet/recharge', {
         method: 'POST',
         body: pack ? { packId: pack.id } : { amount: customPaise },
@@ -106,6 +141,7 @@ export default function Wallet() {
               })}
             </View>
 
+            {!play ? (
             <Input
               label={`Ya apni raqam likhein (kam se kam ₹${minRupees})`}
               value={custom}
@@ -117,6 +153,12 @@ export default function Wallet() {
               placeholder="Amount"
               left={<Text variant="bodyStrong">₹</Text>}
             />
+            ) : null}
+            {notice ? (
+              <View style={{ backgroundColor: colors.successSoft, borderRadius: radius.md, padding: space.md }}>
+                <Text variant="small" color={colors.success}>{notice}</Text>
+              </View>
+            ) : null}
             {w.data!.provider === 'mock' ? (
               <View style={{ backgroundColor: '#EEE8FF', borderRadius: radius.md, padding: space.md }}>
                 <Text variant="small" color="#5B3FD1">
@@ -126,16 +168,18 @@ export default function Wallet() {
             ) : null}
           </ScrollView>
 
-          {amount > 0 && valid ? (
+          {amount > 0 && valid && (!play || !!pack) ? (
             <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.surface, padding: space.lg, paddingBottom: space.lg + insets.bottom, gap: 6, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, ...shadow.raised }}>
               <Row style={{ justifyContent: 'space-between' }}>
                 <Text variant="small">Recharge</Text>
                 <Text variant="bodyStrong">{rupees(amount)}</Text>
               </Row>
-              <Row style={{ justifyContent: 'space-between' }}>
-                <Text variant="small">GST ({gstPct}%)</Text>
-                <Text variant="bodyStrong">{rupees(gst)}</Text>
-              </Row>
+              {!play ? (
+                <Row style={{ justifyContent: 'space-between' }}>
+                  <Text variant="small">GST ({gstPct}%)</Text>
+                  <Text variant="bodyStrong">{rupees(gst)}</Text>
+                </Row>
+              ) : null}
               {bonus ? (
                 <Row style={{ justifyContent: 'space-between' }}>
                   <Text variant="small" color={colors.success}>
@@ -151,7 +195,7 @@ export default function Wallet() {
                   {error}
                 </Text>
               ) : null}
-              <Button title={`${rupees(amount + gst)} pay karein`} onPress={proceed} loading={loading} style={{ marginTop: 6 }} />
+              <Button title={play ? `Google Play se ${rupees(amount)} pay karein` : `${rupees(amount + gst)} pay karein`} onPress={proceed} loading={loading} style={{ marginTop: 6 }} />
             </View>
           ) : null}
         </>

@@ -7,6 +7,7 @@ import { users, vendors, wallets } from '../../db/schema';
 import { env } from '../../config/env';
 import { numericUid } from '../../lib/crypto';
 import { conflict, forbidden, HttpError, notFound, unavailable } from '../../lib/errors';
+import { pushToUser } from '../../lib/push';
 import { emitToRoom, emitToUser } from '../../lib/realtime';
 import { getSettings } from '../../lib/settings';
 import { body, idParam, params } from '../../lib/validate';
@@ -131,7 +132,10 @@ roomsRouter.post('/rooms/:id/gifts', requireRole('USER'), async (req, res) => {
     fromId: userId,
   };
   emitToRoom(id, 'gift', payload);
-  if (out.hostUserId) emitToUser(out.hostUserId, 'gift', payload);
+  if (out.hostUserId) {
+    emitToUser(out.hostUserId, 'gift', payload);
+    void pushToUser(out.hostUserId, { title: `${payload.from} ne ${out.g.name} bheja`, body: `Room mein gift mila: ${Math.round(out.g.price / 100)} coins`, data: { type: 'gift' } });
+  }
   emitToUser(userId, 'room:limit', { roomId: id, endsAt: out.newMax != null ? new Date(out.joinedAt.getTime() + out.newMax * 1000) : null });
   res.status(201).json({ ok: true, gift: payload, endsAt: out.newMax != null ? new Date(out.joinedAt.getTime() + out.newMax * 1000) : null });
 });

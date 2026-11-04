@@ -5,6 +5,7 @@ import Razorpay from 'razorpay';
 import { env, isProd } from '../../config/env';
 import { db } from '../../db/client';
 import { notifications, payments, rechargePacks } from '../../db/schema';
+import { pushToUser } from '../../lib/push';
 import { hmac, safeEqualHex } from '../../lib/crypto';
 import { badRequest, forbidden, notFound } from '../../lib/errors';
 import { logger } from '../../lib/logger';
@@ -125,6 +126,8 @@ export async function creditPayment(paymentId: string, providerPaymentId: string
   if (!result.alreadyCredited) {
     // Chalu session ho to uska samay naye balance ke hisaab se badhao
     await refreshSessionLimit(result.payment.userId).catch((err) => logger.error({ err }, 'refreshSessionLimit failed'));
+    const p = result.payment;
+    void pushToUser(p.userId, { title: 'Recharge safal', body: `${Math.round((p.amount + p.bonus) / 100)} coins aapke wallet mein jod diye gaye`, data: { type: 'wallet' } });
   }
   return result;
 }

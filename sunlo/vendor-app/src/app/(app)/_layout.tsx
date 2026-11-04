@@ -6,6 +6,7 @@ import { IncomingRequest } from '@/components/IncomingRequest';
 import { ErrorBox, Loader, Screen } from '@/components/ui';
 import { errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { registerPush } from '@/lib/push';
 import { qk, usePending, useVendorMe } from '@/lib/queries';
 import { disconnectSocket, getSocket } from '@/lib/socket';
 import type { Session } from '@/lib/types';
@@ -57,6 +58,19 @@ export default function AppLayout() {
   }, [token, qc]);
 
   useEffect(() => () => disconnectSocket(), []);
+
+  // Push notification (FCM): login ke baad token server ko
+  const signedIn = !!token;
+  useEffect(() => {
+    if (!signedIn) return;
+    let off: (() => void) | undefined;
+    let gone = false;
+    void registerPush().then((f) => (gone ? f() : (off = f)));
+    return () => {
+      gone = true;
+      off?.();
+    };
+  }, [signedIn]);
 
   // Socket miss ho jaye to bhi (polling se) pending request dikhe
   const waiting = pending.data?.items.find((x) => x.status === 'REQUESTED' && !dismissed.has(x.id));

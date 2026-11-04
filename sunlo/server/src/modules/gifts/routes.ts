@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { db } from '../../db/client';
 import { consultSessions, users, vendors, wallets } from '../../db/schema';
 import { badRequest, HttpError, notFound } from '../../lib/errors';
+import { pushToUser } from '../../lib/push';
 import { emitToSession, emitToUser } from '../../lib/realtime';
 import { getSettings } from '../../lib/settings';
 import { body, idParam, params } from '../../lib/validate';
@@ -130,7 +131,10 @@ giftsPrivate.post('/sessions/:id/gifts', requireRole('USER'), async (req, res) =
   const payload = { sessionId: id, giftId: out.gift.id, name: out.gift.name, icon: out.gift.icon, price: out.gift.price, svgaUrl: sh.svgaUrl, mediaType: sh.mediaType, thumbUrl: sh.thumbUrl, from: fromUser };
   emitToSession(id, 'gift', payload);
   emitToUser(userId, 'gift', payload); // room join na bhi ho to dikhe
-  if (out.vendorUserId) emitToUser(out.vendorUserId, 'gift', payload);
+  if (out.vendorUserId) {
+    emitToUser(out.vendorUserId, 'gift', payload);
+    void pushToUser(out.vendorUserId, { title: `${fromUser} ne ${out.gift.name} bheja`, body: `Aapko gift mila: ${Math.round(out.gift.price / 100)} coins`, data: { type: 'gift' } });
+  }
   emitToSession(id, 'session:update', { id, maxSeconds: out.maxSeconds, endsAt: new Date(out.acceptedAt.getTime() + out.maxSeconds * 1000) });
   res.status(201).json({ ok: true, gift: payload });
 });

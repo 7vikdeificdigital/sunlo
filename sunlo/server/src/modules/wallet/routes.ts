@@ -9,6 +9,7 @@ import { forbidden } from '../../lib/errors';
 import { body, pagination, params, query } from '../../lib/validate';
 import { authId } from '../../middleware/auth';
 import * as pay from './payments';
+import { verifyPlayPurchase } from './play';
 
 // ----- Login zaroori -----
 export const walletRouter = Router();
@@ -73,6 +74,12 @@ walletRouter.post('/wallet/recharge/verify', async (req, res) => {
     }),
   );
   res.json(await pay.verifyFromApp(authId(req), input));
+});
+
+/** Play Store build: Google Play se hui purchase verify karke coins jodna */
+walletRouter.post('/wallet/play/verify', async (req, res) => {
+  const input = body(req, z.object({ productId: z.string().max(60), purchaseToken: z.string().min(10).max(2000) }));
+  res.json(await verifyPlayPurchase(authId(req), input));
 });
 
 // ----- Public: Razorpay webhook + checkout page -----

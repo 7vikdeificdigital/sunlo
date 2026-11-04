@@ -32,6 +32,11 @@ export const useAuth = create<AuthState>((set) => ({
   },
   setUser: (user) => set({ user }),
   signOut: async () => {
+    try {
+      await (await import('./push')).unregisterPush();
+    } catch {
+      /* push band na ho paye to bhi logout chalne dein */
+    }
     await Promise.all([secureStorage.remove(K_ACCESS), secureStorage.remove(K_REFRESH)]);
     await useTerms.getState().reset();
     set({ accessToken: null, refreshToken: null, user: null, status: 'signedOut' });

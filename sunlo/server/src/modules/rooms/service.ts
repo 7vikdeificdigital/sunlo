@@ -1,8 +1,9 @@
 import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { db, type Tx } from '../../db/client';
-import { consultSessions, userBlocks, users, vendors, wallets } from '../../db/schema';
+import { consultSessions, favorites, userBlocks, users, vendors, wallets } from '../../db/schema';
 import { badRequest, conflict, forbidden, HttpError, notFound } from '../../lib/errors';
 import { logger } from '../../lib/logger';
+import { pushToUsers } from '../../lib/push';
 import { emitToRoom, emitToUser } from '../../lib/realtime';
 import { getSettings } from '../../lib/settings';
 import { visibleVendor } from '../vendors/service';
@@ -67,10 +68,22 @@ export async function createRoom(vendorUserId: string, input: { title: string; t
   if (busy) throw conflict('VENDOR_BUSY', 'Pehle chal raha session ya request khatam karein');
   try {
     const [row] = await db.insert(rooms).values({ hostVendorId: v.id, title: input.title, type: input.type, ratePerMin, commissionPct: st.commissionPct }).returning();
+    void notifyFans(v.id, row);
     return row;
   } catch (e) {
     if (isUnique(e, 'rooms_one_live_per_host_uq')) throw conflict('ROOM_ALREADY_LIVE', 'Aapka room pehle se live hai');
     throw e;
+  }
+}
+
+/** Jinhone is host ko favourite kiya hai unhe "live aa gaye" push */
+async function notifyFans(vendorId: string, room: RoomRow) {
+  try {
+    const fans = await db.select({ userId: favorites.userId }).from(favorites).where(eq(favorites.vendorId, vendorId)).limit(500);
+    const [h] = await db.select({ name: vendors.displayName }).from(vendors).where(eq(vendors.id, vendorId)).limit(1);
+    await pushToUsers(fans.map((f) => f.userId), { title: `${h?.name ?? 'Aapke favourite'} live aa gaye hain`, body: room.title, data: { type: 'room', roomId: room.id } });
+  } catch (err) {
+    logger.warn({ err: String(err) }, 'room live push fail');
   }
 }
 

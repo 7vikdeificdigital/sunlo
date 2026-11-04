@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.satvik.sunlo",
+      "bundleIdentifier": "com.bondty.app",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Call par baat karne ke liye microphone chahiye.",
         "NSCameraUsageDescription": "Video call ke liye camera chahiye.",
@@ -20,7 +20,7 @@
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
-      "package": "com.satvik.sunlo",
+      "package": "com.bondty.app",
       "adaptiveIcon": {
         "backgroundColor": "#E3F4F1",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -31,7 +31,8 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.CAMERA",
         "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.BLUETOOTH_CONNECT"
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "predictiveBackGestureEnabled": false,
       "googleServicesFile": "./google-services.json"
@@ -65,10 +66,11 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "expo-iap"
     ],
     "extra": {
-      "apiUrl": "https://sunlo-zfqd.onrender.com/api/v1"
+      "apiUrl": "https://api.bondty.com/api/v1"
     }
   }
 }

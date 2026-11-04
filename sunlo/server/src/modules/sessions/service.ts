@@ -3,6 +3,7 @@ import { db, type Tx } from '../../db/client';
 import { vendors, consultSessions, notifications, userBlocks, users, wallets } from '../../db/schema';
 import { badRequest, conflict, forbidden, HttpError, notFound } from '../../lib/errors';
 import { logger } from '../../lib/logger';
+import { pushToUser } from '../../lib/push';
 import { emitToSession, emitToUser } from '../../lib/realtime';
 import { getSettings } from '../../lib/settings';
 import { visibleVendor } from '../vendors/service';
@@ -130,6 +131,11 @@ export async function requestSession(
     body: `${u?.name ?? 'Ek user'} aapse baat karna chahte hain`,
     data: { type: 'session', sessionId: row.id },
   });
+  void pushToUser(a.userId, {
+    title: input.type === 'CHAT' ? 'Naya chat request' : input.type === 'AUDIO' ? 'Naya voice call request' : 'Naya video call request',
+    body: `${u?.name?.split(' ')[0] ?? 'Ek user'} aapse baat karna chahte hain. Jaldi accept karein (60 sec)`,
+    data: { type: 'session', sessionId: row.id },
+  });
   return publicSession(row);
 }
 
@@ -194,6 +200,7 @@ export async function acceptByVendor(vendorUserId: string, sessionId: string) {
     throw e;
   }
   await broadcast(row, vendorUserId);
+  if (row.status === 'ACTIVE') void pushToUser(row.userId, { title: 'Request accept ho gayi', body: 'Aapka listener taiyar hai, abhi baat shuru karein', data: { type: 'session', sessionId: row.id } });
   if (row.status !== 'ACTIVE') throw conflict(row.endReason ?? 'INVALID_STATE', 'Session shuru nahi ho saka');
   return publicSession(row);
 }

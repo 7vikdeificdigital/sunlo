@@ -27,6 +27,9 @@ function firebaseApp(): App {
   return app;
 }
 
+/** Push (FCM) jaise doosre Firebase kaam ke liye */
+export const getFirebaseApp = firebaseApp;
+
 /** ID token itna purana nahi hona chahiye (chori hua purana token dobara na chale) */
 export const MAX_TOKEN_AGE_SEC = 5 * 60;
 
