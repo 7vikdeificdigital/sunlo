@@ -1,20 +1,26 @@
 import { PermissionsAndroid, Platform } from 'react-native';
 import { api } from './api';
 
-type Messaging = () => {
-  getToken: () => Promise<string>;
-  deleteToken: () => Promise<void>;
-  onTokenRefresh: (cb: (t: string) => void) => () => void;
+/**
+ * @react-native-firebase v22+ mein purana messaging() (default export) hata diya gaya hai;
+ * ab sirf modular functions hain: getMessaging, getToken, onTokenRefresh, deleteToken.
+ */
+type Messaging = unknown;
+type Fcm = {
+  getMessaging: () => Messaging;
+  getToken: (m: Messaging) => Promise<string>;
+  deleteToken: (m: Messaging) => Promise<void>;
+  onTokenRefresh: (m: Messaging, cb: (t: string) => void) => () => void;
 };
 
 let current: string | null = null;
 
 /** Firebase Cloud Messaging module juda hai to usse, warna null (Expo Go / purani build mein push nahi chalegi, app chalti rahegi) */
-function loadMessaging(): Messaging | null {
+function loadMessaging(): Fcm | null {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const m = require('@react-native-firebase/messaging') as { default?: Messaging };
-    return m.default ?? null;
+    const m = require('@react-native-firebase/messaging') as Partial<Fcm>;
+    return typeof m.getMessaging === 'function' && typeof m.getToken === 'function' ? (m as Fcm) : null;
   } catch {
     return null;
   }
@@ -25,19 +31,19 @@ const send = (token: string) => api('/me/devices', { method: 'POST', body: { tok
 /** Login ke baad: notification ki anumati, FCM token server ko, aur token badle to naya bhi. Cleanup function lautata hai. */
 export async function registerPush(): Promise<() => void> {
   try {
-    const messaging = loadMessaging();
-    if (!messaging) return () => undefined;
+    const fcm = loadMessaging();
+    if (!fcm) return () => undefined;
     if (Platform.OS === 'android' && Number(Platform.Version) >= 33) {
       const r = await PermissionsAndroid.request('android.permission.POST_NOTIFICATIONS' as never);
       if (r !== PermissionsAndroid.RESULTS.GRANTED) return () => undefined;
     }
-    const m = messaging();
-    const token = await m.getToken();
+    const m = fcm.getMessaging();
+    const token = await fcm.getToken(m);
     if (token) {
       current = token;
       await send(token);
     }
-    return m.onTokenRefresh((t) => {
+    return fcm.onTokenRefresh(m, (t) => {
       current = t;
       void send(t);
     });
@@ -51,7 +57,8 @@ export async function unregisterPush(): Promise<void> {
   try {
     if (current) await api('/me/devices', { method: 'DELETE', body: { token: current } }).catch(() => undefined);
     current = null;
-    await loadMessaging()?.().deleteToken().catch(() => undefined);
+    const fcm = loadMessaging();
+    if (fcm) await fcm.deleteToken(fcm.getMessaging()).catch(() => undefined);
   } catch {
     /* ignore */
   }
