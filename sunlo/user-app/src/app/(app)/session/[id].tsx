@@ -16,6 +16,7 @@ import { emitAck, getSocket } from '@/lib/socket';
 import type { ChatMessage } from '@/lib/types';
 import { useLiveSession, useRemaining } from '@/lib/useLiveSession';
 import { colors, font, radius, shadow, space } from '@/theme';
+import { tr } from '@/lib/i18n';
 
 export default function ChatSession() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -236,7 +237,7 @@ function ChatRoom({ sessionId }: { sessionId: string }) {
                 ...(mine ? {} : shadow.card),
               }}
             >
-              <Text variant="body">{item.body}</Text>
+              <Text raw variant="body">{item.body}</Text>
               <Text variant="caption" style={{ alignSelf: 'flex-end', marginTop: 2 }}>
                 {formatTime(item.createdAt)}
                 {mine ? (item.pending ? ' · ⏳' : ' · ✓') : ''}
@@ -260,7 +261,7 @@ function ChatRoom({ sessionId }: { sessionId: string }) {
           <TextInput
             value={text}
             onChangeText={onChange}
-            placeholder="Apna sawaal likhein..."
+            placeholder={tr("Apna sawaal likhein...")}
             placeholderTextColor={colors.textFaint}
             multiline
             maxLength={2000}

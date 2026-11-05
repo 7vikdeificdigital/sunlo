@@ -5,6 +5,7 @@ import { FlatList, Pressable, TextInput, View } from 'react-native';
 import type { RoomChatMsg } from '@/lib/useRoom';
 import { colors, font } from '@/theme';
 import { Text } from './ui';
+import { tr } from '@/lib/i18n';
 
 /** Room ki live chat: neeche taraf halke background mein messages, aur likhne ki patti */
 export function RoomChat({ messages, onSend, placeholder = 'Kuch kahein...', rightSpace = 0 }: { messages: RoomChatMsg[]; onSend: (t: string) => Promise<string | null>; placeholder?: string; rightSpace?: number }) {
@@ -42,7 +43,7 @@ export function RoomChat({ messages, onSend, placeholder = 'Kuch kahein...', rig
             </LinearGradient>
           ) : (
           <View style={{ alignSelf: 'flex-start', maxWidth: '92%', backgroundColor: 'rgba(0,0,0,0.38)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5, marginTop: 4 }}>
-            <Text style={{ fontFamily: font.regular, fontSize: 13, color: colors.white }}>
+            <Text raw style={{ fontFamily: font.regular, fontSize: 13, color: colors.white }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 13, color: item.host ? '#FFC857' : '#B8AFFF' }}>{item.host ? `${item.name} (host) ` : `${item.name} `}</Text>
               {item.body}
             </Text>
@@ -56,7 +57,7 @@ export function RoomChat({ messages, onSend, placeholder = 'Kuch kahein...', rig
           value={text}
           onChangeText={setText}
           onSubmitEditing={() => void go()}
-          placeholder={placeholder}
+          placeholder={tr(placeholder ?? "")}
           placeholderTextColor="rgba(255,255,255,0.55)"
           maxLength={300}
           returnKeyType="send"

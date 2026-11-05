@@ -14,6 +14,7 @@ import { emitAck, getSocket } from '@/lib/socket';
 import type { ChatMessage } from '@/lib/types';
 import { useElapsed, useLiveSession, useRemaining } from '@/lib/useLiveSession';
 import { colors, font, radius, shadow, space } from '@/theme';
+import { tr } from '@/lib/i18n';
 
 export default function VendorChat() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -204,7 +205,7 @@ function Room({ sessionId }: { sessionId: string }) {
                 ...(mine ? {} : shadow.card),
               }}
             >
-              <Text variant="body">{item.body}</Text>
+              <Text raw variant="body">{item.body}</Text>
               <Text variant="caption" style={{ alignSelf: 'flex-end', marginTop: 2 }}>
                 {formatTime(item.createdAt)}
               </Text>
@@ -251,7 +252,7 @@ function Room({ sessionId }: { sessionId: string }) {
                 getSocket().emit('chat:typing', { sessionId });
               }
             }}
-            placeholder="Jawab likhein..."
+            placeholder={tr("Jawab likhein...")}
             placeholderTextColor={colors.textFaint}
             multiline
             maxLength={2000}

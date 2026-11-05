@@ -1,36 +1,68 @@
 import { Ionicons } from '@expo/vector-icons';
 import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus, useAudioRecorder } from 'expo-audio';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui';
 import { mmss } from '@/lib/voice';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, shadow, space } from '@/theme';
 
-/** Play / pause wala chhota audio player */
+const BARS = 32;
+function barHeights(seed: string) {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
+  const out: number[] = [];
+  for (let i = 0; i < BARS; i++) {
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    const r = ((h >>> 0) % 1000) / 1000;
+    const env = 0.45 + 0.55 * Math.sin((Math.PI * (i + 1)) / (BARS + 1)); // beech mein unchi, kinaron par chhoti
+    out.push(6 + Math.round(18 * Math.min(1, r * 0.7 + env * 0.5)));
+  }
+  return out;
+}
+
+/** Waveform wala audio player: play/pause, progress, time, waveform par tap karke aage-peeche */
 export function VoicePlayer({ uri, durationSec }: { uri: string; durationSec?: number }) {
   const player = useAudioPlayer({ uri });
   const st = useAudioPlayerStatus(player);
+  const [w, setW] = useState(0);
+  const bars = useMemo(() => barHeights(uri), [uri]);
   useEffect(() => {
     if (st.didJustFinish) void player.seekTo(0);
   }, [st.didJustFinish, player]);
   const total = st.duration > 0 ? st.duration : (durationSec ?? 0);
+  const progress = total > 0 ? Math.min(1, st.currentTime / total) : 0;
+  const filled = Math.round(progress * BARS);
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: colors.primarySoft, borderRadius: radius.pill, paddingVertical: 8, paddingHorizontal: 12 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: colors.surfaceAlt, borderRadius: radius.lg, paddingVertical: 10, paddingLeft: 10, paddingRight: 14 }}>
       <Pressable
-        accessibilityLabel={st.playing ? 'Roko' : 'Sunein'}
+        accessibilityRole="button"
+        accessibilityLabel={st.playing ? 'Pause' : 'Play'}
         onPress={() => {
           void setAudioModeAsync({ playsInSilentMode: true, allowsRecording: false });
           if (st.playing) player.pause();
           else player.play();
         }}
-        style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}
+        style={({ pressed }) => ({ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.85 : 1, ...shadow.card })}
       >
-        <Ionicons name={st.playing ? 'pause' : 'play'} size={18} color={colors.white} />
+        <Ionicons name={st.playing ? 'pause' : 'play'} size={20} color={colors.white} style={st.playing ? undefined : { marginLeft: 2 }} />
       </Pressable>
-      <View style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: colors.primaryTint }}>
-        <View style={{ width: `${total > 0 ? Math.min(100, (st.currentTime / total) * 100) : 0}%`, height: 4, borderRadius: 2, backgroundColor: colors.primary }} />
+      <View style={{ flex: 1, gap: 4 }}>
+        <Pressable
+          onLayout={(e) => setW(e.nativeEvent.layout.width)}
+          onPress={(e) => {
+            if (w > 0 && total > 0) void player.seekTo((e.nativeEvent.locationX / w) * total);
+          }}
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 28 }}
+        >
+          {bars.map((h, i) => (
+            <View key={i} style={{ width: 3, height: h, borderRadius: 2, backgroundColor: i < filled ? colors.primary : colors.primaryTint }} />
+          ))}
+        </Pressable>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text raw variant="caption">{mmss(st.currentTime)}</Text>
+          <Text raw variant="caption">{mmss(total)}</Text>
+        </View>
       </View>
-      <Text variant="small">{mmss(st.playing ? st.currentTime : total)}</Text>
     </View>
   );
 }

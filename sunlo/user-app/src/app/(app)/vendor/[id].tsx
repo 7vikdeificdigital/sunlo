@@ -162,11 +162,11 @@ export default function VendorProfile() {
                     <Ionicons key={i} name={i < r.rating ? 'star' : 'star-outline'} size={13} color={colors.primary} />
                   ))}
                 </Row>
-                {r.comment ? <Text variant="body">{r.comment}</Text> : null}
+                {r.comment ? <Text raw variant="body">{r.comment}</Text> : null}
                 {r.reply ? (
                   <View style={{ backgroundColor: colors.surfaceAlt, padding: space.sm, borderRadius: radius.sm, marginTop: 4 }}>
                     <Text variant="caption">{a.displayName.split(' ')[0]} ka jawab</Text>
-                    <Text variant="small" color={colors.text}>
+                    <Text raw variant="small" color={colors.text}>
                       {r.reply}
                     </Text>
                   </View>

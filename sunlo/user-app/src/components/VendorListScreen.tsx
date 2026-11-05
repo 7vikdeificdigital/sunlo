@@ -10,6 +10,7 @@ import { StartSessionSheet } from './StartSessionSheet';
 import { Button, Chip, Empty, ErrorBox, Loader, Row, Screen, Text } from './ui';
 import { WalletChip } from './WalletChip';
 import { errorMessage } from '@/lib/api';
+import { tr } from '@/lib/i18n';
 
 const SORTS = [
   { v: 'recommended', l: 'Recommended' },
@@ -61,7 +62,7 @@ export function VendorListScreen({ service }: { service: 'chat' | 'call' }) {
             ref={inputRef}
             value={search}
             onChangeText={setSearch}
-            placeholder="Naam, topic ya skill khojein"
+            placeholder={tr("Naam, topic ya skill khojein")}
             placeholderTextColor={colors.textFaint}
             style={{ flex: 1, fontFamily: font.regular, fontSize: 14, color: colors.text }}
             returnKeyType="search"

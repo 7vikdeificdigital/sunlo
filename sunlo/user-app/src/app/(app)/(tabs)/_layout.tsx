@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
+import { tr, useLang } from '@/lib/i18n';
 import { colors, font } from '@/theme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -10,6 +11,7 @@ const icon =
 
 /** 6 tab: Home, Connect (random), Chat, Call, History, Account */
 export default function TabLayout() {
+  useLang((st) => st.lang);
   return (
     <Tabs
       screenOptions={{
@@ -21,12 +23,12 @@ export default function TabLayout() {
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: icon('home', 'home-outline') }} />
-      <Tabs.Screen name="connect" options={{ title: 'Connect', tabBarIcon: icon('flash', 'flash-outline') }} />
-      <Tabs.Screen name="chat" options={{ title: 'Chat', tabBarIcon: icon('chatbubbles', 'chatbubbles-outline') }} />
-      <Tabs.Screen name="call" options={{ title: 'Call', tabBarIcon: icon('call', 'call-outline') }} />
-      <Tabs.Screen name="history" options={{ title: 'History', tabBarIcon: icon('time', 'time-outline') }} />
-      <Tabs.Screen name="account" options={{ title: 'Account', tabBarIcon: icon('person-circle', 'person-circle-outline') }} />
+      <Tabs.Screen name="index" options={{ title: tr('Home'), tabBarIcon: icon('home', 'home-outline') }} />
+      <Tabs.Screen name="connect" options={{ title: tr('Connect'), tabBarIcon: icon('flash', 'flash-outline') }} />
+      <Tabs.Screen name="chat" options={{ title: tr('Chat'), tabBarIcon: icon('chatbubbles', 'chatbubbles-outline') }} />
+      <Tabs.Screen name="call" options={{ title: tr('Call'), tabBarIcon: icon('call', 'call-outline') }} />
+      <Tabs.Screen name="history" options={{ title: tr('History'), tabBarIcon: icon('time', 'time-outline') }} />
+      <Tabs.Screen name="account" options={{ title: tr('Account'), tabBarIcon: icon('person-circle', 'person-circle-outline') }} />
     </Tabs>
   );
 }

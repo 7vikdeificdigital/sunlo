@@ -4,6 +4,7 @@ import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { onPushMessage, type PushMsg } from '@/lib/pushBus';
 import { colors, font, radius, shadow, space } from '@/theme';
+import { tr } from '@/lib/i18n';
 
 /** App khuli ho tab push aaye to upar ek chhota banner (4 sec). Band/background mein system khud notification dikhata hai. */
 export function PushBanner() {
@@ -42,11 +43,11 @@ export function PushBanner() {
         <View style={s.bar} />
         <View style={s.body}>
           <Text style={s.title} numberOfLines={1}>
-            {msg.title}
+            {tr(msg.title)}
           </Text>
           {msg.body ? (
             <Text style={s.text} numberOfLines={2}>
-              {msg.body}
+              {tr(msg.body)}
             </Text>
           ) : null}
         </View>

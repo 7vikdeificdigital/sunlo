@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import type { ReactNode } from 'react';
+import { Children, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -17,6 +17,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
+import { tr, useLang, type Lang } from '@/lib/i18n';
 import { colors, font, radius, shadow, space } from '@/theme';
 
 // ---------------- Text ----------------
@@ -33,8 +34,26 @@ const variants: Record<Variant, TextStyle> = {
   label: { fontFamily: font.medium, fontSize: 12.5, lineHeight: 17, color: colors.textMuted },
 };
 
-export function Text({ variant = 'body', style, color, ...p }: TextProps & { variant?: Variant; color?: string }) {
-  return <RNText {...p} style={[variants[variant], color ? { color } : null, style]} />;
+function trChildren(children: ReactNode, lang: Lang): ReactNode {
+  if (typeof children === 'string') return tr(children, lang);
+  if (children == null || typeof children === 'number' || typeof children === 'boolean') return children;
+  const arr = Children.toArray(children);
+  if (arr.every((c) => typeof c === 'string' || typeof c === 'number')) {
+    const joined = arr.join('');
+    const t = tr(joined, lang);
+    if (t !== joined) return t;
+  }
+  return arr.map((c) => (typeof c === 'string' ? tr(c, lang) : c));
+}
+
+/** raw = user ka likha hua text (chat, review): kabhi translate nahi hota */
+export function Text({ variant = 'body', style, color, raw, children, ...p }: TextProps & { variant?: Variant; color?: string; raw?: boolean }) {
+  const lang = useLang((st) => st.lang);
+  return (
+    <RNText {...p} style={[variants[variant], color ? { color } : null, style]}>
+      {raw || lang === 'hinglish' ? children : trChildren(children, lang)}
+    </RNText>
+  );
 }
 
 // ---------------- Layout ----------------
@@ -181,12 +200,13 @@ export function IconButton({ name, onPress, badge, label }: { name: keyof typeof
 
 // ---------------- Inputs ----------------
 export function Input({ label, error, left, style, ...p }: TextInputProps & { label?: string; error?: string; left?: ReactNode }) {
+  const lang = useLang((st) => st.lang);
   return (
     <View style={{ gap: 6 }}>
       {label ? <Text variant="label">{label}</Text> : null}
       <View style={[s.input, error ? { borderColor: colors.danger } : null]}>
         {left}
-        <TextInput placeholderTextColor={colors.textFaint} style={[s.inputText, style]} {...p} />
+        <TextInput placeholderTextColor={colors.textFaint} style={[s.inputText, style]} {...p} placeholder={p.placeholder ? tr(p.placeholder, lang) : p.placeholder} />
       </View>
       {error ? (
         <Text variant="small" color={colors.danger}>

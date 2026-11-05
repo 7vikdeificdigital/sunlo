@@ -9,6 +9,7 @@ import { Header, Loader, Row, Screen, Text } from '@/components/ui';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/format';
 import { colors, font, radius, space } from '@/theme';
+import { tr } from '@/lib/i18n';
 
 interface Detail {
   id: string;
@@ -55,7 +56,7 @@ export default function TicketChat() {
                     Support team
                   </Text>
                 ) : null}
-                <Text variant="body">{item.body}</Text>
+                <Text raw variant="body">{item.body}</Text>
                 <Text variant="caption" style={{ alignSelf: 'flex-end' }}>
                   {formatDateTime(item.createdAt)}
                 </Text>
@@ -67,7 +68,7 @@ export default function TicketChat() {
               <TextInput
                 value={text}
                 onChangeText={setText}
-                placeholder="Likhein..."
+                placeholder={tr("Likhein...")}
                 placeholderTextColor={colors.textFaint}
                 multiline
                 maxLength={2000}

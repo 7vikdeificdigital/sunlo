@@ -61,11 +61,11 @@ export default function Reviews() {
                   <Ionicons key={i} name={i < item.rating ? 'star' : 'star-outline'} size={14} color={colors.accent} />
                 ))}
               </Row>
-              {item.comment ? <Text variant="body">{item.comment}</Text> : null}
+              {item.comment ? <Text raw variant="body">{item.comment}</Text> : null}
               {item.reply ? (
                 <View style={{ backgroundColor: colors.surfaceAlt, borderRadius: radius.sm, padding: space.sm }}>
                   <Text variant="caption">Aapka jawab</Text>
-                  <Text variant="small" color={colors.text}>
+                  <Text raw variant="small" color={colors.text}>
                     {item.reply}
                   </Text>
                 </View>

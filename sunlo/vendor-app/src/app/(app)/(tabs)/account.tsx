@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
 import { Alert, Platform, Pressable, ScrollView, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
+import { LanguagePicker } from '@/components/LanguagePicker';
 import { Card, Row, Screen, Text } from '@/components/ui';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -80,6 +81,10 @@ export default function Account() {
             </Pressable>
           ))}
         </Card>
+        <Card>
+          <LanguagePicker />
+        </Card>
+
         <Card style={{ padding: 0 }}>
           <Pressable onPress={askLogout} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg }}>
             <Ionicons name="log-out-outline" size={20} color={colors.danger} />

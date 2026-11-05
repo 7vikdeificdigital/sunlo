@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
 import { Alert, Platform, Pressable, ScrollView, Share, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
+import { LanguagePicker } from '@/components/LanguagePicker';
 import { Card, Row, Screen, Text } from '@/components/ui';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -100,6 +101,10 @@ export default function Account() {
             </Text>
           </View>
         ) : null}
+
+        <Card>
+          <LanguagePicker />
+        </Card>
 
         <Card style={{ padding: 0 }}>
           <Pressable onPress={() => ask('Logout karein?', 'Aap is device se logout ho jayenge.', 'Logout', logout)} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg }}>
