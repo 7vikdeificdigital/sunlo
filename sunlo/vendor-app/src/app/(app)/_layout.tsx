@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { GiftLayer } from '@/components/GiftLayer';
+import { PushBanner } from '@/components/PushBanner';
 import { Redirect, Stack, useSegments } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { IncomingRequest } from '@/components/IncomingRequest';
@@ -107,6 +108,7 @@ export default function AppLayout() {
     <>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
       <GiftLayer role="vendor" />
+      <PushBanner />
       {approved && shown && !here.startsWith('session') && !here.startsWith('call') ? <IncomingRequest key={shown.id} s={shown} onDone={done} /> : null}
     </>
   );

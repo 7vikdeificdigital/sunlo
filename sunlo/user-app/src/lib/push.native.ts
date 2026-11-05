@@ -1,16 +1,19 @@
 import { PermissionsAndroid, Platform } from 'react-native';
 import { api } from './api';
+import { emitPushMessage } from './pushBus';
 
 /**
  * @react-native-firebase v22+ mein purana messaging() (default export) hata diya gaya hai;
- * ab sirf modular functions hain: getMessaging, getToken, onTokenRefresh, deleteToken.
+ * ab sirf modular functions hain: getMessaging, getToken, onTokenRefresh, onMessage, deleteToken.
  */
 type Messaging = unknown;
+type Remote = { notification?: { title?: string; body?: string } };
 type Fcm = {
   getMessaging: () => Messaging;
   getToken: (m: Messaging) => Promise<string>;
   deleteToken: (m: Messaging) => Promise<void>;
   onTokenRefresh: (m: Messaging, cb: (t: string) => void) => () => void;
+  onMessage: (m: Messaging, cb: (msg: Remote) => void) => () => void;
 };
 
 let current: string | null = null;
@@ -28,7 +31,7 @@ function loadMessaging(): Fcm | null {
 
 const send = (token: string) => api('/me/devices', { method: 'POST', body: { token, platform: Platform.OS === 'ios' ? 'ios' : 'android' } }).catch(() => undefined);
 
-/** Login ke baad: notification ki anumati, FCM token server ko, aur token badle to naya bhi. Cleanup function lautata hai. */
+/** Login ke baad: notification ki anumati, FCM token server ko, token badle to naya bhi, aur app khuli ho to banner. Cleanup function lautata hai. */
 export async function registerPush(): Promise<() => void> {
   try {
     const fcm = loadMessaging();
@@ -43,10 +46,19 @@ export async function registerPush(): Promise<() => void> {
       current = token;
       await send(token);
     }
-    return fcm.onTokenRefresh(m, (t) => {
+    const offToken = fcm.onTokenRefresh(m, (t) => {
       current = t;
       void send(t);
     });
+    // App khuli (foreground) ho to Android khud notification nahi dikhata; isliye app ke andar banner
+    const offMsg = fcm.onMessage(m, (rm) => {
+      const n = rm.notification;
+      if (n?.title || n?.body) emitPushMessage({ title: n.title ?? '', body: n.body ?? '' });
+    });
+    return () => {
+      offToken();
+      offMsg();
+    };
   } catch {
     return () => undefined;
   }

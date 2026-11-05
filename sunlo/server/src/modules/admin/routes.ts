@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { and, asc, desc, eq, gte, ilike, inArray, isNull, or, sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../../db/client';
+import { pushToUser } from '../../lib/push';
 import {
   auditLogs,
   banners,
@@ -50,6 +51,7 @@ const count = sql<number>`count(*)::int`;
 async function notify(userId: string, title: string, bodyText: string, data?: Record<string, unknown>) {
   await db.insert(notifications).values({ userId, title, body: bodyText, data: data ?? null });
   emitToUser(userId, 'notification', { title, body: bodyText, data });
+  void pushToUser(userId, { title, body: bodyText, data: { type: String(data?.type ?? 'general') } });
 }
 
 // ======================= Dashboard =======================
