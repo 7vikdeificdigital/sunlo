@@ -53,6 +53,7 @@ export default function Dashboard() {
             {v.displayName}
           </Text>
         </View>
+        <IconButton name="mic-outline" label="Voice notes" onPress={() => router.push('/voice')} />
         <IconButton name="notifications-outline" label="Notifications" badge={notif.data?.unread} onPress={() => router.push('/notifications')} />
       </Row>
 

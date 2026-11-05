@@ -381,7 +381,12 @@ export async function sweepSessions(now = new Date()) {
       ),
     )
     .returning();
-  for (const m of missed) await broadcast(m);
+  for (const m of missed) {
+    await broadcast(m);
+    void pushToUser(m.userId, { title: 'Listener abhi busy hai', body: 'Aapki request ka jawab nahi aaya. Doosre listener try karein', data: { type: 'session', sessionId: m.id } });
+    const vu = await vendorUserIdOf(m.vendorId);
+    if (vu) void pushToUser(vu, { title: 'Request miss ho gayi', body: 'Ek user ne aapko try kiya tha. Online rehkar jaldi accept karein', data: { type: 'session', sessionId: m.id } });
+  }
   return { ended: expired.length, missed: missed.length };
 }
 

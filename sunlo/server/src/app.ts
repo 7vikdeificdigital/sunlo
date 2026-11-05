@@ -15,6 +15,7 @@ import { randomRouter } from './modules/random/routes';
 import { miscPrivate, miscPublic } from './modules/misc/routes';
 import { sessionsRouter, vendorSessionsRouter } from './modules/sessions/routes';
 import { filesPublic, uploadsRouter } from './modules/uploads/routes';
+import { voicePublic, voiceRouter } from './modules/voice/routes';
 import { usersRouter } from './modules/users/routes';
 import { vendorSelfRouter } from './modules/vendor/routes';
 import { vendorsPublic, vendorsUserRouter } from './modules/vendors/routes';
@@ -26,7 +27,7 @@ export const API_PREFIX = '/api/v1';
  * BINA LOGIN wale routers. Naya public route jodne ke liye use yahan jodna padega.
  * Baaki SAB routes neeche `requireAuth` ke peeche hain: default band, khula sirf jaan-boojh kar.
  */
-export const publicRouters = [miscPublic, authPublic, vendorsPublic, filesPublic, giftsPublic];
+export const publicRouters = [miscPublic, authPublic, vendorsPublic, filesPublic, giftsPublic, voicePublic];
 
 /** LOGIN ZAROORI wale routers (tests inki har route ko bina token check karte hain) */
 export { adminRouter };
@@ -44,6 +45,7 @@ export const privateRouters = [
   giftsPrivate,
   randomRouter,
   roomsRouter,
+  voiceRouter,
 ];
 
 export const corsOrigins = (): string[] | true =>
@@ -63,7 +65,7 @@ export function buildApp() {
 
   // Aam JSON limit 100kb; sirf upload route apna bada limit khud lagata hai
   const json = express.json({ limit: '100kb' });
-  app.use((req, res, next) => (req.path === `${API_PREFIX}/uploads` || /\/admin\/gifts\/[^/]+\/(svga|thumb)$/.test(req.path) ? next() : json(req, res, next)));
+  app.use((req, res, next) => (req.path === `${API_PREFIX}/uploads` || req.path === `${API_PREFIX}/voice/clips` || /\/admin\/gifts\/[^/]+\/(svga|thumb)$/.test(req.path) ? next() : json(req, res, next)));
 
   const api = Router();
   for (const r of publicRouters) api.use(r);

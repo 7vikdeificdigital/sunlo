@@ -67,7 +67,13 @@
           }
         }
       ],
-      "expo-iap"
+      "expo-iap",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Voice note record karne ke liye mic chahiye."
+        }
+      ]
     ],
     "extra": {
       "apiUrl": "https://api.bondty.com/api/v1"

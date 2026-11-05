@@ -53,6 +53,14 @@ export default function Home() {
       </Row>
 
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />} contentContainerStyle={{ paddingBottom: space.xxl }}>
+        <Pressable onPress={() => router.push('/voice')} accessibilityRole="button" accessibilityLabel="Voice note chhodein" style={{ marginHorizontal: space.lg, marginTop: space.sm, borderRadius: radius.lg, backgroundColor: colors.primarySoft, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Ionicons name="mic" size={22} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text variant="title">Voice note chhodein</Text>
+            <Text variant="small">Koi online nahi? Apni baat bolein, listeners jawab denge</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </Pressable>
         {/* Search */}
         <Pressable
           onPress={() => router.push({ pathname: '/chat', params: { focus: '1' } })}

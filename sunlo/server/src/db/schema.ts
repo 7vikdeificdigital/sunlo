@@ -527,3 +527,55 @@ export const auditLogs = pgTable(
   },
   (t) => [index('audit_created_idx').on(t.createdAt)],
 );
+
+// ---------------- Voice-note board ----------------
+// User raat ko audio note chhode -> vendors sunkar reply (voice) karein -> user ek vendor chune.
+
+export const voiceClips = pgTable('voice_clips', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  ownerId: uuid('owner_id')
+    .notNull()
+    .references(() => users.id),
+  mime: text('mime').notNull(),
+  size: integer('size').notNull(),
+  durationSec: integer('duration_sec').notNull(),
+  storageKey: text('storage_key').notNull().unique(),
+  createdAt: createdAt(),
+});
+
+export const voiceNotes = pgTable(
+  'voice_notes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    clipId: uuid('clip_id')
+      .notNull()
+      .references(() => voiceClips.id),
+    topic: text('topic'),
+    status: text('status').notNull().default('OPEN'), // OPEN | CLOSED
+    chosenVendorId: uuid('chosen_vendor_id').references(() => vendors.id),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('voice_notes_open_idx').on(t.status, t.createdAt), index('voice_notes_user_idx').on(t.userId, t.createdAt)],
+);
+
+export const voiceReplies = pgTable(
+  'voice_replies',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    noteId: uuid('note_id')
+      .notNull()
+      .references(() => voiceNotes.id, { onDelete: 'cascade' }),
+    vendorId: uuid('vendor_id')
+      .notNull()
+      .references(() => vendors.id),
+    clipId: uuid('clip_id')
+      .notNull()
+      .references(() => voiceClips.id),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('voice_replies_one_per_vendor_uq').on(t.noteId, t.vendorId)],
+);

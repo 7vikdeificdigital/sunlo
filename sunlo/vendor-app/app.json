@@ -1,4 +1,4 @@
-﻿{
+{
   "expo": {
     "name": "Sunlo Partner",
     "slug": "sunlo-partner",
@@ -32,7 +32,8 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.CAMERA",
         "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.BLUETOOTH_CONNECT", "android.permission.POST_NOTIFICATIONS"
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "predictiveBackGestureEnabled": false,
       "googleServicesFile": "./google-services.json"
@@ -72,6 +73,12 @@
             "useFrameworks": "static"
           }
         }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Voice note record karne ke liye mic chahiye."
+        }
       ]
     ],
     "extra": {
@@ -79,4 +86,3 @@
     }
   }
 }
-

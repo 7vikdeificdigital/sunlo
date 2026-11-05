@@ -8,6 +8,7 @@ import { env } from '../../config/env';
 import { db } from '../../db/client';
 import { vendors, chatMessages, reviews } from '../../db/schema';
 import { numericUid } from '../../lib/crypto';
+import { pushToUser } from '../../lib/push';
 import { badRequest, conflict, unavailable } from '../../lib/errors';
 import { body, idParam, pagination, params, query } from '../../lib/validate';
 import { authId, requireRole } from '../../middleware/auth';
@@ -67,6 +68,8 @@ sessionsRouter.post('/sessions/:id/review', requireRole('USER'), async (req, res
       })
       .where(eq(vendors.id, session.vendorId));
   });
+  const [rv] = await db.select({ userId: vendors.userId }).from(vendors).where(eq(vendors.id, session.vendorId)).limit(1);
+  if (rv) void pushToUser(rv.userId, { title: 'Naya feedback mila', body: `Kisi ne aapko ${rating} star diye${comment ? `: "${comment.slice(0, 80)}"` : ''}`, data: { type: 'review' } });
   res.status(201).json({ ok: true });
 });
 

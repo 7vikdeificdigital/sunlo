@@ -16,6 +16,7 @@ import {
   withdrawals,
 } from '../../db/schema';
 import { encryptField } from '../../lib/crypto';
+import { notifyFavoritesOnline, notifyRecentChatters } from '../../lib/favNotify';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors';
 import { getSettings } from '../../lib/settings';
 import { body, idParam, pagination, params, query } from '../../lib/validate';
@@ -172,6 +173,10 @@ vendorSelfRouter.patch('/vendor/status', async (req, res) => {
   const { isOnline } = body(req, z.object({ isOnline: z.boolean() }));
   if (isOnline && v.status !== 'APPROVED') throw forbidden('Approval ke baad hi online ho sakte hain');
   await db.update(vendors).set({ isOnline }).where(eq(vendors.id, v.id));
+  if (isOnline && !v.isOnline) {
+    void notifyFavoritesOnline(v.id, v.displayName);
+    void notifyRecentChatters(v.id, v.displayName);
+  }
   res.json({ isOnline });
 });
 
