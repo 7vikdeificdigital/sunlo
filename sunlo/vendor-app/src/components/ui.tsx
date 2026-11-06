@@ -57,9 +57,43 @@ export function Text({ variant = 'body', style, color, raw, children, ...p }: Te
 }
 
 // ---------------- Layout ----------------
+/** Har screen ke upar chhota language toggle (English / हिंदी / Hinglish) */
+function LanguageStrip() {
+  const { lang, setLang } = useLang();
+  const opts: { v: Lang; label: string }[] = [
+    { v: 'en', label: 'English' },
+    { v: 'hi', label: 'हिंदी' },
+    { v: 'hinglish', label: 'Hinglish' },
+  ];
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: space.lg, paddingTop: 4, paddingBottom: 2 }}>
+      <View style={{ flexDirection: 'row', backgroundColor: 'rgba(120,110,160,0.16)', borderRadius: 999, padding: 2 }}>
+        {opts.map((o) => {
+          const on = lang === o.v;
+          return (
+            <Pressable
+              key={o.v}
+              onPress={() => setLang(o.v)}
+              hitSlop={4}
+              accessibilityRole="button"
+              accessibilityLabel={'Language ' + o.label}
+              accessibilityState={{ selected: on }}
+              style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: on ? colors.primary : 'transparent' }}
+            >
+              <RNText style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 11, color: on ? colors.white : colors.textMuted }}>{o.label}</RNText>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export function Screen({ children, edges = ['top'], style }: { children: ReactNode; edges?: Edge[]; style?: StyleProp<ViewStyle> }) {
+  const showLang = edges.includes('top') && StyleSheet.flatten(style)?.backgroundColor !== 'transparent';
   return (
     <SafeAreaView edges={edges} style={[{ flex: 1, backgroundColor: colors.bg }, style]}>
+      {showLang ? <LanguageStrip /> : null}
       {children}
     </SafeAreaView>
   );
