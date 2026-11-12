@@ -1,15 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api, ApiError } from '@/lib/api';
 import { rupees, perMin } from '@/lib/format';
-import { useAppConfig, useMe } from '@/lib/queries';
-import type { Session, SessionType, VendorCard } from '@/lib/types';
+import { useAppConfig, useFeatures, useMe } from '@/lib/queries';
+import type { Quote, Session, SessionType, VendorCard } from '@/lib/types';
 import { colors, radius, space } from '@/theme';
 import { Avatar } from './Avatar';
+import { ScheduleSheet } from './ScheduleSheet';
 import { Button, Input, Row, Text } from './ui';
 
 export function StartSessionSheet({ vendor, initialType, topic, onClose }: { vendor: VendorCard | null; initialType: SessionType; topic?: string; onClose: () => void }) {
@@ -21,19 +22,29 @@ export function StartSessionSheet({ vendor, initialType, topic, onClose }: { ven
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState('');
+  const [scheduling, setScheduling] = useState(false);
+  const features = useFeatures();
+  // Server se pakki keemat: rate, GST, minute ki gol-gaanth, free trial (CCPA: chhupa charge nahi)
+  const quote = useQuery({
+    queryKey: ['quote', vendor?.id, type],
+    enabled: Boolean(vendor),
+    queryFn: () => api<Quote>('/sessions/quote', { query: { vendorId: vendor!.id, type } }),
+  });
   if (!vendor) return null;
+  if (scheduling) return <ScheduleSheet vendor={vendor} initialType={type} onClose={onClose} />;
 
   const options: { t: SessionType; label: string; icon: keyof typeof Ionicons.glyphMap; rate: number; on: boolean }[] = [
     { t: 'CHAT', label: 'Chat', icon: 'chatbubble-ellipses-outline', rate: vendor.chatRatePerMin, on: vendor.chatEnabled },
     { t: 'AUDIO', label: 'Voice Call', icon: 'call-outline', rate: vendor.callRatePerMin, on: vendor.callEnabled },
-    { t: 'VIDEO', label: 'Video Call', icon: 'videocam-outline', rate: vendor.videoRatePerMin, on: vendor.videoEnabled },
+    { t: 'VIDEO', label: 'Video Call', icon: 'videocam-outline', rate: vendor.videoRatePerMin, on: vendor.videoEnabled && features.videoCalls },
   ];
   const current = options.find((o) => o.t === type) ?? options[0];
   const minMin = cfg.data?.settings.minSessionMinutes ?? 5;
   const balance = me.data?.walletBalance ?? 0;
-  const required = current.rate * minMin;
+  const q = quote.data?.type === type ? quote.data : undefined;
+  const required = q?.requiredBalance ?? current.rate * minMin;
   const enough = balance >= required;
-  const minutesAffordable = Math.floor(balance / current.rate);
+  const minutesAffordable = q?.maxMinutes ?? Math.floor(balance / current.rate);
 
   async function start() {
     setLoading(true);
@@ -45,6 +56,7 @@ export function StartSessionSheet({ vendor, initialType, topic, onClose }: { ven
           vendorId: vendor!.id,
           type,
           intake: { topic: topic ?? vendor!.categories[0]?.name, note: note.trim() || undefined },
+          pricingAck: true, // user ne neeche ki keemat dekh kar button dabaya
         },
       });
       qc.invalidateQueries({ queryKey: ['sessions'] });
@@ -114,14 +126,31 @@ export function StartSessionSheet({ vendor, initialType, topic, onClose }: { ven
             })}
         </Row>
 
+        {q?.freeTrial ? (
+          <View style={{ backgroundColor: colors.successSoft, borderRadius: radius.md, padding: space.md, flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <Ionicons name="gift-outline" size={20} color={colors.success} />
+            <Text variant="small" color={colors.success} style={{ flex: 1 }}>
+              {q.freeTrial.note}
+            </Text>
+          </View>
+        ) : null}
+
         <View style={{ backgroundColor: colors.surfaceAlt, borderRadius: radius.md, padding: space.md, gap: 6 }}>
+          <Row style={{ justifyContent: 'space-between' }}>
+            <Text variant="small">Rate</Text>
+            <Text variant="bodyStrong">
+              {perMin(current.rate)}
+              {q ? ` (GST sahit ${perMin(q.ratePerMinInclGst)})` : ''}
+            </Text>
+          </Row>
+          {q ? <Text variant="caption">{q.roundingNote}</Text> : null}
           <Row style={{ justifyContent: 'space-between' }}>
             <Text variant="small">Wallet balance</Text>
             <Text variant="bodyStrong">{rupees(balance)}</Text>
           </Row>
           <Row style={{ justifyContent: 'space-between' }}>
             <Text variant="small">Kam se kam ({minMin} min)</Text>
-            <Text variant="bodyStrong">{rupees(required)}</Text>
+            <Text variant="bodyStrong">{required ? rupees(required) : 'Free trial'}</Text>
           </Row>
           {enough ? (
             <Text variant="caption">Aap lagbhag {minutesAffordable} minute baat kar sakte hain. Paisa sirf baat hue minuton ka katega.</Text>
@@ -150,7 +179,7 @@ export function StartSessionSheet({ vendor, initialType, topic, onClose }: { ven
         ) : null}
 
         {enough ? (
-          <Button title={`${current.label} shuru karein`} icon={current.icon} loading={loading} onPress={start} />
+          <Button title={`${current.label} shuru karein${q?.freeTrial ? ' (free)' : ''}`} icon={current.icon} loading={loading || quote.isLoading} onPress={start} />
         ) : (
           <Button
             title="Wallet recharge karein"
@@ -161,6 +190,12 @@ export function StartSessionSheet({ vendor, initialType, topic, onClose }: { ven
             }}
           />
         )}
+        <Pressable onPress={() => setScheduling(true)} accessibilityRole="button" style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, padding: 4 }}>
+          <Ionicons name="calendar-outline" size={16} color={colors.primaryDark} />
+          <Text variant="label" color={colors.primaryDark}>
+            Abhi nahi? Baad ka time book karein
+          </Text>
+        </Pressable>
       </View>
     </Modal>
   );

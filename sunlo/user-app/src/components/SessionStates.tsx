@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, View } from 'react-native';
 import { api, errorMessage } from '@/lib/api';
 import { durationText, rupees } from '@/lib/format';
+import type { Receipt } from '@/lib/types';
 import { useElapsed, type SessionDetail } from '@/lib/useLiveSession';
 import { colors, radius, space } from '@/theme';
 import { Avatar } from './Avatar';
@@ -92,6 +93,9 @@ export function SummaryCard({ s }: { s: SessionDetail }) {
   const [comment, setComment] = useState('');
   const [state, setState] = useState<'idle' | 'saving' | 'done'>('idle');
   const [err, setErr] = useState<string | null>(null);
+  // Raseed (CCPA): kitne minute, rate, free minute, kul katauti
+  const receipt = useQuery({ queryKey: ['receipt', s.id], queryFn: () => api<Receipt>(`/sessions/${s.id}/receipt`), enabled: s.status === 'COMPLETED' });
+  const r = receipt.data;
 
   async function submit() {
     setState('saving');
@@ -120,10 +124,39 @@ export function SummaryCard({ s }: { s: SessionDetail }) {
         <Text variant="small">Rate</Text>
         <Text variant="bodyStrong">{rupees(s.ratePerMin)}/min</Text>
       </Row>
+      {r ? (
+        <Row style={{ justifyContent: 'space-between' }}>
+          <Text variant="small">Bill hue minute</Text>
+          <Text variant="bodyStrong">
+            {r.billedMinutes} × {rupees(r.ratePerMin)} = {rupees(r.grossAmount)}
+          </Text>
+        </Row>
+      ) : null}
+      {r?.freeMinutes ? (
+        <Row style={{ justifyContent: 'space-between' }}>
+          <Text variant="small" color={colors.success}>
+            Free trial ({r.freeMinutes} min)
+          </Text>
+          <Text variant="bodyStrong" color={colors.success}>
+            − {rupees(r.freeAmount)}
+          </Text>
+        </Row>
+      ) : null}
+      {r?.refunded ? (
+        <Row style={{ justifyContent: 'space-between' }}>
+          <Text variant="small">Refund</Text>
+          <Text variant="bodyStrong">− {rupees(r.refunded)}</Text>
+        </Row>
+      ) : null}
       <Row style={{ justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: space.sm }}>
         <Text variant="bodyStrong">Kul katauti</Text>
-        <Text variant="h3">{rupees(s.chargedAmount)}</Text>
+        <Text variant="h3">{rupees(r ? r.net : s.chargedAmount)}</Text>
       </Row>
+      {r ? (
+        <Text variant="caption">
+          Raseed {r.receiptNo}. {r.roundingNote} {r.gstNote}
+        </Text>
+      ) : null}
       {s.billedSeconds > 0 ? (
         state === 'done' ? (
           <Text variant="small" color={colors.success}>

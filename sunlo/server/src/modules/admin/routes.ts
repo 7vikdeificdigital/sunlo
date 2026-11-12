@@ -195,8 +195,9 @@ adminRouter.get('/admin/vendors/:id', async (req, res) => {
       .orderBy(desc(consultSessions.requestedAt))
       .limit(10),
   ]);
+  const { panEnc: _panEnc, ...vendorRow } = row.v;
   res.json({
-    ...row.v,
+    ...vendorRow,
     phone: row.phone,
     userStatus: row.userStatus,
     categories: cats,
@@ -572,6 +573,22 @@ const settingsSchema = z
     minWithdrawalPaise: z.number().int().min(100).max(10_000_000),
     supportEmail: z.string().trim().email(),
     maskContactInfoInChat: z.boolean(),
+    grievanceOfficerName: z.string().trim().max(80),
+    grievanceOfficerEmail: z.union([z.literal(''), z.string().trim().email().max(120)]),
+    grievanceOfficerPhone: z.union([z.literal(''), z.string().trim().regex(/^\+?[0-9 -]{8,16}$/, 'Phone sahi nahi hai')]),
+    grievanceAddress: z.string().trim().max(300),
+    policyVersion: z.string().trim().regex(/^[0-9A-Za-z.\-]{2,20}$/),
+    policyNoticeAuto: z.boolean(),
+    liveRoomsEnabled: z.boolean(),
+    randomVideoEnabled: z.boolean(),
+    videoCallsEnabled: z.boolean(),
+    giftsEnabled: z.boolean(),
+    chatRetentionDays: z.number().int().min(7).max(3650),
+    tdsEnabled: z.boolean(),
+    tdsBps: z.number().int().min(0).max(1000),
+    tdsNoPanBps: z.number().int().min(0).max(3000),
+    freeTrialMinutes: z.number().int().min(0).max(15),
+    freeTrialMaxRatePaise: z.number().int().min(0).max(100_000),
   })
   .partial()
   .strict();
@@ -709,7 +726,7 @@ adminRouter.post('/admin/tickets/:id/reply', async (req, res) => {
 
 adminRouter.post('/admin/tickets/:id/close', async (req, res) => {
   const { id } = params(req, idParam);
-  const [t] = await db.update(supportTickets).set({ status: 'CLOSED' }).where(eq(supportTickets.id, id)).returning();
+  const [t] = await db.update(supportTickets).set({ status: 'CLOSED', closedAt: new Date() }).where(eq(supportTickets.id, id)).returning();
   if (!t) throw notFound('Ticket');
   await audit(req, 'ticket.close', 'ticket', id);
   res.json(t);

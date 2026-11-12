@@ -12,7 +12,7 @@ export const COMPANY = {
 
 export type LegalSection = { title: string; points: string[] };
 
-export const LAST_UPDATED = '27 October 2026';
+export const LAST_UPDATED = '10 November 2026';
 
 export const TERMS_INTRO =
   'Yeh Partner Terms ("Terms") un Listeners aur Experts par lagu hote hain jo Bondty ke Partner app se users se baat karte hain. App istemaal karne se pehle inhe dhyan se padhein. App istemaal karna yaani in Terms ko maan lena.';
@@ -57,7 +57,10 @@ export const TERMS_SECTIONS: LegalSection[] = [
       'Users ke gifts par bhi Bondty ka commission lagta hai, bacha hua hissa aapko milta hai.',
       'Billing minute ke hisaab se hoti hai. Agar user ke wallet ka balance khatam ho jaye to session apne aap band ho jata hai. Jo session shuru nahi hua ya user ne poora nahi kiya uski kamai nahi hoti.',
       'Kamai wallet mein dikhti hai. Wallet se paise nikalna Bondty ki payout niti, samay aur shartein ke anusaar hoga.',
-      'Aapki kamai par lagne wale kar (jaise income tax aur jahan lagu ho GST) ki zimmedari aapki apni hai. Bondty kaanoon ke anusaar zaroori hone par TDS jaise kat-outi kar sakta hai aur jaankari sarkar ko de sakta hai.',
+      'Aapki kamai par lagne wale kar (jaise income tax aur jahan lagu ho GST) ki zimmedari aapki apni hai.',
+      'Bondty Income-tax Act ke anusaar (Sec 393 / purana Sec 194-O) har kamai ki gross raqam par TDS kaatta hai: PAN dene par 0.1%, PAN na dene par 5%. Kata hua TDS sarkar ko jama hota hai aur aap use apne income tax return mein claim kar sakte hain. Isliye PAN dena zaroori hai.',
+      'Naye users ko diye jaane wale free trial minute ka paisa Bondty deta hai; aapko un minuton ki poori kamai milti hai.',
+      'Har mahine ka statement (gross, platform fee, TDS, net) app mein Account > Mahine ka statement mein milta hai.',
       'Dhokhadhadi, galat tareeke se ki gayi kamai ya Terms todne par Bondty us kamai ko ghata ya rok sakta hai.',
     ],
   },
@@ -155,7 +158,8 @@ export const TERMS_SECTIONS: LegalSection[] = [
     title: 'Lagu kanoon aur shikayat',
     points: [
       'Yeh Terms Bharat ke kaanoon ke adheen hain. Kisi bhi vivaad ke liye Bharat ki adaalatein adhikar kshetra rakhti hain.',
-      'Kisi bhi shikayat ya sujhav ke liye app ke Help section ka istemaal karein. Hum shikayat ko Information Technology (Intermediary Guidelines) Rules ke anusaar nipatayenge.',
+      'Kisi bhi shikayat ke liye app ke Help section ka istemaal karein. Shikayat milte hi ticket number milta hai; aam shikayat 7 din mein aur ashleel/ghair-kanooni content ki shikayat 36 ghante mein nipatayi jaati hai (IT (Intermediary Guidelines) Amendment Rules, 2026).',
+      'Court ya sarkari aadesh par Bondty kisi profile, sandesh ya room ko turant (3 ghante ke andar) hata sakta hai.',
     ],
   },
 ];

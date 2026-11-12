@@ -9,6 +9,7 @@ import {
   boolean,
   check,
   customType,
+  date,
   doublePrecision,
   index,
   integer,
@@ -49,6 +50,8 @@ export const txnTypeEnum = pgEnum('txn_type', [
   'REFUND',
   'WITHDRAWAL',
   'ADJUSTMENT',
+  'TDS', // vendor ki kamai se TDS (Income-tax Act 2025 Sec 393, purana 194-O)
+  'PAYMENT_REFUND', // recharge ka paisa original payment source par wapas (coins wallet se ghatte hain)
 ]);
 export const paymentStatusEnum = pgEnum('payment_status', ['CREATED', 'PAID', 'FAILED']);
 export const sessionTypeEnum = pgEnum('session_type', ['CHAT', 'AUDIO', 'VIDEO']);
@@ -73,6 +76,13 @@ export const users = pgTable(
     avatarUrl: text('avatar_url'),
     language: text('language').notNull().default('en'),
     ageConfirmedAt: timestamp('age_confirmed_at', { withTimezone: true }), // 18+ ki pushti
+    dateOfBirth: date('date_of_birth'), // 18+ ki jaanch janm-tithi se (sirf checkbox kaafi nahi)
+    consentVersion: text('consent_version'), // DPDP: kis privacy notice par sahmati di
+    consentAt: timestamp('consent_at', { withTimezone: true }),
+    totpSecretEnc: text('totp_secret_enc'), // sirf ADMIN: 2FA secret (encrypted)
+    totpEnabledAt: timestamp('totp_enabled_at', { withTimezone: true }),
+    checkinReminder: boolean('checkin_reminder').notNull().default(false), // roz raat check-in reminder (user ki marzi)
+    checkinRemindedOn: date('checkin_reminded_on'),
     role: roleEnum('role').notNull().default('USER'),
     status: accountStatusEnum('status').notNull().default('ACTIVE'),
     tokenVersion: integer('token_version').notNull().default(0),
@@ -189,6 +199,11 @@ export const vendors = pgTable(
     totalMinutes: integer('total_minutes').notNull().default(0),
     totalSessions: integer('total_sessions').notNull().default(0),
     favoritesCount: integer('favorites_count').notNull().default(0),
+    // PAN: TDS ke liye zaroori. Poora PAN encrypted; dikhaya sirf last 4
+    panEnc: text('pan_enc'),
+    panLast4: text('pan_last4'),
+    panName: text('pan_name'),
+    panAddedAt: timestamp('pan_added_at', { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -265,6 +280,7 @@ export const withdrawals = pgTable(
     payoutSnapshot: jsonb('payout_snapshot').notNull(), // request ke waqt ka (masked) account
     reference: text('reference'), // bank UTR / UPI ref
     note: text('note'),
+    panLast4: text('pan_last4'),
     processedBy: uuid('processed_by').references(() => users.id),
     processedAt: timestamp('processed_at', { withTimezone: true }),
     createdAt: createdAt(),
@@ -371,6 +387,12 @@ export const consultSessions = pgTable(
     chargedAmount: integer('charged_amount').notNull().default(0),
     vendorEarning: integer('vendor_earning').notNull().default(0),
     refundedAmount: integer('refunded_amount').notNull().default(0),
+    freeSeconds: integer('free_seconds').notNull().default(0), // free trial ke second (platform deta hai)
+    promoAmount: integer('promo_amount').notNull().default(0), // free minute ki keemat jo user ne nahi di
+    tdsAmount: integer('tds_amount').notNull().default(0),
+    pricingAckAt: timestamp('pricing_ack_at', { withTimezone: true }), // user ne keemat dekh kar haan kaha
+    lowBalanceWarnedAt: timestamp('low_balance_warned_at', { withTimezone: true }),
+    scheduledCallId: uuid('scheduled_call_id'),
   },
   (t) => [
     index('cs_user_status_idx').on(t.userId, t.status),
@@ -436,6 +458,7 @@ export const reports = pgTable(
     reason: text('reason').notNull(),
     details: text('details'),
     status: reportStatusEnum('status').notNull().default('OPEN'),
+    dueAt: timestamp('due_at', { withTimezone: true }), // 36 ghante (IT Rules 2026)
     resolution: text('resolution'),
     resolvedBy: uuid('resolved_by').references(() => users.id),
     resolvedAt: timestamp('resolved_at', { withTimezone: true }),
@@ -480,10 +503,15 @@ export const supportTickets = pgTable(
       .references(() => users.id),
     subject: text('subject').notNull(),
     status: ticketStatusEnum('status').notNull().default('OPEN'),
+    // GRIEVANCE | GENERAL | PAYMENT | SAFETY | DATA | UNLAWFUL_CONTENT
+    category: text('category').notNull().default('GENERAL'),
+    acknowledgedAt: timestamp('acknowledged_at', { withTimezone: true }),
+    dueAt: timestamp('due_at', { withTimezone: true }), // 7 din; UNLAWFUL_CONTENT 36 ghante
+    closedAt: timestamp('closed_at', { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index('tickets_user_idx').on(t.userId), index('tickets_status_idx').on(t.status, t.updatedAt)],
+  (t) => [index('tickets_user_idx').on(t.userId), index('tickets_status_idx').on(t.status, t.updatedAt), index('tickets_due_idx').on(t.status, t.dueAt)],
 );
 
 export const ticketMessages = pgTable('ticket_messages', {
@@ -578,4 +606,84 @@ export const voiceReplies = pgTable(
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex('voice_replies_one_per_vendor_uq').on(t.noteId, t.vendorId)],
+);
+
+// ---------------- Compliance ----------------
+
+/** Court ya sarkari order par content/account hatana: IT Rules 2026 ke hisaab se 3 ghante */
+export const takedowns = pgTable(
+  'takedowns',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    targetType: text('target_type').notNull(), // USER | VENDOR | MESSAGE | ROOM | VOICE_NOTE | REVIEW
+    targetId: text('target_id').notNull(),
+    authority: text('authority').notNull(), // jaise "Delhi High Court", "MeitY", "UP Police (DIG)"
+    orderRef: text('order_ref').notNull(),
+    note: text('note'),
+    receivedAt: timestamp('received_at', { withTimezone: true }).notNull(),
+    dueAt: timestamp('due_at', { withTimezone: true }).notNull(),
+    actionedAt: timestamp('actioned_at', { withTimezone: true }).notNull(),
+    actionedBy: uuid('actioned_by')
+      .notNull()
+      .references(() => users.id),
+    createdAt: createdAt(),
+  },
+  (t) => [index('takedowns_created_idx').on(t.createdAt)],
+);
+
+// ---------------- Care features ----------------
+
+/** Free trial: ek phone number ek hi baar. Phone ka hash rakhte hain taaki account delete karke dobara na mile */
+export const trialClaims = pgTable('trial_claims', {
+  phoneHash: text('phone_hash').primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  sessionId: uuid('session_id').notNull(),
+  claimedAt: timestamp('claimed_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** User apne listener ke saath aage ka time book karta hai; listener confirm karta hai; dono ko reminder */
+export const scheduledCalls = pgTable(
+  'scheduled_calls',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    vendorId: uuid('vendor_id')
+      .notNull()
+      .references(() => vendors.id),
+    type: sessionTypeEnum('type').notNull(),
+    scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
+    durationMin: integer('duration_min').notNull(),
+    note: text('note'),
+    status: text('status').notNull().default('PENDING'), // PENDING | CONFIRMED | DECLINED | CANCELLED | COMPLETED | MISSED
+    declineReason: text('decline_reason'),
+    remindedAt: timestamp('reminded_at', { withTimezone: true }),
+    sessionId: uuid('session_id'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    index('sc_vendor_time_idx').on(t.vendorId, t.scheduledAt),
+    index('sc_user_time_idx').on(t.userId, t.scheduledAt),
+    index('sc_status_time_idx').on(t.status, t.scheduledAt),
+  ],
+);
+
+/** Roz ka mood (1-5). Note encrypted, kyunki yeh mann ki baat hai */
+export const moodCheckins = pgTable(
+  'mood_checkins',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    day: date('day').notNull(), // IST din (YYYY-MM-DD)
+    mood: integer('mood').notNull(),
+    noteEnc: text('note_enc'),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('mood_user_day_uq').on(t.userId, t.day), check('mood_range_chk', sql`${t.mood} BETWEEN 1 AND 5`)],
 );

@@ -3,9 +3,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Pressable, ScrollView, View } from 'react-native';
+import { DobInput, isAdult } from '@/components/DobInput';
 import { Button, Chip, Input, Row, Screen, Text } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
-import { qk } from '@/lib/queries';
+import { qk, useAppConfig } from '@/lib/queries';
 import type { Gender } from '@/lib/types';
 import { colors, radius, space } from '@/theme';
 
@@ -15,16 +16,23 @@ export default function Onboarding() {
   const [name, setName] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
   const [adult, setAdult] = useState(false);
+  const [dob, setDob] = useState<string | null>(null);
+  const cfg = useAppConfig();
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function save() {
     if (name.trim().length < 2) return setError('Apna naam likhein (koi bhi naam chalega)');
-    if (!adult) return setError('Bondty sirf 18 saal ya usse bade logon ke liye hai');
+    if (!dob) return setError('Apni janm-tithi sahi daalein');
+    if (!isAdult(dob)) return setError('Bondty sirf 18 saal ya usse bade logon ke liye hai');
+    if (!adult) return setError('Aage badhne ke liye Terms aur Privacy notice par sahmati dein');
     setSaving(true);
     setError(null);
     try {
-      await api('/me', { method: 'PATCH', body: { name: name.trim(), ...(gender ? { gender } : {}), ageConfirmed: true } });
+      await api('/me', { method: 'PATCH', body: { name: name.trim(), ...(gender ? { gender } : {}), dateOfBirth: dob, ageConfirmed: true } });
+      // DPDP: kis privacy notice par sahmati di, uska record
+      const version = cfg.data?.settings.policyVersion;
+      if (version) await api('/me/consent', { method: 'POST', body: { version } }).catch(() => undefined);
       await qc.invalidateQueries({ queryKey: qk.me });
       router.replace('/');
     } catch (e) {
@@ -59,6 +67,7 @@ export default function Onboarding() {
               ))}
             </Row>
           </View>
+          <DobInput value={dob} onChange={setDob} />
           <Pressable
             onPress={() => setAdult((x) => !x)}
             accessibilityRole="checkbox"
@@ -67,7 +76,7 @@ export default function Onboarding() {
           >
             <Ionicons name={adult ? 'checkbox' : 'square-outline'} size={22} color={adult ? colors.primary : colors.textFaint} />
             <Text variant="body" style={{ flex: 1 }}>
-              Main 18 saal ya usse bada/badi hoon aur Terms of Use aur Privacy Policy se sahmat hoon.
+              Main 18 saal ya usse bada/badi hoon. Maine Terms of Use aur Privacy notice padh li hai aur apna data uske hisaab se use karne ki sahmati deta/deti hoon.
             </Text>
           </Pressable>
           {error ? (

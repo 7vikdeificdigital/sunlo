@@ -38,6 +38,9 @@ export default function Account() {
     { icon: 'person-outline', label: 'Profile edit karein', sub: 'Naam, parichay, topics, photo', href: '/edit-profile' },
     { icon: 'pricetags-outline', label: 'Rate aur services', sub: 'Chat / call / video ka rate', href: '/rates' },
     { icon: 'card-outline', label: 'Bank / UPI details', sub: v?.payout ? (v.payout.method === 'UPI' ? v.payout.upiId : `A/c ••••${v.payout.accountLast4}`) : 'Abhi nahi joda', href: '/payout' },
+    { icon: 'document-text-outline', label: 'PAN (TDS)', sub: v?.pan ? `XXXXXX${v.pan.last4} · TDS ${v.tds?.pctWithPan ?? 0.1}%` : `Abhi nahi joda · TDS ${v?.tds?.pctWithoutPan ?? 5}% katega`, href: '/pan' },
+    { icon: 'receipt-outline', label: 'Mahine ka statement', sub: 'Gross, platform fee, TDS, net', href: '/statement' },
+    { icon: 'calendar-outline', label: 'Booked calls', sub: 'Users ki booking confirm karein', href: '/bookings' },
     { icon: 'notifications-outline', label: 'Notifications', href: '/notifications' },
     { icon: 'help-buoy-outline', label: 'Help aur Support', href: '/support' },
   ];

@@ -128,6 +128,10 @@ vendorsUserRouter.post('/reports', async (req, res) => {
       .limit(1);
     if (!s) throw badRequest('BAD_SESSION', 'Yeh session aapka nahi hai');
   }
-  const [r] = await db.insert(reports).values({ reporterId: userId, ...input }).returning({ id: reports.id });
+  // IT Rules 2026: shikayat par 36 ghante mein kaarvai
+  const [r] = await db
+    .insert(reports)
+    .values({ reporterId: userId, ...input, dueAt: new Date(Date.now() + 36 * 3600_000) })
+    .returning({ id: reports.id });
   res.status(201).json({ id: r.id, ok: true });
 });

@@ -235,3 +235,14 @@ export async function paymentHistory(userId: string) {
     .orderBy(desc(payments.createdAt))
     .limit(50);
 }
+
+/**
+ * Recharge ka paisa ORIGINAL payment source par wapas (RBI closed-system PPI: coins cash mein nahi nikalte;
+ * refund sirf usi card/UPI/bank par jahan se paisa aaya). Mock mode mein sirf record banta hai.
+ */
+export async function refundAtProvider(p: { provider: string; providerPaymentId: string | null; totalPayable: number }, reason: string) {
+  if (p.provider === 'mock') return { refundId: `mock_rf_${crypto.randomUUID().slice(0, 8)}` };
+  if (p.provider !== 'razorpay' || !p.providerPaymentId) throw badRequest('REFUND_NOT_SUPPORTED', 'Is payment ka refund yahan se nahi ho sakta (Play Store refund Google Play Console se)');
+  const r = await razorpay().payments.refund(p.providerPaymentId, { amount: p.totalPayable, notes: { reason: reason.slice(0, 200) } });
+  return { refundId: String(r.id) };
+}

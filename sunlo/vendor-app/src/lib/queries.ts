@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from './api';
 import { useAuth } from './auth';
-import type { Category, Paged, Session, VendorMe, WalletTxn, Withdrawal } from './types';
+import type { Category, Paged, Session, Statement, VendorBooking, VendorMe, WalletTxn, Withdrawal } from './types';
 
 export const qk = {
   me: ['vendor-me'] as const,
@@ -15,7 +15,7 @@ export function useVendorMe() {
 }
 
 export interface AppConfig {
-  settings: { appName: string; minRatePerMinPaise: number; maxRatePerMinPaise: number; minWithdrawalPaise: number; supportEmail: string };
+  settings: { appName: string; minRatePerMinPaise: number; maxRatePerMinPaise: number; minWithdrawalPaise: number; supportEmail: string; liveRoomsEnabled?: boolean; videoCallsEnabled?: boolean; policyVersion?: string };
   categories: Category[];
   languages: string[];
 }
@@ -47,3 +47,8 @@ export const useNotifications = () =>
     queryKey: ['notifications'],
     queryFn: () => api<Paged<{ id: string; title: string; body: string; readAt: string | null; createdAt: string }> & { unread: number }>('/notifications'),
   });
+
+export const useStatement = (month: string) => useQuery({ queryKey: ['statement', month], queryFn: () => api<Statement>('/vendor/statement', { query: { month } }) });
+
+export const useVendorBookings = (enabled = true) =>
+  useQuery({ queryKey: ['vendor-bookings'], enabled, refetchInterval: 60_000, queryFn: () => api<{ items: VendorBooking[] }>('/vendor/scheduled-calls') });

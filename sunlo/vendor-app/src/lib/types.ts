@@ -32,6 +32,36 @@ export interface VendorMe {
   payout: { method: 'UPI'; upiId: string } | { method: 'BANK'; accountHolder: string; accountLast4: string; ifsc: string } | null;
   walletBalance: number;
   limits: { minRatePerMinPaise: number; maxRatePerMinPaise: number; minWithdrawalPaise: number; commissionPct: number };
+  pan?: { last4: string; name: string | null; addedAt: string | null } | null;
+  tds?: { enabled: boolean; pctWithPan: number; pctWithoutPan: number };
+}
+
+export interface Statement {
+  month: string;
+  pan: string | null;
+  sessions: number;
+  minutes: number;
+  gross: number;
+  sessionGross: number;
+  giftGross: number;
+  freeTrialPaidByPlatform: number;
+  commission: number;
+  earning: number;
+  tds: number;
+  net: number;
+  adjustments: number;
+  withdrawn: number;
+  note: string;
+}
+
+export interface VendorBooking {
+  id: string;
+  type: 'CHAT' | 'AUDIO' | 'VIDEO';
+  scheduledAt: string;
+  durationMin: number;
+  note: string | null;
+  status: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'CANCELLED' | 'COMPLETED' | 'MISSED';
+  userName: string;
 }
 
 export interface Category {
@@ -86,7 +116,7 @@ export interface ChatMessage {
 
 export interface WalletTxn {
   id: string;
-  type: 'RECHARGE' | 'RECHARGE_BONUS' | 'SESSION_CHARGE' | 'SESSION_EARNING' | 'REFUND' | 'WITHDRAWAL' | 'ADJUSTMENT';
+  type: 'RECHARGE' | 'RECHARGE_BONUS' | 'SESSION_CHARGE' | 'SESSION_EARNING' | 'REFUND' | 'WITHDRAWAL' | 'ADJUSTMENT' | 'TDS' | 'PAYMENT_REFUND';
   amount: number;
   balanceAfter: number;
   note: string | null;

@@ -5,6 +5,8 @@ import { db } from '../../db/client';
 import { banners, categories, notifications, supportTickets, ticketMessages } from '../../db/schema';
 import { conflict, notFound } from '../../lib/errors';
 import { getSettings, PUBLIC_SETTING_KEYS } from '../../lib/settings';
+import { emitToUser } from '../../lib/realtime';
+import { MOODS } from '../care/moods';
 import { body, idParam, pagination, params, query } from '../../lib/validate';
 import { authId } from '../../middleware/auth';
 
@@ -33,7 +35,30 @@ miscPublic.get('/app/config', async (_req, res) => {
       { name: 'Tele-MANAS (Bharat Sarkar)', phone: '14416', note: '24x7, muft, kai bhashaon mein' },
       { name: 'Emergency', phone: '112', note: 'Turant khatra ho to' },
     ],
+    moods: MOODS.map(({ key, label, icon }) => ({ key, label, icon })),
+    grievance: grievanceInfo(s),
   });
+});
+
+type S = Awaited<ReturnType<typeof getSettings>>;
+/** IT Rules: Grievance Officer ka naam/sampark + shikayat ka samay (app aur website par dikhana zaroori) */
+function grievanceInfo(s: S) {
+  return {
+    officerName: s.grievanceOfficerName,
+    email: s.grievanceOfficerEmail || s.supportEmail,
+    phone: s.grievanceOfficerPhone,
+    address: s.grievanceAddress,
+    acknowledgeWithinHours: 24,
+    resolveWithinDays: 7,
+    unlawfulContentWithinHours: 36,
+    appealNote: 'Jawab se santusht na hon to Grievance Appellate Committee (gac.gov.in) mein 30 din ke andar appeal kar sakte hain.',
+    policyVersion: s.policyVersion,
+  };
+}
+
+/** Website / app ka "Grievance Officer" page (bina login) */
+miscPublic.get('/grievance', async (_req, res) => {
+  res.json(grievanceInfo(await getSettings()));
 });
 
 miscPublic.get('/banners', async (_req, res) => {
@@ -84,18 +109,41 @@ miscPrivate.post('/notifications/read', async (req, res) => {
 
 miscPrivate.get('/support/tickets', async (req, res) => {
   const items = await db.select().from(supportTickets).where(eq(supportTickets.userId, authId(req))).orderBy(desc(supportTickets.updatedAt));
-  res.json({ items });
+  res.json({ items: items.map((t) => ({ ...t, ticketNo: ticketNo(t.id) })) });
 });
+
+export const TICKET_CATEGORIES = ['GENERAL', 'PAYMENT', 'SAFETY', 'DATA', 'GRIEVANCE', 'UNLAWFUL_CONTENT'] as const;
+/** IT Rules 2026: aam shikayat 7 din, ghair-kanooni content wali 36 ghante */
+export const ticketDueAt = (category: string, from = new Date()) =>
+  new Date(from.getTime() + (category === 'UNLAWFUL_CONTENT' ? 36 * 3600_000 : 7 * 86400_000));
+export const ticketNo = (id: string) => `GR-${id.slice(0, 8).toUpperCase()}`;
 
 miscPrivate.post('/support/tickets', async (req, res) => {
   const userId = authId(req);
-  const { subject, message } = body(req, z.object({ subject: z.string().trim().min(3).max(120), message: z.string().trim().min(1).max(2000) }));
+  const { subject, message, category } = body(
+    req,
+    z.object({
+      subject: z.string().trim().min(3).max(120),
+      message: z.string().trim().min(1).max(2000),
+      category: z.enum(TICKET_CATEGORIES).default('GENERAL'),
+    }),
+  );
+  const now = new Date();
   const t = await db.transaction(async (tx) => {
-    const [ticket] = await tx.insert(supportTickets).values({ userId, subject }).returning();
+    // Shikayat milte hi pavti (acknowledgement): ticket number + kab tak jawab
+    const [ticket] = await tx
+      .insert(supportTickets)
+      .values({ userId, subject, category, acknowledgedAt: now, dueAt: ticketDueAt(category, now) })
+      .returning();
     await tx.insert(ticketMessages).values({ ticketId: ticket.id, senderId: userId, body: message });
     return ticket;
   });
-  res.status(201).json(t);
+  const due = t.dueAt!.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+  const title = 'Aapki shikayat mil gayi';
+  const ack = `Ticket ${ticketNo(t.id)} darj ho gaya. Hum ${due} tak samadhan karenge.`;
+  await db.insert(notifications).values({ userId, title, body: ack, data: { type: 'ticket', ticketId: t.id } });
+  emitToUser(userId, 'notification', { title, body: ack, data: { type: 'ticket', ticketId: t.id } });
+  res.status(201).json({ ...t, ticketNo: ticketNo(t.id), acknowledgement: ack });
 });
 
 async function ownTicket(userId: string, id: string) {
@@ -117,7 +165,7 @@ miscPrivate.get('/support/tickets/:id', async (req, res) => {
     .from(ticketMessages)
     .where(eq(ticketMessages.ticketId, id))
     .orderBy(asc(ticketMessages.createdAt));
-  res.json({ ...t, messages });
+  res.json({ ...t, ticketNo: ticketNo(t.id), messages });
 });
 
 miscPrivate.post('/support/tickets/:id/messages', async (req, res) => {

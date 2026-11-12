@@ -10,6 +10,7 @@ import { getSettings } from '../../lib/settings';
 import { body, idParam, params } from '../../lib/validate';
 import { authId, requireRole } from '../../middleware/auth';
 import { audit } from '../admin/audit';
+import { postVendorEarning } from '../wallet/earning';
 import { postTxn } from '../wallet/ledger';
 import { giftSends, gifts } from './schema';
 
@@ -80,6 +81,7 @@ giftsPrivate.post('/sessions/:id/gifts', requireRole('USER'), async (req, res) =
   const { giftId } = body(req, z.object({ giftId: z.string().uuid() }));
   const userId = authId(req);
   const st = await getSettings();
+  if (!st.giftsEnabled) throw new HttpError(403, 'FEATURE_OFF', 'Gift abhi band hain');
   const pct = st.giftCommissionPct;
 
   const out = await db.transaction(async (tx) => {
@@ -116,10 +118,10 @@ giftsPrivate.post('/sessions/:id/gifts', requireRole('USER'), async (req, res) =
     await postTxn(tx, { userId, type: 'SESSION_CHARGE', amount: -g.price, referenceType: 'gift', referenceId: send.id, note: `Gift: ${g.name}` });
     const [v] = await tx.select({ userId: vendors.userId }).from(vendors).where(eq(vendors.id, sess.vendorId)).limit(1);
     if (earning > 0 && v) {
-      await postTxn(tx, { userId: v.userId, type: 'SESSION_EARNING', amount: earning, referenceType: 'gift', referenceId: send.id, note: `Gift mila: ${g.name}` });
+      await postVendorEarning(tx, { vendorId: sess.vendorId, vendorUserId: v.userId, gross: g.price, earning, referenceType: 'gift', referenceId: send.id, note: `Gift mila: ${g.name}` });
     }
     // Balance kam hua hai, isliye session ki seema usi hisaab se (kabhi badhti nahi)
-    const affordableSec = Math.floor((balance - g.price) / sess.ratePerMin) * 60;
+    const affordableSec = sess.freeSeconds + Math.floor((balance - g.price) / sess.ratePerMin) * 60;
     const newMax = Math.min(sess.maxSeconds ?? affordableSec, affordableSec);
     if (newMax !== sess.maxSeconds) await tx.update(consultSessions).set({ maxSeconds: newMax }).where(eq(consultSessions.id, sess.id));
     return { send, gift: g, vendorUserId: v?.userId ?? null, acceptedAt: sess.acceptedAt, maxSeconds: newMax, earning };

@@ -8,6 +8,8 @@ import { requireAuth } from './middleware/auth';
 import { errorHandler, notFoundHandler } from './middleware/error';
 import { apiLimiter } from './middleware/rateLimit';
 import { adminRouter } from './modules/admin/routes';
+import { careRouter } from './modules/care/routes';
+import { complianceRouter } from './modules/compliance/routes';
 import { authPrivate, authPublic } from './modules/auth/routes';
 import { giftsPrivate, giftsPublic } from './modules/gifts/routes';
 import { roomsRouter } from './modules/rooms/routes';
@@ -46,6 +48,8 @@ export const privateRouters = [
   randomRouter,
   roomsRouter,
   voiceRouter,
+  careRouter,
+  complianceRouter,
 ];
 
 export const corsOrigins = (): string[] | true =>

@@ -53,8 +53,11 @@ authPublic.post('/auth/refresh', authLimiter, async (req, res) => {
 });
 
 authPublic.post('/auth/admin/login', adminLoginLimiter, async (req, res) => {
-  const { email, password } = body(req, z.object({ email: z.string().email(), password: z.string().min(1).max(200) }));
-  res.json(await auth.adminLogin(email, password, req.get('user-agent')));
+  const { email, password, totp } = body(
+    req,
+    z.object({ email: z.string().email(), password: z.string().min(1).max(200), totp: z.string().trim().max(10).optional() }),
+  );
+  res.json(await auth.adminLogin(email, password, req.get('user-agent'), totp));
 });
 
 /** Login ke baad wale auth routes */

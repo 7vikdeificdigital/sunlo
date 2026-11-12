@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView } from 'react-native';
 import { Button, Card, Header, Input, Loader, Screen, Text } from '@/components/ui';
-import { api, errorMessage } from '@/lib/api';
+import { api, ApiError, errorMessage } from '@/lib/api';
 import { rupees } from '@/lib/format';
 import { qk, useEarnings, useVendorMe } from '@/lib/queries';
 import { colors, space } from '@/theme';
@@ -31,6 +31,9 @@ export default function Withdraw() {
       await Promise.all([qc.invalidateQueries({ queryKey: ['earnings'] }), qc.invalidateQueries({ queryKey: ['withdrawals'] }), qc.invalidateQueries({ queryKey: qk.me })]);
       router.back();
     } catch (err) {
+      if (err instanceof ApiError && err.code === 'PAN_REQUIRED') {
+        router.push('/pan');
+      }
       setError(errorMessage(err));
     } finally {
       setSaving(false);

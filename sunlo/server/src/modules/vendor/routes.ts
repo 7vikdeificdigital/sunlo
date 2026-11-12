@@ -56,9 +56,11 @@ vendorSelfRouter.get('/vendor/me', async (req, res) => {
     db.select({ phone: users.phone }).from(users).where(eq(users.id, userId)),
     getSettings(),
   ]);
-  const { kycUploadId, ...rest } = v;
+  const { kycUploadId, panEnc, ...rest } = v;
   res.json({
     ...rest,
+    pan: v.panLast4 ? { last4: v.panLast4, name: v.panName, addedAt: v.panAddedAt } : null,
+    tds: { enabled: s.tdsEnabled, pctWithPan: s.tdsBps / 100, pctWithoutPan: s.tdsNoPanBps / 100 },
     phone: u?.phone,
     hasKyc: Boolean(kycUploadId),
     categories: cats,
@@ -133,6 +135,7 @@ vendorSelfRouter.post('/vendor/me/submit', async (req, res) => {
   if (!n) missing.push('category');
   if (!v.kycUploadId || !v.kycDocType) missing.push('ID document');
   if (!v.avatarUrl) missing.push('profile photo');
+  if (!v.panLast4) missing.push('PAN (TDS ke liye)');
   if (missing.length) throw badRequest('INCOMPLETE_PROFILE', `Yeh bharna baaki hai: ${missing.join(', ')}`, { missing });
   await db.update(vendors).set({ status: 'PENDING', submittedAt: new Date(), rejectionReason: null }).where(eq(vendors.id, v.id));
   res.json({ status: 'PENDING' });
@@ -286,11 +289,12 @@ vendorSelfRouter.post('/vendor/withdrawals', async (req, res) => {
   const { amount } = body(req, z.object({ amount: z.number().int().positive() }));
   const s = await getSettings();
   if (amount < s.minWithdrawalPaise) throw badRequest('AMOUNT_TOO_LOW', `Kam se kam Rs ${s.minWithdrawalPaise / 100} nikal sakte hain`);
+  if (!v.panLast4) throw badRequest('PAN_REQUIRED', 'Withdrawal ke liye pehle PAN jodein (TDS ke liye zaroori)');
   const [p] = await db.select().from(payoutAccounts).where(eq(payoutAccounts.vendorId, v.id)).limit(1);
   if (!p) throw badRequest('NO_PAYOUT_ACCOUNT', 'Pehle bank ya UPI details jodein');
   try {
     const w = await db.transaction(async (tx) => {
-      const [row] = await tx.insert(withdrawals).values({ vendorId: v.id, amount, payoutSnapshot: maskedPayout(p)! }).returning();
+      const [row] = await tx.insert(withdrawals).values({ vendorId: v.id, amount, payoutSnapshot: maskedPayout(p)!, panLast4: v.panLast4 }).returning();
       await postTxn(tx, { userId, type: 'WITHDRAWAL', amount: -amount, referenceType: 'withdrawal', referenceId: row.id, note: 'Withdrawal request' });
       return row;
     });
@@ -300,6 +304,79 @@ vendorSelfRouter.post('/vendor/withdrawals', async (req, res) => {
     if (c?.code === '23505' && c?.constraint === 'withdrawal_one_pending_uq') throw conflict('WITHDRAWAL_PENDING', 'Ek withdrawal pehle se pending hai');
     throw e;
   }
+});
+
+// ---------------- PAN (TDS) ----------------
+
+/** PAN: poora encrypted rakhte hain, wapas sirf last 4. PAN ke bina TDS 5% katta hai, PAN ke saath 0.1% */
+vendorSelfRouter.put('/vendor/pan', async (req, res) => {
+  const v = await myVendor(authId(req));
+  const { pan, name } = body(
+    req,
+    z.object({
+      pan: z.string().trim().toUpperCase().regex(/^[A-Z]{5}[0-9]{4}[A-Z]$/, 'PAN sahi nahi hai (jaise ABCDE1234F)'),
+      name: z.string().trim().min(3).max(80),
+    }),
+  );
+  const [pending] = await db.select({ id: withdrawals.id }).from(withdrawals).where(and(eq(withdrawals.vendorId, v.id), eq(withdrawals.status, 'PENDING'))).limit(1);
+  if (pending) throw conflict('WITHDRAWAL_PENDING', 'Pending withdrawal ke dauran PAN nahi badal sakte');
+  await db.update(vendors).set({ panEnc: encryptField(pan), panLast4: pan.slice(-4), panName: name, panAddedAt: new Date() }).where(eq(vendors.id, v.id));
+  res.json({ pan: { last4: pan.slice(-4), name } });
+});
+
+/**
+ * Mahine ka kamai statement: gross (user ne kitna diya + free trial), commission, TDS, net, payout.
+ * month = YYYY-MM (IST)
+ */
+vendorSelfRouter.get('/vendor/statement', async (req, res) => {
+  const userId = authId(req);
+  const v = await myVendor(userId);
+  const { month } = query(req, z.object({ month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) }));
+  const [y, m] = month.split('-').map(Number);
+  const from = new Date(`${month}-01T00:00:00+05:30`);
+  const to = new Date(`${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, '0')}-01T00:00:00+05:30`);
+  const [w] = await db.select({ id: wallets.id }).from(wallets).where(eq(wallets.userId, userId)).limit(1);
+  const [sess] = await db
+    .select({
+      sessions: sql<number>`count(*)::int`,
+      minutes: sql<number>`coalesce(sum(ceil(${consultSessions.billedSeconds} / 60.0)),0)::int`,
+      gross: sql<number>`coalesce(sum(${consultSessions.chargedAmount} + ${consultSessions.promoAmount}),0)::int`,
+      free: sql<number>`coalesce(sum(${consultSessions.promoAmount}),0)::int`,
+    })
+    .from(consultSessions)
+    .where(and(eq(consultSessions.vendorId, v.id), eq(consultSessions.status, 'COMPLETED'), gte(consultSessions.endedAt, from), sql`${consultSessions.endedAt} < ${to.toISOString()}::timestamptz`));
+  const ledger = w
+    ? (
+        await db.execute(sql`
+          select type, coalesce(sum(amount),0)::int as total from wallet_transactions
+          where wallet_id = ${w.id} and created_at >= ${from.toISOString()}::timestamptz and created_at < ${to.toISOString()}::timestamptz
+          group by type`)
+      ).rows as { type: string; total: number }[]
+    : [];
+  const sum = (t: string) => Number(ledger.find((r) => r.type === t)?.total ?? 0);
+  const gifts = (
+    await db.execute(sql`select coalesce(sum(price),0)::int as gross from gift_sends where vendor_id = ${v.id} and created_at >= ${from.toISOString()}::timestamptz and created_at < ${to.toISOString()}::timestamptz`)
+  ).rows[0] as { gross: number };
+  const earning = sum('SESSION_EARNING');
+  const tds = -sum('TDS');
+  const grossAll = sess.gross + Number(gifts.gross);
+  res.json({
+    month,
+    pan: v.panLast4 ? `XXXXXX${v.panLast4}` : null,
+    sessions: sess.sessions,
+    minutes: sess.minutes,
+    gross: grossAll,
+    sessionGross: sess.gross,
+    giftGross: Number(gifts.gross),
+    freeTrialPaidByPlatform: sess.free,
+    commission: grossAll - earning,
+    earning,
+    tds,
+    net: earning - tds,
+    adjustments: sum('ADJUSTMENT'),
+    withdrawn: -sum('WITHDRAWAL') - sum('REFUND'),
+    note: 'TDS ka certificate (Form 16A jaisa) har quarter ke baad milega. PAN sahi rakhein.',
+  });
 });
 
 // ---------------- Reviews ----------------

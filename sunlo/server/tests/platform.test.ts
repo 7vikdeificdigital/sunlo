@@ -95,6 +95,15 @@ describe('Vendor onboarding → admin approval', () => {
         kycUploadId: kyc.body.id,
       });
     expect(patch.status).toBe(200);
+    // PAN ke bina submit nahi (TDS)
+    const noPan = await api().post(`${P}/vendor/me/submit`).set(bearer(v.accessToken));
+    expect(noPan.status).toBe(400);
+    expect(noPan.body.error.details.missing).toContain('PAN (TDS ke liye)');
+    expect((await api().put(`${P}/vendor/pan`).set(bearer(v.accessToken)).send({ pan: 'BAD123', name: 'Test Vendor' })).status).toBe(400);
+    const pan = await api().put(`${P}/vendor/pan`).set(bearer(v.accessToken)).send({ pan: 'abcde1234f', name: 'Test Vendor' });
+    expect(pan.status).toBe(200);
+    expect(pan.body.pan.last4).toBe('234F');
+    expect(JSON.stringify((await api().get(`${P}/vendor/me`).set(bearer(v.accessToken))).body)).not.toContain('ABCDE1234F');
     const submit = await api().post(`${P}/vendor/me/submit`).set(bearer(v.accessToken));
     expect(submit.body.status).toBe('PENDING');
 

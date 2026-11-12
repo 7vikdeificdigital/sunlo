@@ -1,5 +1,6 @@
 import { db } from '../db/client';
 import { settings } from '../db/schema';
+import { HttpError } from './errors';
 
 /**
  * Platform settings. Default yahan hain; Admin panel se badli ja sakti hain (DB mein save).
@@ -20,6 +21,33 @@ export const DEFAULT_SETTINGS = {
   minWithdrawalPaise: 50_000, // Rs 500 se kam ka withdrawal nahi
   supportEmail: 'support@example.com',
   maskContactInfoInChat: true,
+
+  // ---- Grievance Officer (IT Rules 2021/2026: naam aur sampark app + website par dikhana zaroori) ----
+  grievanceOfficerName: '',
+  grievanceOfficerEmail: '',
+  grievanceOfficerPhone: '',
+  grievanceAddress: '',
+  policyVersion: '2026-11', // Terms/Privacy ka version; badalne par users se dobara sahmati
+  policyNoticeAuto: true, // har 90 din users ko niyamon ka notice (IT Rules 2026)
+  lastPolicyNoticeAt: '' as string, // ISO time
+
+  // ---- Feature switches (Play Store / court ki sakhti ke hisaab se) ----
+  liveRoomsEnabled: false, // Live Rooms + room gifts: moderation taiyaar hone tak band
+  randomVideoEnabled: false, // Random Connect mein video band; sirf chat/voice
+  videoCallsEnabled: true, // chune hue (verified) listener ke saath video call
+  giftsEnabled: true, // 1:1 session mein gift
+
+  // ---- Data (DPDP) ----
+  chatRetentionDays: 90, // itne din baad chat messages apne aap delete (khuli shikayat wale session chhod kar)
+
+  // ---- TDS (Income-tax Act 2025 Sec 393(1) Table 8(v), purana 194-O) ----
+  tdsEnabled: true,
+  tdsBps: 10, // 0.1% = 10 basis points (PAN ho to)
+  tdsNoPanBps: 500, // 5% (PAN na ho to)
+
+  // ---- Free trial ----
+  freeTrialMinutes: 5, // 0 = band
+  freeTrialMaxRatePaise: 2000, // sirf Rs 20/min tak ke listener ke saath free trial
 };
 
 export type Settings = typeof DEFAULT_SETTINGS;
@@ -36,6 +64,18 @@ export const PUBLIC_SETTING_KEYS: SettingKey[] = [
   'maxRatePerMinPaise',
   'minWithdrawalPaise',
   'supportEmail',
+  'grievanceOfficerName',
+  'grievanceOfficerEmail',
+  'grievanceOfficerPhone',
+  'grievanceAddress',
+  'policyVersion',
+  'liveRoomsEnabled',
+  'randomVideoEnabled',
+  'videoCallsEnabled',
+  'giftsEnabled',
+  'chatRetentionDays',
+  'freeTrialMinutes',
+  'freeTrialMaxRatePaise',
 ];
 
 let cache: { at: number; value: Settings } | null = null;
@@ -52,4 +92,10 @@ export async function getSettings(): Promise<Settings> {
 
 export function clearSettingsCache() {
   cache = null;
+}
+
+/** Feature band ho to saaf error (app purani ho to bhi server rok de) */
+export async function requireFeature(key: 'liveRoomsEnabled' | 'randomVideoEnabled' | 'videoCallsEnabled' | 'giftsEnabled') {
+  const s = await getSettings();
+  if (!s[key]) throw new HttpError(403, 'FEATURE_OFF', 'Yeh suvidha abhi band hai');
 }

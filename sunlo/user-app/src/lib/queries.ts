@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api } from './api';
 import { useAuth } from './auth';
-import type { Category, Helpline, Paged, RechargePack, Session, User, VendorCard, VendorDetail, WalletTxn } from './types';
+import type { Category, Checkins, Grievance, Helpline, Mood, Paged, RechargePack, ScheduledCall, Session, User, VendorCard, VendorDetail, WalletTxn } from './types';
 
 export const qk = {
   me: ['me'] as const,
@@ -15,7 +15,7 @@ export function useMe() {
     queryKey: qk.me,
     enabled: signedIn,
     queryFn: async () => {
-      const r = await api<{ user: User; walletBalance: number }>('/me');
+      const r = await api<{ user: User; walletBalance: number; needsConsent?: boolean; needsDob?: boolean }>('/me');
       useAuth.getState().setUser(r.user);
       return r;
     },
@@ -23,10 +23,26 @@ export function useMe() {
 }
 
 export interface AppConfig {
-  settings: { appName: string; currency: string; gstPct: number; minSessionMinutes: number; minRechargePaise: number; supportEmail: string };
+  settings: {
+    appName: string;
+    currency: string;
+    gstPct: number;
+    minSessionMinutes: number;
+    minRechargePaise: number;
+    supportEmail: string;
+    policyVersion?: string;
+    liveRoomsEnabled?: boolean;
+    randomVideoEnabled?: boolean;
+    videoCallsEnabled?: boolean;
+    giftsEnabled?: boolean;
+    chatRetentionDays?: number;
+    freeTrialMinutes?: number;
+  };
   categories: Category[];
   languages: string[];
   helplines: Helpline[];
+  moods?: Mood[];
+  grievance?: Grievance;
 }
 export const useAppConfig = () => useQuery({ queryKey: qk.config, queryFn: () => api<AppConfig>('/app/config', { auth: false }), staleTime: 10 * 60_000 });
 
@@ -86,3 +102,20 @@ export const useNotifications = () =>
     queryKey: ['notifications'],
     queryFn: () => api<Paged<{ id: string; title: string; body: string; readAt: string | null; createdAt: string }> & { unread: number }>('/notifications'),
   });
+
+export const useScheduledCalls = () =>
+  useQuery({ queryKey: ['scheduled-calls'], queryFn: () => api<{ items: ScheduledCall[] }>('/scheduled-calls'), refetchInterval: 60_000 });
+
+export const useCheckins = () => useQuery({ queryKey: ['checkins'], queryFn: () => api<Checkins>('/checkins', { query: { days: 30 } }) });
+
+/** Feature switches (server band kare to purani app bhi na dikhaye) */
+export function useFeatures() {
+  const cfg = useAppConfig();
+  const st = cfg.data?.settings;
+  return {
+    liveRooms: st?.liveRoomsEnabled ?? false,
+    randomVideo: st?.randomVideoEnabled ?? false,
+    videoCalls: st?.videoCallsEnabled ?? true,
+    gifts: st?.giftsEnabled ?? true,
+  };
+}

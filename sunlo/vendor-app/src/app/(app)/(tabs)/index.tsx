@@ -9,7 +9,7 @@ import { Card, IconButton, Row, Screen, SectionHeader, Text } from '@/components
 import { api, errorMessage } from '@/lib/api';
 import { formatTime, perMin, rupees } from '@/lib/format';
 import { useHostRoom } from '@/lib/rooms';
-import { qk, useEarnings, useNotifications, usePending, useVendorMe } from '@/lib/queries';
+import { qk, useAppConfig, useEarnings, useNotifications, usePending, useVendorBookings, useVendorMe } from '@/lib/queries';
 import { colors, font, gradient, radius, shadow, space } from '@/theme';
 
 const TYPE = { CHAT: 'Chat', AUDIO: 'Voice call', VIDEO: 'Video call' } as const;
@@ -21,6 +21,10 @@ export default function Dashboard() {
   const pending = usePending(true);
   const notif = useNotifications();
   const hostRoom = useHostRoom(10_000);
+  const liveRoomsOn = useAppConfig().data?.settings.liveRoomsEnabled ?? false;
+  const bookings = useVendorBookings(me.data?.status === 'APPROVED');
+  const pendingBookings = (bookings.data?.items ?? []).filter((b) => b.status === 'PENDING').length;
+  const nextBooking = (bookings.data?.items ?? []).find((b) => b.status === 'CONFIRMED' && new Date(b.scheduledAt).getTime() > Date.now() - b.durationMin * 60_000);
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const v = me.data;
@@ -113,8 +117,20 @@ export default function Dashboard() {
           </Pressable>
         ) : null}
 
-        {/* Live room */}
-        {hostRoom.data?.room ? (
+        {/* Booked calls */}
+        {pendingBookings || nextBooking ? (
+          <Pressable onPress={() => router.push('/bookings')} style={{ backgroundColor: colors.primarySoft, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+            <Ionicons name="calendar" size={22} color={colors.primaryDark} />
+            <View style={{ flex: 1 }}>
+              <Text variant="title">{pendingBookings ? `${pendingBookings} nayi booking confirm karni hai` : 'Agli booked call'}</Text>
+              <Text variant="small">{nextBooking ? `${nextBooking.userName} · ${formatTime(nextBooking.scheduledAt)} · ${nextBooking.durationMin} min` : 'Tap karke dekhein'}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.primaryDark} />
+          </Pressable>
+        ) : null}
+
+        {/* Live room (feature switch band ho to nahi dikhta) */}
+        {!liveRoomsOn && !hostRoom.data?.room ? null : hostRoom.data?.room ? (
           <Pressable onPress={() => router.push(`/room/${hostRoom.data!.room!.id}`)} style={{ backgroundColor: '#FDECEC', borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center', gap: space.md }}>
             <Ionicons name="radio" size={22} color="#D64545" />
             <View style={{ flex: 1 }}>

@@ -6,6 +6,7 @@ import { logger } from './lib/logger';
 import { setIo } from './lib/realtime';
 import { sweepRooms } from './modules/rooms/service';
 import { sweepSessions } from './modules/sessions/service';
+import { sweepCompliance } from './modules/compliance/jobs';
 import { attachSocket } from './modules/sessions/socket';
 
 const app = buildApp();
@@ -20,6 +21,7 @@ const ticker = setInterval(async () => {
   try {
     await sweepSessions();
     await sweepRooms();
+    await sweepCompliance();
   } catch (err) {
     logger.error({ err }, 'session sweep failed');
   } finally {

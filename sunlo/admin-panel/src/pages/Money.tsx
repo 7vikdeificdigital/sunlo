@@ -223,6 +223,8 @@ export function SessionDetail() {
 // ======================= Payments =======================
 
 export function Payments() {
+  const qc = useQueryClient();
+  const [refundOf, setRefundOf] = useState<{ id: string; totalPayable: number; amount: number; bonus: number } | null>(null);
   const [status, setStatus] = useState('PAID');
   const [page, setPage] = useState(1);
   const q = useQuery({
@@ -269,6 +271,7 @@ export function Payments() {
                   <th className="right">GST</th>
                   <th className="right">Kul</th>
                   <th>Ref</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
@@ -288,6 +291,13 @@ export function Payments() {
                       <b>{rupees(p.totalPayable)}</b>
                     </td>
                     <td className="mono faint">{p.providerPaymentId ?? p.provider}</td>
+                    <td className="right">
+                      {p.status === 'PAID' && p.provider !== 'play' ? (
+                        <button className="btn ghost sm" onClick={() => setRefundOf(p)}>
+                          Refund (source par)
+                        </button>
+                      ) : null}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -296,6 +306,24 @@ export function Payments() {
           <Pager page={page} setPage={setPage} hasMore={page * 25 < q.data.total} />
         </>
       )}
+      {refundOf ? (
+        <ReasonDialog
+          title={`Recharge refund: ${rupees(refundOf.totalPayable)}`}
+          label="Wajah (audit log aur user ke record mein)"
+          confirm="Original source par refund"
+          danger
+          extra={
+            <p className="faint">
+              Paisa usi card/UPI/bank par wapas jayega jahan se aaya (RBI: coins cash mein nahi nikalte). User ke wallet se {rupees(refundOf.amount + refundOf.bonus)} ke coins hatenge; kharch ho chuke hon to refund nahi hoga.
+            </p>
+          }
+          onSubmit={async (reason) => {
+            await api(`/admin/payments/${refundOf.id}/refund-to-source`, { method: 'POST', body: { reason } });
+            qc.invalidateQueries({ queryKey: ['payments'] });
+          }}
+          onClose={() => setRefundOf(null)}
+        />
+      ) : null}
     </>
   );
 }

@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { Button, Card, Header, Input, Row, Screen, Text } from '@/components/ui';
+import { Button, Card, Chip, Header, Input, Row, Screen, Text } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
 import { formatDateTime } from '@/lib/format';
 import { colors, radius, space } from '@/theme';
@@ -13,14 +13,30 @@ interface Ticket {
   subject: string;
   status: 'OPEN' | 'CLOSED';
   updatedAt: string;
+  ticketNo?: string;
+  dueAt?: string | null;
+  category?: string;
 }
+
+const CATEGORIES = [
+  ['GENERAL', 'Aam sawaal'],
+  ['PAYMENT', 'Payment / refund'],
+  ['SAFETY', 'Listener ka vyavhar'],
+  ['DATA', 'Mera data / privacy'],
+  ['GRIEVANCE', 'Grievance (shikayat)'],
+  ['UNLAWFUL_CONTENT', 'Ashleel / ghair-kanooni content'],
+] as const;
+type Cat = (typeof CATEGORIES)[number][0];
 
 export default function Support() {
   const qc = useQueryClient();
   const faqs = useQuery({ queryKey: ['faqs'], queryFn: () => api<{ items: { q: string; a: string }[] }>('/support/faqs', { auth: false }) });
   const tickets = useQuery({ queryKey: ['tickets'], queryFn: () => api<{ items: Ticket[] }>('/support/tickets') });
   const [open, setOpen] = useState<number | null>(null);
-  const [creating, setCreating] = useState(false);
+  const params = useLocalSearchParams<{ category?: string }>();
+  const initialCat = CATEGORIES.find((c) => c[0] === params.category)?.[0];
+  const [creating, setCreating] = useState(Boolean(initialCat));
+  const [category, setCategory] = useState<Cat>(initialCat ?? 'GENERAL');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +47,7 @@ export default function Support() {
     setSaving(true);
     setError(null);
     try {
-      const t = await api<Ticket>('/support/tickets', { method: 'POST', body: { subject, message } });
+      const t = await api<Ticket>('/support/tickets', { method: 'POST', body: { subject, message, category } });
       qc.invalidateQueries({ queryKey: ['tickets'] });
       setCreating(false);
       setSubject('');
@@ -69,6 +85,17 @@ export default function Support() {
         </Row>
         {creating ? (
           <Card style={{ gap: space.md }}>
+            <View style={{ gap: 6 }}>
+              <Text variant="label">Kis baare mein?</Text>
+              <Row gap={6} style={{ flexWrap: 'wrap' }}>
+                {CATEGORIES.map(([c, l]) => (
+                  <Chip key={c} label={l} active={category === c} onPress={() => setCategory(c)} />
+                ))}
+              </Row>
+              <Text variant="caption">
+                {category === 'UNLAWFUL_CONTENT' ? '36 ghante mein kaarvai. Ticket number turant milega.' : '7 din mein samadhan. Ticket number turant milega.'}
+              </Text>
+            </View>
             <Input label="Vishay" value={subject} onChangeText={setSubject} maxLength={120} placeholder="Jaise: Recharge ka paisa nahi aaya" />
             <Input label="Poori baat" value={message} onChangeText={setMessage} maxLength={2000} multiline style={{ minHeight: 90, textAlignVertical: 'top' }} />
             {error ? (
@@ -87,7 +114,11 @@ export default function Support() {
             <Card key={t.id} onPress={() => router.push(`/support/${t.id}`)} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
               <View style={{ flex: 1 }}>
                 <Text variant="bodyStrong">{t.subject}</Text>
-                <Text variant="caption">{formatDateTime(t.updatedAt)}</Text>
+                <Text variant="caption">
+                  {t.ticketNo ? `${t.ticketNo} · ` : ''}
+                  {formatDateTime(t.updatedAt)}
+                  {t.status === 'OPEN' && t.dueAt ? ` · jawab ${formatDateTime(t.dueAt)} tak` : ''}
+                </Text>
               </View>
               <View style={{ backgroundColor: t.status === 'OPEN' ? colors.successSoft : colors.surfaceAlt, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 3 }}>
                 <Text variant="caption" color={t.status === 'OPEN' ? colors.success : colors.textMuted}>

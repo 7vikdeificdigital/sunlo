@@ -7,7 +7,8 @@ import { Avatar } from '@/components/Avatar';
 import { IconButton, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { VendorMiniCard } from '@/components/VendorCard';
 import { WalletChip } from '@/components/WalletChip';
-import { useAppConfig, useBanners, useMe, useNotifications, useVendors } from '@/lib/queries';
+import { useAppConfig, useBanners, useCheckins, useMe, useNotifications, useScheduledCalls, useVendors } from '@/lib/queries';
+import { formatDateTime } from '@/lib/format';
 import { colors, font, gradient, radius, shadow, space } from '@/theme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -90,6 +91,7 @@ export default function Home() {
         </LinearGradient>
 
         {/* Categories */}
+        <CareStrip />
         <SectionHeader title="Kis baare mein baat karni hai?" />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: space.md }}>
           {(cfg.data?.categories ?? []).map((c, i) => (
@@ -207,5 +209,33 @@ export default function Home() {
         </Row>
       </ScrollView>
     </Screen>
+  );
+}
+
+/** Home par chhoti patti: aaj ka mood check-in + agli booked call */
+function CareStrip() {
+  const ck = useCheckins();
+  const sc = useScheduledCalls();
+  const next = sc.data?.items.find((c) => c.status === 'CONFIRMED' || c.status === 'PENDING');
+  const done = ck.data?.checkedInToday;
+  return (
+    <View style={{ flexDirection: 'row', gap: space.sm, paddingHorizontal: space.lg, marginTop: space.md }}>
+      <Pressable onPress={() => router.push('/checkin')} accessibilityRole="button" style={{ flex: 1, backgroundColor: colors.accentSoft, borderRadius: radius.lg, padding: space.md, gap: 2 }}>
+        <Text style={{ fontSize: 20 }} raw>
+          {done ? '✅' : '🙂'}
+        </Text>
+        <Text variant="title">{done ? 'Aaj ka check-in ho gaya' : 'Aaj kaisa din tha?'}</Text>
+        <Text variant="caption">{ck.data?.streak ? `🔥 ${ck.data.streak} din lagaatar` : '1 tap mein batayein'}</Text>
+      </Pressable>
+      <Pressable onPress={() => router.push('/bookings')} accessibilityRole="button" style={{ flex: 1, backgroundColor: colors.primarySoft, borderRadius: radius.lg, padding: space.md, gap: 2 }}>
+        <Ionicons name={next?.canStart ? 'call' : 'calendar-outline'} size={20} color={colors.primaryDark} />
+        <Text variant="title" numberOfLines={1}>
+          {next ? (next.canStart ? 'Booked call: abhi shuru karein' : next.vendor.displayName) : 'Call book karein'}
+        </Text>
+        <Text variant="caption" numberOfLines={1}>
+          {next ? formatDateTime(next.scheduledAt) : 'Apne listener ke saath baad ka time'}
+        </Text>
+      </Pressable>
+    </View>
   );
 }

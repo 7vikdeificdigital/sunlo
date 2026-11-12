@@ -27,9 +27,20 @@ const intakeSchema = z
 sessionsRouter.post('/sessions', requireRole('USER'), async (req, res) => {
   const input = body(
     req,
-    z.object({ vendorId: z.string().uuid(), type: z.enum(['CHAT', 'AUDIO', 'VIDEO']), intake: intakeSchema.optional() }),
+    z.object({
+      vendorId: z.string().uuid(),
+      type: z.enum(['CHAT', 'AUDIO', 'VIDEO']),
+      intake: intakeSchema.optional(),
+      pricingAck: z.boolean().optional(), // user ne keemat ka popup dekh kar "Shuru karein" dabaya
+    }),
   );
   res.status(201).json(await svc.requestSession(authId(req), input));
+});
+
+/** Session se pehle keemat ka popup: rate, GST, minute ki gol-gaanth, free trial, kitne minute milenge */
+sessionsRouter.get('/sessions/quote', requireRole('USER'), async (req, res) => {
+  const q = query(req, z.object({ vendorId: z.string().uuid(), type: z.enum(['CHAT', 'AUDIO', 'VIDEO']) }));
+  res.json(await svc.quoteSession(authId(req), q.vendorId, q.type));
 });
 
 sessionsRouter.get('/sessions', requireRole('USER'), async (req, res) => {
@@ -77,6 +88,12 @@ sessionsRouter.post('/sessions/:id/review', requireRole('USER'), async (req, res
 sessionsRouter.get('/sessions/:id', async (req, res) => {
   const { id } = params(req, idParam);
   res.json(await svc.getSessionDetail(authId(req), id));
+});
+
+/** Session ki raseed (user aur vendor dono, apne-apne hisaab se) */
+sessionsRouter.get('/sessions/:id/receipt', async (req, res) => {
+  const { id } = params(req, idParam);
+  res.json(await svc.sessionReceipt(authId(req), id));
 });
 
 sessionsRouter.post('/sessions/:id/end', async (req, res) => {

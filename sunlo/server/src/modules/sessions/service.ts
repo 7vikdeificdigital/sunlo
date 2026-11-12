@@ -1,12 +1,14 @@
 import { and, desc, eq, inArray, lte, sql } from 'drizzle-orm';
 import { db, type Tx } from '../../db/client';
-import { vendors, consultSessions, notifications, userBlocks, users, wallets } from '../../db/schema';
+import { vendors, consultSessions, notifications, scheduledCalls, trialClaims, userBlocks, users, wallets } from '../../db/schema';
+import { sha256 } from '../../lib/crypto';
 import { badRequest, conflict, forbidden, HttpError, notFound } from '../../lib/errors';
 import { logger } from '../../lib/logger';
 import { pushToUser } from '../../lib/push';
 import { emitToSession, emitToUser } from '../../lib/realtime';
 import { getSettings } from '../../lib/settings';
 import { visibleVendor } from '../vendors/service';
+import { postVendorEarning } from '../wallet/earning';
 import { InsufficientBalanceError, postTxn } from '../wallet/ledger';
 
 export type SessionType = 'CHAT' | 'AUDIO' | 'VIDEO';
@@ -43,6 +45,8 @@ function publicSession(s: SessionRow) {
     billedSeconds: s.billedSeconds,
     chargedAmount: s.chargedAmount,
     refundedAmount: s.refundedAmount,
+    freeSeconds: s.freeSeconds,
+    promoAmount: s.promoAmount,
     // Session khatam hone ka server ka pakka samay (app iske hisaab se timer dikhaye)
     endsAt: s.acceptedAt && s.maxSeconds != null ? new Date(s.acceptedAt.getTime() + s.maxSeconds * 1000) : null,
   };
@@ -63,11 +67,51 @@ async function vendorUserIdOf(vendorId: string) {
 
 // ---------------- User side ----------------
 
+/** Free trial ka phone-hash: account delete karke dobara banane par bhi wahi number = wahi hash */
+const trialKey = (phone: string) => sha256(`trial:${phone}`);
+
+/** Kya yeh user is rate par free trial le sakta hai? (CHAT/AUDIO, rate seema ke andar, number ne pehle na liya ho) */
+export async function freeTrialEligible(userId: string, type: SessionType, rate: number) {
+  const s = await getSettings();
+  if (s.freeTrialMinutes <= 0 || type === 'VIDEO' || rate > s.freeTrialMaxRatePaise) return false;
+  const [u] = await db.select({ phone: users.phone }).from(users).where(eq(users.id, userId)).limit(1);
+  if (!u?.phone) return false;
+  const [c] = await db.select({ k: trialClaims.phoneHash }).from(trialClaims).where(eq(trialClaims.phoneHash, trialKey(u.phone))).limit(1);
+  return !c;
+}
+
+/** Session se pehle user ko dikhane wali keemat (CCPA: saaf keemat, chhupa charge nahi) */
+export async function quoteSession(userId: string, vendorId: string, type: SessionType) {
+  const s = await getSettings();
+  const [a] = await db.select().from(vendors).where(and(eq(vendors.id, vendorId), visibleVendor)).limit(1);
+  if (!a) throw notFound('Profile');
+  const rate = type === 'CHAT' ? a.chatRatePerMin : type === 'AUDIO' ? a.callRatePerMin : a.videoRatePerMin;
+  const [w] = await db.select({ balance: wallets.balance }).from(wallets).where(eq(wallets.userId, userId)).limit(1);
+  const balance = w?.balance ?? 0;
+  const trial = await freeTrialEligible(userId, type, rate);
+  const paidMinutes = Math.floor(balance / rate);
+  return {
+    vendorId,
+    type,
+    ratePerMin: rate,
+    gstPct: s.gstPct,
+    ratePerMinInclGst: Math.round((rate * (100 + s.gstPct)) / 100),
+    gstNote: `Coins ki keemat GST se pehle ki hai. ${s.gstPct}% GST recharge karte waqt lagta hai, isliye ${'₹'}${(rate / 100).toFixed(2)}/min ki asli keemat ${'₹'}${((rate * (100 + s.gstPct)) / 10_000).toFixed(2)}/min hai.`,
+    roundingNote: 'Har shuru hua minute poora gina jaata hai (jaise 2 min 5 sec = 3 minute).',
+    minSessionMinutes: s.minSessionMinutes,
+    requiredBalance: trial ? 0 : rate * s.minSessionMinutes,
+    balance,
+    maxMinutes: paidMinutes + (trial ? s.freeTrialMinutes : 0),
+    freeTrial: trial ? { minutes: s.freeTrialMinutes, note: `Pehle ${s.freeTrialMinutes} minute free. Uske baad ${'₹'}${(rate / 100).toFixed(2)}/min katega.` } : null,
+  };
+}
+
 export async function requestSession(
   userId: string,
-  input: { vendorId: string; type: SessionType; intake?: Record<string, unknown> },
+  input: { vendorId: string; type: SessionType; intake?: Record<string, unknown>; pricingAck?: boolean; scheduledCallId?: string },
 ) {
   const s = await getSettings();
+  if (input.type === 'VIDEO' && !s.videoCallsEnabled) throw new HttpError(403, 'FEATURE_OFF', 'Video call abhi band hai');
   const [a] = await db.select().from(vendors).where(and(eq(vendors.id, input.vendorId), visibleVendor)).limit(1);
   if (!a) throw notFound('Profile');
   if (a.userId === userId) throw badRequest('SELF_SESSION', 'Apne aap se session nahi ho sakta');
@@ -92,7 +136,8 @@ export async function requestSession(
   if (live.rows.length) throw conflict('VENDOR_BUSY', 'Yeh abhi live room mein hain');
 
   const rate = input.type === 'CHAT' ? a.chatRatePerMin : input.type === 'AUDIO' ? a.callRatePerMin : a.videoRatePerMin;
-  const required = rate * s.minSessionMinutes;
+  const trial = await freeTrialEligible(userId, input.type, rate);
+  const required = trial ? 0 : rate * s.minSessionMinutes;
   const [w] = await db.select({ balance: wallets.balance }).from(wallets).where(eq(wallets.userId, userId)).limit(1);
   const balance = w?.balance ?? 0;
   if (balance < required) {
@@ -114,6 +159,9 @@ export async function requestSession(
         ratePerMin: rate,
         commissionPct: s.commissionPct,
         intake: input.intake ?? null,
+        freeSeconds: trial ? s.freeTrialMinutes * 60 : 0,
+        pricingAckAt: input.pricingAck ? new Date() : null,
+        scheduledCallId: input.scheduledCallId ?? null,
       })
       .returning();
   } catch (e) {
@@ -178,7 +226,16 @@ export async function acceptByVendor(vendorUserId: string, sessionId: string) {
       }
       const [w] = await tx.select({ balance: wallets.balance }).from(wallets).where(eq(wallets.userId, cur.userId)).limit(1);
       const affordableMinutes = Math.floor((w?.balance ?? 0) / cur.ratePerMin);
-      if (affordableMinutes < 1) {
+      // Free trial: number ka claim isi waqt (session sach mein shuru hone par). Pehle hi liya ja chuka ho to trial nahi.
+      let freeSeconds = 0;
+      if (cur.freeSeconds > 0) {
+        const [u] = await tx.select({ phone: users.phone }).from(users).where(eq(users.id, cur.userId)).limit(1);
+        const claimed = u?.phone
+          ? await tx.insert(trialClaims).values({ phoneHash: trialKey(u.phone), userId: cur.userId, sessionId: cur.id }).onConflictDoNothing().returning()
+          : [];
+        freeSeconds = claimed.length ? cur.freeSeconds : 0;
+      }
+      if (affordableMinutes < 1 && freeSeconds === 0) {
         const [c] = await tx
           .update(consultSessions)
           .set({ status: 'CANCELLED', endedAt: new Date(), endReason: 'INSUFFICIENT_BALANCE' })
@@ -188,7 +245,7 @@ export async function acceptByVendor(vendorUserId: string, sessionId: string) {
       }
       const [act] = await tx
         .update(consultSessions)
-        .set({ status: 'ACTIVE', acceptedAt: new Date(), maxSeconds: affordableMinutes * 60 })
+        .set({ status: 'ACTIVE', acceptedAt: new Date(), maxSeconds: freeSeconds + affordableMinutes * 60, freeSeconds })
         .where(eq(consultSessions.id, cur.id))
         .returning();
       return act;
@@ -200,6 +257,10 @@ export async function acceptByVendor(vendorUserId: string, sessionId: string) {
     throw e;
   }
   await broadcast(row, vendorUserId);
+  // Booked call shuru ho gayi
+  if (row.status === 'ACTIVE' && row.scheduledCallId) {
+    await db.update(scheduledCalls).set({ status: 'COMPLETED', sessionId: row.id }).where(and(eq(scheduledCalls.id, row.scheduledCallId), inArray(scheduledCalls.status, ['PENDING', 'CONFIRMED'])));
+  }
   if (row.status === 'ACTIVE') void pushToUser(row.userId, { title: 'Request accept ho gayi', body: 'Aapka listener taiyar hai, abhi baat shuru karein', data: { type: 'session', sessionId: row.id } });
   if (row.status !== 'ACTIVE') throw conflict(row.endReason ?? 'INVALID_STATE', 'Session shuru nahi ho saka');
   return publicSession(row);
@@ -288,13 +349,16 @@ export async function finalizeSession(sessionId: string, reason: string, vendorU
     if (!cur || cur.status !== 'ACTIVE' || !cur.acceptedAt) return cur ?? null;
     const elapsed = (now.getTime() - cur.acceptedAt.getTime()) / 1000;
     let bill = computeBilling({ ratePerMin: cur.ratePerMin, commissionPct: cur.commissionPct, maxSeconds: cur.maxSeconds ?? 0 }, elapsed);
+    // Free trial ke minute platform deta hai: user se nahi katte, vendor ko poori kamai milti hai
+    const promo = Math.min(bill.charge, Math.ceil(cur.freeSeconds / 60) * cur.ratePerMin);
+    let userCharge = bill.charge - promo;
 
-    if (bill.charge > 0) {
+    if (userCharge > 0) {
       try {
         await postTxn(tx, {
           userId: cur.userId,
           type: 'SESSION_CHARGE',
-          amount: -bill.charge,
+          amount: -userCharge,
           referenceType: 'session',
           referenceId: cur.id,
           note: `${cur.type} session (${bill.minutes} min)`,
@@ -304,8 +368,10 @@ export async function finalizeSession(sessionId: string, reason: string, vendorU
         // Bahut hi kam hone wali sthiti: jitna balance hai utna hi katega
         const [w] = await tx.select({ balance: wallets.balance }).from(wallets).where(eq(wallets.userId, cur.userId)).limit(1);
         const charge = w?.balance ?? 0;
-        const fee = Math.round((charge * cur.commissionPct) / 100);
-        bill = { ...bill, charge, vendorEarning: charge - fee };
+        userCharge = charge;
+        const gross = charge + promo;
+        const fee = Math.round((gross * cur.commissionPct) / 100);
+        bill = { ...bill, charge: gross, vendorEarning: gross - fee };
         logger.warn({ sessionId, charge }, 'Session charge capped at balance');
         if (charge > 0)
           await postTxn(tx, {
@@ -323,16 +389,15 @@ export async function finalizeSession(sessionId: string, reason: string, vendorU
       .set({ totalMinutes: sql`${vendors.totalMinutes} + ${bill.minutes}`, totalSessions: sql`${vendors.totalSessions} + 1` })
       .where(eq(vendors.id, cur.vendorId))
       .returning({ userId: vendors.userId });
-    if (bill.vendorEarning > 0) {
-      await postTxn(tx, {
-        userId: a.userId,
-        type: 'SESSION_EARNING',
-        amount: bill.vendorEarning,
-        referenceType: 'session',
-        referenceId: cur.id,
-        note: `${cur.type} session earning`,
-      });
-    }
+    const { tds } = await postVendorEarning(tx, {
+      vendorId: cur.vendorId,
+      vendorUserId: a.userId,
+      gross: bill.charge,
+      earning: bill.vendorEarning,
+      referenceType: 'session',
+      referenceId: cur.id,
+      note: `${cur.type} session earning`,
+    });
     const [done] = await tx
       .update(consultSessions)
       .set({
@@ -340,8 +405,10 @@ export async function finalizeSession(sessionId: string, reason: string, vendorU
         endedAt: now,
         endReason: reason,
         billedSeconds: bill.billedSeconds,
-        chargedAmount: bill.charge,
+        chargedAmount: userCharge,
+        promoAmount: bill.charge - userCharge,
         vendorEarning: bill.vendorEarning,
+        tdsAmount: tds,
       })
       .where(eq(consultSessions.id, cur.id))
       .returning();
@@ -370,6 +437,25 @@ export async function sweepSessions(now = new Date()) {
       logger.error({ err, sessionId: s.id }, 'Auto-end failed');
     }
   }
+  // Balance khatam hone se 1 minute pehle user ko chetavani (ek hi baar)
+  const warn = await db
+    .update(consultSessions)
+    .set({ lowBalanceWarnedAt: now })
+    .where(
+      and(
+        eq(consultSessions.status, 'ACTIVE'),
+        sql`${consultSessions.lowBalanceWarnedAt} is null`,
+        sql`${consultSessions.acceptedAt} + make_interval(secs => ${consultSessions.maxSeconds} - 60) <= ${now.toISOString()}::timestamptz`,
+      ),
+    )
+    .returning();
+  for (const w of warn) {
+    const endsAt = new Date(w.acceptedAt!.getTime() + (w.maxSeconds ?? 0) * 1000);
+    const secondsLeft = Math.max(0, Math.round((endsAt.getTime() - now.getTime()) / 1000));
+    emitToUser(w.userId, 'session:low_balance', { sessionId: w.id, secondsLeft, endsAt });
+    emitToSession(w.id, 'session:low_balance', { sessionId: w.id, secondsLeft, endsAt });
+  }
+
   const st = await getSettings();
   const missed = await db
     .update(consultSessions)
@@ -387,7 +473,7 @@ export async function sweepSessions(now = new Date()) {
     const vu = await vendorUserIdOf(m.vendorId);
     if (vu) void pushToUser(vu, { title: 'Request miss ho gayi', body: 'Ek user ne aapko try kiya tha. Online rehkar jaldi accept karein', data: { type: 'session', sessionId: m.id } });
   }
-  return { ended: expired.length, missed: missed.length };
+  return { ended: expired.length, missed: missed.length, warned: warn.length };
 }
 
 /**
@@ -404,7 +490,7 @@ export async function refreshSessionLimit(userId: string) {
       .limit(1);
     if (!cur) return null;
     const [w] = await tx.select({ balance: wallets.balance }).from(wallets).where(eq(wallets.userId, userId)).limit(1);
-    const newMax = Math.floor((w?.balance ?? 0) / cur.ratePerMin) * 60;
+    const newMax = cur.freeSeconds + Math.floor((w?.balance ?? 0) / cur.ratePerMin) * 60;
     if (newMax <= (cur.maxSeconds ?? 0)) return null;
     const [up] = await tx.update(consultSessions).set({ maxSeconds: newMax }).where(eq(consultSessions.id, cur.id)).returning();
     return up;
@@ -437,4 +523,43 @@ export async function openSessionForUser(userId: string) {
     .where(and(eq(consultSessions.userId, userId), inArray(consultSessions.status, ['REQUESTED', 'ACTIVE'])))
     .limit(1);
   return row ? publicSession(row) : null;
+}
+
+/**
+ * Session ki raseed (CCPA): kitne minute, rate, free minute, kitna kata, kitna wapas.
+ * User ko apni raseed; vendor ko apni (commission + TDS ke saath).
+ */
+export async function sessionReceipt(actorId: string, sessionId: string) {
+  const { session: x, isUser } = await getParticipantSession(actorId, sessionId);
+  if (x.status !== 'COMPLETED') throw conflict('INVALID_STATE', 'Raseed session khatam hone ke baad milti hai');
+  const st = await getSettings();
+  const [v] = await db.select({ displayName: vendors.displayName }).from(vendors).where(eq(vendors.id, x.vendorId)).limit(1);
+  const minutes = Math.ceil(x.billedSeconds / 60);
+  const freeMinutes = x.ratePerMin ? Math.round(x.promoAmount / x.ratePerMin) : 0;
+  const base = {
+    receiptNo: `BT-${x.id.slice(0, 8).toUpperCase()}`,
+    sessionId: x.id,
+    type: x.type,
+    listener: v?.displayName ?? '',
+    startedAt: x.acceptedAt,
+    endedAt: x.endedAt,
+    durationSeconds: x.billedSeconds,
+    billedMinutes: minutes,
+    ratePerMin: x.ratePerMin,
+    grossAmount: x.chargedAmount + x.promoAmount,
+    freeMinutes,
+    freeAmount: x.promoAmount,
+    roundingNote: 'Har shuru hua minute poora gina gaya.',
+  };
+  if (isUser) {
+    return {
+      ...base,
+      charged: x.chargedAmount,
+      refunded: x.refundedAmount,
+      net: x.chargedAmount - x.refundedAmount,
+      gstNote: `Coins par ${st.gstPct}% GST recharge ke waqt diya ja chuka hai; is session par alag GST nahi.`,
+    };
+  }
+  const commission = x.chargedAmount + x.promoAmount - x.vendorEarning;
+  return { ...base, commissionPct: x.commissionPct, commission, earning: x.vendorEarning, tds: x.tdsAmount, net: x.vendorEarning - x.tdsAmount };
 }

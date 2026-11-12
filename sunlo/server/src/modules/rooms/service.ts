@@ -7,6 +7,7 @@ import { pushToUsers } from '../../lib/push';
 import { emitToRoom, emitToUser } from '../../lib/realtime';
 import { getSettings } from '../../lib/settings';
 import { visibleVendor } from '../vendors/service';
+import { postVendorEarning } from '../wallet/earning';
 import { InsufficientBalanceError, postTxn } from '../wallet/ledger';
 import { roomMembers, rooms } from './schema';
 
@@ -254,7 +255,7 @@ export async function finalizeMember(memberId: string, reason: string, now = new
       earning = charge - Math.round((charge * room.commissionPct) / 100);
       if (earning > 0) {
         const [h] = await tx.select({ userId: vendors.userId }).from(vendors).where(eq(vendors.id, room.hostVendorId)).limit(1);
-        if (h) await postTxn(tx, { userId: h.userId, type: 'SESSION_EARNING', amount: earning, referenceType: 'room', referenceId: cur.id, note: 'Room kamai' });
+        if (h) await postVendorEarning(tx, { vendorId: room.hostVendorId, vendorUserId: h.userId, gross: charge, earning, referenceType: 'room', referenceId: cur.id, note: 'Room kamai' });
         await tx.update(rooms).set({ totalEarned: sql`${rooms.totalEarned} + ${earning}` }).where(eq(rooms.id, room.id));
       }
     }

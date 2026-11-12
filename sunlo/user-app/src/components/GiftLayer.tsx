@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Image, Modal, Pressable, ScrollView, StyleSheet, Vibration, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { API_URL, api, errorMessage } from '@/lib/api';
+import { useFeatures } from '@/lib/queries';
 import { useAuth } from '@/lib/auth';
 import { getSocket } from '@/lib/socket';
 import { colors } from '@/theme';
@@ -232,7 +233,9 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
   // Session query ko subscribe karte hain, taaki ACTIVE hote hi button dikhe (cache badalne par re-render)
   const sessionQ = useQuery({ queryKey: ['session', sid ?? 'none'], queryFn: () => api<SessionLite>(`/sessions/${sid}`), enabled: !!sid, staleTime: 5000 });
   const session = sid ? sessionQ.data : undefined;
-  const canGift = role === 'user' && ((!!sid && session?.status === 'ACTIVE') || !!rid);
+  const features = useFeatures();
+  // Feature switch: 1:1 gifts (giftsEnabled), room gifts (liveRoomsEnabled)
+  const canGift = role === 'user' && ((!!sid && session?.status === 'ACTIVE' && features.gifts) || (!!rid && features.liveRooms));
 
   useEffect(() => {
     if (!canGift) return;

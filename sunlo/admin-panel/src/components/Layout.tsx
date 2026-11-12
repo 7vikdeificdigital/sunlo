@@ -30,6 +30,7 @@ const NAV: { group: string; items: { to: string; label: string; count?: keyof Da
       { to: '/reports', label: 'Reports', count: 'reports' },
       { to: '/tickets', label: 'Support tickets', count: 'tickets' },
       { to: '/reviews', label: 'Reviews' },
+      { to: '/compliance', label: 'Compliance (niyam)' },
     ],
   },
   {

@@ -36,6 +36,13 @@
       "when": 1793300000000,
       "tag": "0005_voice_board",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794300000000,
+      "tag": "0006_compliance_care",
+      "breakpoints": true
     }
   ]
 }

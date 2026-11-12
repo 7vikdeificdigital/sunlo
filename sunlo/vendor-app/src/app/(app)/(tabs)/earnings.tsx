@@ -18,6 +18,8 @@ const TXN: Record<WalletTxn['type'], string> = {
   RECHARGE: 'Recharge',
   RECHARGE_BONUS: 'Bonus',
   SESSION_CHARGE: 'Session',
+  TDS: 'TDS kata (tax)',
+  PAYMENT_REFUND: 'Refund',
 };
 const WSTATUS = { PENDING: ['Process ho raha hai', colors.busy], PAID: ['Bhej diya gaya', colors.success], REJECTED: ['Wapas hua', colors.danger] } as const;
 
@@ -47,6 +49,10 @@ export default function Earnings() {
           <Row gap={space.sm} style={{ marginTop: space.md }}>
             <Button title={hasPending ? 'Pending hai' : 'Nikaalein'} icon="arrow-up-circle-outline" size="md" kind="secondary" disabled={hasPending} onPress={() => router.push('/withdraw')} style={{ flex: 1 }} />
             <Button title={me.data?.payout ? 'Bank / UPI' : 'Bank jodein'} icon="card-outline" size="md" kind="secondary" onPress={() => router.push('/payout')} style={{ flex: 1 }} />
+          </Row>
+          <Row gap={space.sm}>
+            <Button title="Statement" icon="receipt-outline" size="md" kind="secondary" onPress={() => router.push('/statement')} style={{ flex: 1 }} />
+            <Button title={me.data?.pan ? `PAN ••${me.data.pan.last4}` : 'PAN jodein (TDS)'} icon="document-text-outline" size="md" kind="secondary" onPress={() => router.push('/pan')} style={{ flex: 1 }} />
           </Row>
         </LinearGradient>
 

@@ -10,6 +10,7 @@ import { Login } from '@/pages/Login';
 import { Payments, SessionDetail, Sessions, Withdrawals } from '@/pages/Money';
 import { Reports, Reviews, TicketDetail, Tickets } from '@/pages/Safety';
 import { Audit, Catalog, Settings } from '@/pages/Setup';
+import { Compliance } from '@/pages/Compliance';
 import { UserDetail, Users } from '@/pages/Users';
 import { VendorDetail, Vendors } from '@/pages/Vendors';
 import './styles.css';
@@ -40,6 +41,7 @@ function App() {
         <Route path="tickets" element={<Tickets />} />
         <Route path="tickets/:id" element={<TicketDetail />} />
         <Route path="reviews" element={<Reviews />} />
+        <Route path="compliance" element={<Compliance />} />
         <Route path="catalog" element={<Catalog />} />
         <Route path="gifts" element={<Gifts />} />
         <Route path="settings" element={<Settings />} />

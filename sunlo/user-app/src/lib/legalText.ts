@@ -13,7 +13,7 @@ export const COMPANY = {
 
 export type LegalSection = { title: string; points: string[] };
 
-export const LAST_UPDATED = '27 October 2026';
+export const LAST_UPDATED = '10 November 2026';
 
 export const TERMS_INTRO =
   'Yeh Terms of Use ("Terms") Bondty app aur usse jude saare features ke istemaal par lagu hote hain. App istemaal karne se pehle inhe dhyan se padhein. App istemaal karna yaani in Terms ko maan lena.';
@@ -66,6 +66,8 @@ export const TERMS_SECTIONS: LegalSection[] = [
       'Coins sirf Bondty ke andar istemaal ho sakte hain. Inhe kisi doosre account mein bheja, becha ya bank mein nahi nikala ja sakta, aur inpar byaaj nahi milta.',
       'Recharge ke liye payment doosri adhikrit payment company ke zariye hota hai. Payment fail hone par ya paisa kat kar coins na aane par humein Help section mein batayein, hum jaanch karke theek karenge.',
       'Refund Bondty ki refund niti ke anusaar hi hoga. Jo samay baat-cheet mein pehle hi istemaal ho chuka hai uska paisa wapas nahi hoga.',
+      'Bina istemaal hue recharge ka refund sirf usi card/UPI/bank account mein jata hai jisse payment hua tha. Coins kabhi cash mein nahi badle jaate.',
+      'Coins ki keemat GST se pehle ki hai. 18% GST recharge ke waqt lagta hai, isliye "₹10/min" ka matlab GST sahit ₹11.80/min hai. Yeh keemat har call se pehle dikhayi jaati hai.',
     ],
   },
   {
@@ -75,6 +77,8 @@ export const TERMS_SECTIONS: LegalSection[] = [
       'Billing minute ke hisaab se hoti hai. Adha minute bhi poora ek minute ginaa jaata hai.',
       'Aapke wallet ke balance jitne hi minute ki baat ho sakti hai. Balance khatam hone par call/chat apne aap band ho jaati hai. Isliye lambi baat se pehle wallet mein kaafi coins rakhein.',
       'Agar Vendor ne request accept nahi ki, ya baat-cheet shuru nahi hui, to koi paisa nahi katta.',
+      'Naye user ko pehle kuch minute free mil sakte hain (har mobile number par ek hi baar). Free minute ki shart call se pehle saaf dikhayi jaati hai.',
+      'Balance khatam hone se lagbhag 1 minute pehle aapko chetavani milti hai, aur har session ke baad raseed (kitne minute, rate, kitna kata) dikhti hai.',
     ],
   },
   {
@@ -117,18 +121,20 @@ export const TERMS_SECTIONS: LegalSection[] = [
   {
     title: 'Report aur karwai',
     points: [
-      'Koi bhi baat-cheet ya Vendor galat lage to app mein "Report" ka option istemaal karein. Hum report ki jaanch karenge aur zaroorat par warning, rok ya account band karne jaisi karwai karenge.',
+      'Koi bhi baat-cheet ya Vendor galat lage to app mein "Report" ka option istemaal karein. Hum 36 ghante ke andar jaanch karke zaroorat par warning, rok ya account band karne jaisi karwai karenge.',
       'Jhoothi ya durbhavna se ki gayi report karna Terms ka ullanghan hai.',
     ],
   },
   {
     title: 'Aapki jaankari aur privacy',
     points: [
-      'Hum aapka mobile number, naam, profile ki jaankari, wallet len-den, baat-cheet ka record (sampark ka samay, avadhi, chat sandesh) aur device ki zaroori jaankari jama karte hain.',
+      'Hum aapka mobile number, naam, janm-tithi (18+ ki jaanch ke liye), profile ki jaankari, wallet len-den, baat-cheet ka record (sampark ka samay, avadhi, chat sandesh) aur device ki zaroori jaankari jama karte hain.',
+      'Audio/video call record nahi hoti. Chat sandesh lagbhag 90 din baad apne aap mita diye jaate hain; sirf wahi rakhe jaate hain jinpar shikayat ki jaanch chal rahi ho.',
+      'Mood check-in aur uska note sirf aapko dikhta hai, encrypted rehta hai, aur ads ya kisi doosre kaam mein istemaal nahi hota.',
       'Yeh jaankari app chalane, login/OTP bhejne, payment karne, calls jodne, suraksha banaye rakhne, dhokhadhadi rokne aur seva behtar karne ke liye istemaal hoti hai. Hum aapki jaankari bechte nahi hain.',
       'Seva dene ke liye hum bharosemand teesre paksh jaise OTP/login, payment, aur call (audio/video) seva dene wali companies ki madad lete hain. Unhe sirf zaroori jaankari hi milti hai.',
       'Kaanoon ya adaalat ke aadesh par, ya kisi ki suraksha ke liye zaroori hone par hum sarkari agencies ko jaankari de sakte hain.',
-      'Aapko apni jaankari dekhne, sudharne aur account hatane ka adhikaar hai (Digital Personal Data Protection Act, 2023 ke anusaar). Iske liye Help section se sampark karein. Kaanoon ya suraksha ke liye zaroori record kuch samay tak rakhe ja sakte hain.',
+      'Aapko apni jaankari dekhne, lene (download), sudharne, sahmati wapas lene aur account hatane ka adhikaar hai (Digital Personal Data Protection Act, 2023 aur Rules, 2025 ke anusaar). App mein Account > Data aur privacy se yeh khud kar sakte hain. Kaanoon (jaise tax) ke liye zaroori len-den ka record bina naam ke rakha ja sakta hai.',
       'Aapki baat-cheet aapke aur Vendor ke beech ki hai, lekin intezaam aur suraksha ke liye Bondty ke paas uska record reh sakta hai.',
     ],
   },
@@ -170,7 +176,10 @@ export const TERMS_SECTIONS: LegalSection[] = [
     title: 'Lagu kanoon aur shikayat',
     points: [
       'Yeh Terms Bharat ke kaanoon ke adheen hain. Kisi bhi vivaad ke liye Bharat ki adaalatein adhikar kshetra rakhti hain.',
-      'Kisi bhi shikayat ya sujhav ke liye app ke Help section ka istemaal karein. Hum shikayat ko Information Technology (Intermediary Guidelines) Rules ke anusaar nipatayenge.',
+      'Kisi bhi shikayat ke liye app mein Account > Shikayat / Grievance Officer dekhein. Grievance Officer ka naam aur sampark wahan diya hai.',
+      'Shikayat milte hi ticket number milta hai. Aam shikayat ka samadhan 7 din mein, aur ashleel/ghair-kanooni content ki shikayat par 36 ghante mein karwai hoti hai (Information Technology (Intermediary Guidelines) Amendment Rules, 2026).',
+      'Jawab se santusht na hon to 30 din ke andar Grievance Appellate Committee (gac.gov.in) mein appeal kar sakte hain.',
+      'Hum kam se kam har 3 mahine aapko in niyamon aur unke todne ke nateejon ki yaad dilayenge.',
     ],
   },
 ];

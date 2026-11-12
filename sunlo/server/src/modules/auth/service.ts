@@ -3,8 +3,9 @@ import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
 import { env, testLogins } from '../../config/env';
 import { db } from '../../db/client';
 import { otpCodes, refreshTokens, users, vendors, wallets } from '../../db/schema';
-import { hmac, randomOtp, randomReferralCode, randomToken, safeEqualHex, sha256, verifyPassword } from '../../lib/crypto';
-import { badRequest, forbidden, notFound, tooMany, unauthorized } from '../../lib/errors';
+import { decryptField, hmac, randomOtp, randomReferralCode, randomToken, safeEqualHex, sha256, verifyPassword } from '../../lib/crypto';
+import { badRequest, forbidden, HttpError, notFound, tooMany, unauthorized } from '../../lib/errors';
+import { verifyTotp } from '../../lib/totp';
 import { verifyFirebasePhoneToken } from '../../lib/firebase';
 import { signAccessToken, type Role } from '../../middleware/auth';
 import { sendOtpSms } from './sms';
@@ -145,13 +146,18 @@ async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; refe
   return { ...tokens, isNewUser, user: publicUser(user) };
 }
 
-export async function adminLogin(email: string, password: string, userAgent?: string) {
+export async function adminLogin(email: string, password: string, userAgent?: string, totp?: string) {
   const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
   // User na mile tab bhi utna hi samay lage (timing se email ka pata na chale)
   const dummy = 'scrypt$00000000000000000000000000000000$' + '0'.repeat(128);
   const ok = await verifyPassword(password, user?.passwordHash ?? dummy);
   if (!user || !ok || user.role !== 'ADMIN' || user.status !== 'ACTIVE' || user.deletedAt) {
     throw unauthorized('Email ya password galat hai');
+  }
+  // 2FA chalu ho to Authenticator app ka 6-ank code bhi zaroori
+  if (user.totpEnabledAt && user.totpSecretEnc) {
+    if (!totp) throw new HttpError(401, 'TOTP_REQUIRED', 'Authenticator app ka 6-ank code daalein');
+    if (!verifyTotp(decryptField(user.totpSecretEnc), totp)) throw new HttpError(401, 'TOTP_INVALID', 'Authenticator code galat hai');
   }
   const tokens = await issueTokens(user, userAgent);
   return { ...tokens, user: publicUser(user) };
@@ -227,5 +233,10 @@ export function publicUser(u: typeof users.$inferSelect) {
     referralCode: u.referralCode,
     createdAt: u.createdAt,
     profileComplete: Boolean(u.name && u.ageConfirmedAt),
+    dateOfBirth: u.dateOfBirth,
+    consentVersion: u.consentVersion,
+    consentAt: u.consentAt,
+    checkinReminder: u.checkinReminder,
+    totpEnabled: Boolean(u.totpEnabledAt),
   };
 }

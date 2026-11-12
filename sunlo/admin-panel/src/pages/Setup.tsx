@@ -332,8 +332,34 @@ interface S {
   minWithdrawalPaise: number;
   supportEmail: string;
   maskContactInfoInChat: boolean;
+  grievanceOfficerName: string;
+  grievanceOfficerEmail: string;
+  grievanceOfficerPhone: string;
+  grievanceAddress: string;
+  policyVersion: string;
+  policyNoticeAuto: boolean;
+  liveRoomsEnabled: boolean;
+  randomVideoEnabled: boolean;
+  videoCallsEnabled: boolean;
+  giftsEnabled: boolean;
+  chatRetentionDays: number;
+  tdsEnabled: boolean;
+  tdsBps: number;
+  tdsNoPanBps: number;
+  freeTrialMinutes: number;
+  freeTrialMaxRatePaise: number;
 }
-const FIELDS: { k: keyof S; l: string; help: string; money?: boolean; text?: boolean }[] = [
+type Field = { k: keyof S; l: string; help: string; money?: boolean; text?: boolean; group?: string };
+const BOOLS: { k: keyof S; l: string; group: string }[] = [
+  { k: 'maskContactInfoInChat', l: 'Chat mein phone number / email / band shabd chhupayein (suraksha ke liye chalu rakhein)', group: 'main' },
+  { k: 'liveRoomsEnabled', l: 'Live Rooms + room gifts (moderation taiyaar hone tak BAND rakhein)', group: 'features' },
+  { k: 'randomVideoEnabled', l: 'Random Connect mein video (BAND rakhein: "random video chat" par Play/App Store sakht hain)', group: 'features' },
+  { k: 'videoCallsEnabled', l: 'Chune hue verified listener ke saath video call', group: 'features' },
+  { k: 'giftsEnabled', l: '1:1 session mein gift', group: 'features' },
+  { k: 'policyNoticeAuto', l: 'Har 90 din users ko niyamon ka notice apne aap (IT Rules 2026)', group: 'grievance' },
+  { k: 'tdsEnabled', l: 'Listener ki kamai se TDS kaatein (Sec 393 / 194-O)', group: 'tds' },
+];
+const FIELDS: Field[] = [
   { k: 'appName', l: 'App ka naam', help: 'Users ko dikhta hai', text: true },
   { k: 'commissionPct', l: 'Platform commission (%)', help: 'Har session ki raqam mein platform ka hissa' },
   { k: 'gstPct', l: 'GST (%)', help: 'Recharge par' },
@@ -345,6 +371,24 @@ const FIELDS: { k: keyof S; l: string; help: string; money?: boolean; text?: boo
   { k: 'maxRechargePaise', l: 'Max recharge (₹)', help: '', money: true },
   { k: 'minWithdrawalPaise', l: 'Min withdrawal (₹)', help: 'Vendor isse kam nahi nikal sakta', money: true },
   { k: 'supportEmail', l: 'Support email', help: '', text: true },
+  { k: 'grievanceOfficerName', l: 'Grievance Officer ka naam', help: 'App aur website par dikhega (IT Rules)', text: true, group: 'grievance' },
+  { k: 'grievanceOfficerEmail', l: 'Grievance Officer email', help: '', text: true, group: 'grievance' },
+  { k: 'grievanceOfficerPhone', l: 'Grievance Officer phone', help: '', text: true, group: 'grievance' },
+  { k: 'grievanceAddress', l: 'Pata (address)', help: '', text: true, group: 'grievance' },
+  { k: 'policyVersion', l: 'Terms/Privacy version', help: 'Badalne par sab users se dobara sahmati li jayegi', text: true, group: 'grievance' },
+  { k: 'chatRetentionDays', l: 'Chat kitne din rakhein', help: 'Iske baad apne aap delete (DPDP). Khuli shikayat wale rahenge', group: 'data' },
+  { k: 'tdsBps', l: 'TDS (PAN ke saath) basis points', help: '10 = 0.1%', group: 'tds' },
+  { k: 'tdsNoPanBps', l: 'TDS (bina PAN) basis points', help: '500 = 5%', group: 'tds' },
+  { k: 'freeTrialMinutes', l: 'Naye user ko free minute', help: '0 = band. Kharcha platform ka, listener ko poori kamai', group: 'trial' },
+  { k: 'freeTrialMaxRatePaise', l: 'Free trial: listener ka max rate (₹/min)', help: 'Isse mehenge listener par trial nahi', money: true, group: 'trial' },
+];
+const GROUPS: { g: string; t: string; sub?: string }[] = [
+  { g: 'main', t: 'Paisa aur session' },
+  { g: 'grievance', t: 'Grievance Officer aur niyam', sub: 'IT Rules 2021/2026: naam aur sampark app + website par zaroori' },
+  { g: 'features', t: 'Feature switches', sub: 'Play Store aur court ki sakhti ke hisaab se' },
+  { g: 'data', t: 'Data (DPDP)' },
+  { g: 'tds', t: 'TDS' },
+  { g: 'trial', t: 'Pehle minute free' },
 ];
 
 export function Settings() {
@@ -355,8 +399,9 @@ export function Settings() {
   useEffect(() => {
     if (!q.data) return;
     const s = q.data.settings;
-    const o: Record<string, string | boolean> = { maskContactInfoInChat: s.maskContactInfoInChat };
-    for (const f of FIELDS) o[f.k] = f.money ? String((s[f.k] as number) / 100) : String(s[f.k]);
+    const o: Record<string, string | boolean> = {};
+    for (const b of BOOLS) o[b.k] = Boolean(s[b.k]);
+    for (const f of FIELDS) o[f.k] = f.money ? String((s[f.k] as number) / 100) : String(s[f.k] ?? '');
     setV(o);
   }, [q.data]);
   if (q.isLoading) return <Loading />;
@@ -364,7 +409,8 @@ export function Settings() {
 
   async function save() {
     setMsg(null);
-    const body: Record<string, unknown> = { maskContactInfoInChat: v.maskContactInfoInChat };
+    const body: Record<string, unknown> = {};
+    for (const b of BOOLS) body[b.k] = Boolean(v[b.k]);
     for (const f of FIELDS) {
       const raw = String(v[f.k] ?? '');
       body[f.k] = f.text ? raw.trim() : f.money ? Math.round(Number(raw) * 100) : Number(raw);
@@ -381,20 +427,28 @@ export function Settings() {
   return (
     <>
       <PageHead title="Settings" sub="Har badlav audit log mein darj hota hai. API keys yahan nahi: woh sirf server ki .env mein." />
-      <div className="card" style={{ maxWidth: 820 }}>
-        <div className="grid g2">
-          {FIELDS.map((f) => (
-            <div className="field" key={f.k}>
-              <label htmlFor={f.k}>{f.l}</label>
-              <input id={f.k} className="input" value={String(v[f.k] ?? '')} onChange={(e) => setV({ ...v, [f.k]: e.target.value })} inputMode={f.text ? 'text' : 'decimal'} />
-              {f.help ? <span className="faint">{f.help}</span> : null}
+      <div className="card stack" style={{ maxWidth: 820 }}>
+        {GROUPS.map((g) => (
+          <section key={g.g}>
+            <h3 style={{ margin: '4px 0 2px' }}>{g.t}</h3>
+            {g.sub ? <p className="faint" style={{ marginTop: 0 }}>{g.sub}</p> : null}
+            <div className="grid g2">
+              {FIELDS.filter((f) => (f.group ?? 'main') === g.g).map((f) => (
+                <div className="field" key={f.k}>
+                  <label htmlFor={f.k}>{f.l}</label>
+                  <input id={f.k} className="input" value={String(v[f.k] ?? '')} onChange={(e) => setV({ ...v, [f.k]: e.target.value })} inputMode={f.text ? 'text' : 'decimal'} />
+                  {f.help ? <span className="faint">{f.help}</span> : null}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <label className="row" style={{ marginTop: 16 }}>
-          <input type="checkbox" checked={Boolean(v.maskContactInfoInChat)} onChange={(e) => setV({ ...v, maskContactInfoInChat: e.target.checked })} />
-          Chat mein phone number / email / band shabd chhupayein (suraksha ke liye chalu rakhein)
-        </label>
+            {BOOLS.filter((b) => b.group === g.g).map((b) => (
+              <label className="row" style={{ marginTop: 10 }} key={b.k}>
+                <input type="checkbox" checked={Boolean(v[b.k])} onChange={(e) => setV({ ...v, [b.k]: e.target.checked })} />
+                {b.l}
+              </label>
+            ))}
+          </section>
+        ))}
         {msg ? (
           <div className={msg.ok ? 'notice' : 'error'} style={{ marginTop: 14, ...(msg.ok ? { background: 'var(--good-soft)', color: 'var(--good)' } : {}) }}>
             {msg.t}
@@ -428,6 +482,12 @@ const ACTION_HI: Record<string, string> = {
   'withdrawal.reject': 'Withdrawal reject',
   'settings.update': 'Settings badli',
   'report.resolve': 'Report resolve',
+  takedown: 'Kanooni order par hataya',
+  'tds.export': 'TDS report (poora PAN) download',
+  'payment.refund_to_source': 'Recharge refund (source par)',
+  'policy.notice': 'Niyamon ka notice bheja',
+  'admin.2fa.enable': '2FA chalu',
+  'admin.2fa.disable': '2FA band',
 };
 
 export function Audit() {

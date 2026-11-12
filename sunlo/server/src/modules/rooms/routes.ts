@@ -9,10 +9,11 @@ import { numericUid } from '../../lib/crypto';
 import { conflict, forbidden, HttpError, notFound, unavailable } from '../../lib/errors';
 import { pushToUser } from '../../lib/push';
 import { emitToRoom, emitToUser } from '../../lib/realtime';
-import { getSettings } from '../../lib/settings';
+import { getSettings, requireFeature } from '../../lib/settings';
 import { body, idParam, params } from '../../lib/validate';
 import { authId, requireRole } from '../../middleware/auth';
 import { giftSends, gifts } from '../gifts/schema';
+import { postVendorEarning } from '../wallet/earning';
 import { postTxn } from '../wallet/ledger';
 import { roomMembers, rooms } from './schema';
 import * as svc from './service';
@@ -27,6 +28,7 @@ const createBody = z.object({
 
 // ---- Host (vendor app) ----
 roomsRouter.post('/vendor/rooms', requireRole('VENDOR'), async (req, res) => {
+  await requireFeature('liveRoomsEnabled');
   res.status(201).json(await svc.createRoom(authId(req), body(req, createBody)));
 });
 roomsRouter.get('/vendor/rooms/current', requireRole('VENDOR'), async (req, res) => {
@@ -46,6 +48,8 @@ roomsRouter.post('/vendor/rooms/:id/kick', requireRole('VENDOR'), async (req, re
 
 // ---- User ----
 roomsRouter.get('/rooms', requireRole('USER'), async (req, res) => {
+  // Feature band: list khaali (purani app bhi kuch na dikhaye)
+  if (!(await getSettings()).liveRoomsEnabled) return void res.json({ items: [] });
   res.json({ items: await svc.listLiveRooms(authId(req)) });
 });
 roomsRouter.get('/rooms/:id', requireRole('USER'), async (req, res) => {
@@ -53,6 +57,7 @@ roomsRouter.get('/rooms/:id', requireRole('USER'), async (req, res) => {
   res.json(await svc.roomDetail(authId(req), id));
 });
 roomsRouter.post('/rooms/:id/join', requireRole('USER'), async (req, res) => {
+  await requireFeature('liveRoomsEnabled');
   const { id } = params(req, idParam);
   res.status(201).json(await svc.joinRoom(authId(req), id));
 });
@@ -81,6 +86,7 @@ roomsRouter.post('/rooms/:id/gifts', requireRole('USER'), async (req, res) => {
   const { id } = params(req, idParam);
   const { giftId } = body(req, z.object({ giftId: z.string().uuid() }));
   const userId = authId(req);
+  await requireFeature('liveRoomsEnabled');
   const pct = (await getSettings()).giftCommissionPct;
 
   const out = await db.transaction(async (tx) => {
@@ -106,7 +112,7 @@ roomsRouter.post('/rooms/:id/gifts', requireRole('USER'), async (req, res) => {
       .returning();
     await postTxn(tx, { userId, type: 'SESSION_CHARGE', amount: -g.price, referenceType: 'gift', referenceId: send.id, note: `Room gift: ${g.name}` });
     const [h] = await tx.select({ userId: vendors.userId }).from(vendors).where(eq(vendors.id, room.hostVendorId)).limit(1);
-    if (earning > 0 && h) await postTxn(tx, { userId: h.userId, type: 'SESSION_EARNING', amount: earning, referenceType: 'gift', referenceId: send.id, note: `Room gift mila: ${g.name}` });
+    if (earning > 0 && h) await postVendorEarning(tx, { vendorId: room.hostVendorId, vendorUserId: h.userId, gross: g.price, earning, referenceType: 'gift', referenceId: send.id, note: `Room gift mila: ${g.name}` });
     let newMax = m.maxSeconds;
     if (room.ratePerMin > 0) {
       const affordable = Math.floor((balance - g.price) / room.ratePerMin) * 60;

@@ -20,6 +20,8 @@ const TXN_LABEL: Record<WalletTxn['type'], string> = {
   REFUND: 'Refund',
   WITHDRAWAL: 'Withdrawal',
   ADJUSTMENT: 'Adjustment',
+  TDS: 'TDS',
+  PAYMENT_REFUND: 'Recharge refund (bank/UPI par)',
 };
 
 const STATUS: Record<Session['status'], { label: string; color: string }> = {

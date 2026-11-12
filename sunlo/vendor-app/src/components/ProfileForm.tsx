@@ -37,6 +37,10 @@ export function ProfileForm({ me, mode, onSaved }: { me: VendorMe; mode: 'onboar
   const [avatar, setAvatar] = useState<{ id?: string; uri: string | null }>({ uri: me.avatarUrl });
   const [kyc, setKyc] = useState<{ id?: string; uri?: string; done: boolean }>({ done: me.hasKyc });
   const [kycType, setKycType] = useState<string | null>(me.kycDocType);
+  // PAN: TDS ke liye zaroori (bina PAN 5% TDS). Pehle se juda ho to dobara nahi maangte.
+  const [pan, setPan] = useState('');
+  const [panName, setPanName] = useState(me.pan?.name ?? '');
+  const panValid = /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const kycLocked = me.status === 'PENDING';
@@ -59,6 +63,7 @@ export function ProfileForm({ me, mode, onSaved }: { me: VendorMe; mode: 'onboar
     if (s === 2) {
       if (!avatar.uri) return 'Profile photo lagayein';
       if (mode === 'onboarding' && (!kyc.done || !kycType)) return 'ID document ka type chunein aur photo upload karein';
+      if (mode === 'onboarding' && !me.pan && (!panValid || panName.trim().length < 3)) return 'PAN number aur PAN par likha naam daalein (TDS ke liye zaroori)';
     }
     return null;
   }
@@ -90,6 +95,7 @@ export function ProfileForm({ me, mode, onSaved }: { me: VendorMe; mode: 'onboar
           ...(!kycLocked && kycType && mode === 'onboarding' ? { kycDocType: kycType } : {}),
         },
       });
+      if (mode === 'onboarding' && !me.pan && panValid) await api('/vendor/pan', { method: 'PUT', body: { pan, name: panName.trim() } });
       if (mode === 'onboarding') await api('/vendor/me/submit', { method: 'POST' });
       await qc.invalidateQueries({ queryKey: qk.me });
       onSaved();
@@ -224,6 +230,18 @@ export function ProfileForm({ me, mode, onSaved }: { me: VendorMe; mode: 'onboar
                 disabled={kycLocked}
                 onPress={() => upload('KYC')}
               />
+            </View>
+          ) : null}
+
+          {mode === 'onboarding' && !me.pan ? (
+            <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, padding: space.lg, gap: space.md }}>
+              <Row gap={8}>
+                <Ionicons name="document-text-outline" size={20} color={colors.primaryDark} />
+                <Text variant="title">PAN (TDS ke liye)</Text>
+              </Row>
+              <Text variant="small">Sarkari niyam: kamai par TDS katta hai. PAN ke saath sirf 0.1%, bina PAN 5%. PAN encrypted rakha jaata hai.</Text>
+              <Input value={pan} onChangeText={(t) => setPan(t.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} placeholder="ABCDE1234F" autoCapitalize="characters" maxLength={10} error={pan.length === 10 && !panValid ? 'PAN sahi nahi lag raha' : undefined} />
+              <Input value={panName} onChangeText={setPanName} placeholder="PAN par likha naam" autoCapitalize="characters" maxLength={80} />
             </View>
           ) : null}
         </View>

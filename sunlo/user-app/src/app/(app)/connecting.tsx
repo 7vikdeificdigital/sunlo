@@ -47,7 +47,7 @@ function Rings() {
 }
 
 export default function Connecting() {
-  const { type: rawType } = useLocalSearchParams<{ type: string }>();
+  const { type: rawType, mood, gender } = useLocalSearchParams<{ type: string; mood?: string; gender?: string }>();
   const type: SessionType = rawType === 'AUDIO' || rawType === 'VIDEO' ? rawType : 'CHAT';
   const meta = TYPE_META[type];
   const qc = useQueryClient();
@@ -96,7 +96,12 @@ export default function Connecting() {
       setTries(attempt);
       let s: Session;
       try {
-        s = (await api<{ session: Session }>('/random/connect', { method: 'POST', body: { type, exclude } })).session;
+        s = (
+          await api<{ session: Session }>('/random/connect', {
+            method: 'POST',
+            body: { type, exclude, pricingAck: true, ...(mood ? { mood } : {}), ...(gender === 'FEMALE' || gender === 'MALE' ? { listenerGender: gender } : {}) },
+          })
+        ).session;
       } catch (e) {
         if (!alive.current) return;
         if (e instanceof ApiError && e.code === 'NO_ONE_AVAILABLE') return setPhase('none');

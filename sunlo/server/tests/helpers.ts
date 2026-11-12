@@ -3,7 +3,9 @@ import { eq } from 'drizzle-orm';
 import { buildApp } from '../src/app';
 import { db } from '../src/db/client';
 import { rechargePacks, users, vendors, wallets } from '../src/db/schema';
-import { hashPassword } from '../src/lib/crypto';
+import { encryptField, hashPassword } from '../src/lib/crypto';
+import { settings } from '../src/db/schema';
+import { clearSettingsCache } from '../src/lib/settings';
 import { randomReferralCode } from '../src/lib/crypto';
 import { devOtpOutbox } from '../src/modules/auth/sms';
 
@@ -26,7 +28,7 @@ export async function loginViaOtp(phone = newPhone(), appKind: 'user' | 'vendor'
 export const bearer = (t: string) => ({ Authorization: `Bearer ${t}` });
 
 /** Test ke liye ek approved, online vendor (phone ke saath, taaki vendor app se login ho sake) */
-export async function makeVendor(opts: { chatRate?: number; online?: boolean } = {}) {
+export async function makeVendor(opts: { chatRate?: number; online?: boolean; gender?: 'MALE' | 'FEMALE'; tags?: string[]; pan?: boolean } = {}) {
   const phone = newPhone();
   const [u] = await db.insert(users).values({ phone, role: 'VENDOR', name: 'Test Vendor', referralCode: randomReferralCode() }).returning();
   await db.insert(wallets).values({ userId: u.id });
@@ -41,6 +43,9 @@ export async function makeVendor(opts: { chatRate?: number; online?: boolean } =
       callRatePerMin: 3000,
       videoRatePerMin: 4000,
       isOnline: opts.online ?? true,
+      gender: opts.gender ?? null,
+      tags: opts.tags ?? [],
+      ...(opts.pan === false ? {} : { panEnc: encryptField('ABCDE1234F'), panLast4: '234F', panName: 'Test Vendor', panAddedAt: new Date() }),
     })
     .returning();
   return { vendor: v, user: u, phone };
@@ -73,4 +78,12 @@ export async function rechargeVia(token: string, packId: string) {
   const v = await api().post(`${P}/wallet/recharge/verify`).set(bearer(token)).send({ paymentId: r.body.paymentId, mockResult: 'success' });
   if (v.body.status !== 'PAID') throw new Error('verify failed');
   return r.body as { paymentId: string; amount: number; bonus: number; gstAmount: number; totalPayable: number };
+}
+
+/** Test ke liye settings badalna (DB + cache). Wapas karne ke liye wahi function purani values ke saath. */
+export async function setSettings(values: Record<string, unknown>) {
+  for (const [key, value] of Object.entries(values)) {
+    await db.insert(settings).values({ key, value }).onConflictDoUpdate({ target: settings.key, set: { value } });
+  }
+  clearSettingsCache();
 }
