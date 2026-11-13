@@ -46,54 +46,29 @@ function trChildren(children: ReactNode, lang: Lang): ReactNode {
   return arr.map((c) => (typeof c === 'string' ? tr(c, lang) : c));
 }
 
+/** Devanagari ke matra upar/neeche kat na jayein: Hindi mein line-height badi rakhte hain */
+function hindiLine(base: TextStyle, style: StyleProp<TextStyle>): TextStyle {
+  const f = StyleSheet.flatten([base, style]) ?? {};
+  const fs = typeof f.fontSize === 'number' ? f.fontSize : 14;
+  const lh = typeof f.lineHeight === 'number' ? f.lineHeight : 0;
+  return { lineHeight: Math.round(Math.max(lh, fs * 1.6)) };
+}
+
 /** raw = user ka likha hua text (chat, review): kabhi translate nahi hota */
 export function Text({ variant = 'body', style, color, raw, children, ...p }: TextProps & { variant?: Variant; color?: string; raw?: boolean }) {
   const lang = useLang((st) => st.lang);
+  const hiLine = lang === 'hi' ? hindiLine(variants[variant], style) : null;
   return (
-    <RNText {...p} style={[variants[variant], color ? { color } : null, style]}>
+    <RNText {...p} style={[variants[variant], color ? { color } : null, style, hiLine]}>
       {raw || lang === 'hinglish' ? children : trChildren(children, lang)}
     </RNText>
   );
 }
 
 // ---------------- Layout ----------------
-/** Har screen ke upar chhota language toggle (English / हिंदी / Hinglish) */
-function LanguageStrip() {
-  const { lang, setLang } = useLang();
-  const opts: { v: Lang; label: string }[] = [
-    { v: 'en', label: 'English' },
-    { v: 'hi', label: 'हिंदी' },
-    { v: 'hinglish', label: 'Hinglish' },
-  ];
-  return (
-    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: space.lg, paddingTop: 4, paddingBottom: 2 }}>
-      <View style={{ flexDirection: 'row', backgroundColor: 'rgba(120,110,160,0.16)', borderRadius: 999, padding: 2 }}>
-        {opts.map((o) => {
-          const on = lang === o.v;
-          return (
-            <Pressable
-              key={o.v}
-              onPress={() => setLang(o.v)}
-              hitSlop={4}
-              accessibilityRole="button"
-              accessibilityLabel={'Language ' + o.label}
-              accessibilityState={{ selected: on }}
-              style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: on ? colors.primary : 'transparent' }}
-            >
-              <RNText style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 11, color: on ? colors.white : colors.textMuted }}>{o.label}</RNText>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
-  );
-}
-
 export function Screen({ children, edges = ['top'], style }: { children: ReactNode; edges?: Edge[]; style?: StyleProp<ViewStyle> }) {
-  const showLang = edges.includes('top') && StyleSheet.flatten(style)?.backgroundColor !== 'transparent';
   return (
     <SafeAreaView edges={edges} style={[{ flex: 1, backgroundColor: colors.bg }, style]}>
-      {showLang ? <LanguageStrip /> : null}
       {children}
     </SafeAreaView>
   );

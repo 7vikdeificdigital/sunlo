@@ -6,7 +6,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ApiError } from '@/lib/api';
+import { LanguageChooser } from '@/components/LanguageChooser';
 import { useAuth } from '@/lib/auth';
+import { useLang } from '@/lib/i18n';
 import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -24,12 +26,14 @@ export default function RootLayout() {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold });
   const status = useAuth((s) => s.status);
   const hydrate = useAuth((s) => s.hydrate);
+  const langReady = useLang((s) => s.ready);
+  const langPicked = useLang((s) => s.picked);
 
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
 
-  const ready = fontsLoaded && status !== 'loading';
+  const ready = fontsLoaded && status !== 'loading' && langReady;
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => undefined);
   }, [ready]);
@@ -40,6 +44,15 @@ export default function RootLayout() {
   }, [status]);
 
   if (!ready) return null;
+  // Pehli baar: pehle bhasha puchte hain
+  if (!langPicked) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <LanguageChooser />
+      </SafeAreaProvider>
+    );
+  }
   const signedIn = status === 'signedIn';
 
   return (

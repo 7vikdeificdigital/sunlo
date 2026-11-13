@@ -10,15 +10,15 @@ const icon =
   ({ color, focused }: { color: ColorValue; focused: boolean }) => <Ionicons name={focused ? on : off} size={23} color={color} />;
 
 export default function TabLayout() {
-  useLang((st) => st.lang);
+  const lang = useLang((st) => st.lang);
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textFaint,
-        tabBarLabelStyle: { fontFamily: font.medium, fontSize: 11, lineHeight: 14 },
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, height: 64, paddingTop: 6, paddingBottom: 8 },
+        tabBarLabelStyle: { fontFamily: font.medium, fontSize: 11, lineHeight: lang === 'hi' ? 18 : 14 },
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, height: lang === 'hi' ? 72 : 64, paddingTop: 6, paddingBottom: 8 },
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
