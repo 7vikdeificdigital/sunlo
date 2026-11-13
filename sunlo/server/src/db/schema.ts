@@ -148,6 +148,7 @@ export const uploads = pgTable('uploads', {
   mime: text('mime').notNull(),
   size: integer('size').notNull(),
   storageKey: text('storage_key').notNull().unique(), // disk par random naam; asli file naam kabhi use nahi
+  cdnUrl: text('cdn_url'), // AVATAR ka Cloudinary link (agar chalu ho). KYC ka hamesha null
   data: bytea('data'), // file ke bytes database mein (hosting par disk mit jaati hai). Purani rows mein null = disk par
   createdAt: createdAt(),
 });

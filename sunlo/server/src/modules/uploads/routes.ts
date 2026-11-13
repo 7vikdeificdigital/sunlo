@@ -8,6 +8,7 @@ import { env } from '../../config/env';
 import { db } from '../../db/client';
 import { uploads } from '../../db/schema';
 import { badRequest, forbidden, notFound } from '../../lib/errors';
+import { uploadAvatarToCloudinary } from '../../lib/cloudinary';
 import { logger } from '../../lib/logger';
 import { body, idParam, params } from '../../lib/validate';
 import { authId, requireRole } from '../../middleware/auth';
@@ -90,6 +91,11 @@ uploadsRouter.post(
       .insert(uploads)
       .values({ ownerId: userId, kind: input.kind, mime: type.mime, size: buf.length, storageKey, data: buf })
       .returning({ id: uploads.id, kind: uploads.kind });
+    // Sirf photo Cloudinary par (best effort). Database wali copy hamesha rehti hai, to fail hone par bhi kaam chalta hai.
+    if (input.kind === 'AVATAR') {
+      const cdn = await uploadAvatarToCloudinary(buf, type.mime, row!.id);
+      if (cdn) await db.update(uploads).set({ cdnUrl: cdn }).where(eq(uploads.id, row!.id));
+    }
     res.status(201).json({ id: row!.id, kind: row!.kind, url: row!.kind === 'AVATAR' ? avatarUrl(row!.id) : null });
   },
 );
@@ -101,6 +107,12 @@ uploadsRouter.post(
 export async function sendUpload(res: Response, id: string, opts: { allowKyc?: boolean } = {}) {
   const [row] = await db.select().from(uploads).where(eq(uploads.id, id)).limit(1);
   if (!row || (row.kind === 'KYC' && !opts.allowKyc)) throw notFound('File');
+  // Photo Cloudinary par ho to wahin bhej do (tez CDN). KYC par yeh kabhi nahi hota.
+  if (row.kind === 'AVATAR' && row.cdnUrl) {
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.redirect(302, row.cdnUrl);
+    return;
+  }
   let data: Buffer;
   if (row.data) {
     data = row.data;

@@ -26,7 +26,7 @@ export async function sendOtpSms(phone: string, code: string): Promise<void> {
     body: JSON.stringify({
       template_id: env.MSG91_TEMPLATE_ID,
       short_url: '0',
-      recipients: [{ mobiles: phone.replace(/^\+/, ''), otp: code }],
+      recipients: [{ mobiles: phone.replace(/^\+/, ''), otp: code, app: 'Bondty' }],
     }),
     signal: AbortSignal.timeout(10_000),
   }).catch((err) => {
