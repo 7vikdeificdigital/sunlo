@@ -3,13 +3,16 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePathname } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, Modal, Pressable, ScrollView, StyleSheet, Vibration, View } from 'react-native';
+import { Animated, Dimensions, Easing, Image, Modal, PanResponder, Pressable, ScrollView, StyleSheet, Vibration, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { API_URL, api, errorMessage } from '@/lib/api';
 import { useFeatures } from '@/lib/queries';
 import { useAuth } from '@/lib/auth';
 import { getSocket } from '@/lib/socket';
 import { colors } from '@/theme';
+
+/** Gift button ki yaad rakhi hui jagah (app chalne tak) */
+let giftPos = { x: 0, y: 0 };
 import { Coin, CoinPrice } from './Coin';
 import { SvgaView } from './SvgaView';
 import { Text } from './ui';
@@ -175,6 +178,33 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
   const seq = useRef(0);
   const lastMinute = useRef<{ id: string; m: number } | null>(null);
   const btnPulse = useRef(new Animated.Value(0)).current;
+  // Gift button ko ungli se kahin bhi khiska sakte hain (position app chalne tak yaad rehti hai)
+  const insRef = useRef(insets);
+  insRef.current = insets;
+  const giftXY = useRef(new Animated.ValueXY(giftPos)).current;
+  const giftCur = useRef({ x: giftPos.x, y: giftPos.y });
+  const giftPan = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dx) > 6 || Math.abs(g.dy) > 6,
+      onPanResponderGrant: () => {
+        giftXY.setOffset({ x: giftCur.current.x, y: giftCur.current.y });
+        giftXY.setValue({ x: 0, y: 0 });
+      },
+      onPanResponderMove: Animated.event([null, { dx: giftXY.x, dy: giftXY.y }], { useNativeDriver: false }),
+      onPanResponderRelease: (_e, g) => {
+        const { width: W, height: H } = Dimensions.get('window');
+        const ins = insRef.current;
+        const baseTop = ins.top + 64;
+        const nx = Math.min(8, Math.max(-(W - 52 - 16 - 8), giftCur.current.x + g.dx));
+        const ny = Math.min(H - baseTop - 52 - ins.bottom - 8, Math.max(-(baseTop - ins.top - 8), giftCur.current.y + g.dy));
+        giftXY.flattenOffset();
+        giftCur.current = { x: nx, y: ny };
+        giftPos = { x: nx, y: ny };
+        Animated.spring(giftXY, { toValue: { x: nx, y: ny }, useNativeDriver: false, friction: 8 }).start();
+      },
+    }),
+  ).current;
 
   const push = useCallback((a: Omit<Anim, 'key'>) => setQueue((q) => [...q, { ...a, key: ++seq.current }]), []);
 
@@ -276,19 +306,21 @@ export function GiftLayer({ role }: { role: 'user' | 'vendor' }) {
   return (
     <>
       {canGift ? (
+        <Animated.View {...giftPan.panHandlers} style={{ position: 'absolute', right: 16, top: insets.top + 64, width: 52, height: 52, transform: giftXY.getTranslateTransform() }}>
         <Pressable
           accessibilityLabel="Gift bhejein"
           onPress={() => {
             setMsg(null);
             setSheet(true);
           }}
-          style={{ position: 'absolute', right: 16, top: insets.top + 64, width: 52, height: 52, alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: 52, height: 52, alignItems: 'center', justifyContent: 'center' }}
         >
           <Animated.View style={{ position: 'absolute', width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(255,122,89,0.45)', opacity: btnPulse.interpolate({ inputRange: [0, 1], outputRange: [0.8, 0] }), transform: [{ scale: btnPulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.7] }) }] }} />
           <LinearGradient colors={['#FF9A6B', '#FF5E7E']} style={{ width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', elevation: 8 }}>
             <Ionicons name="gift" size={22} color={colors.white} />
           </LinearGradient>
         </Pressable>
+        </Animated.View>
       ) : null}
 
       {cur ? <Overlay key={cur.key} anim={cur} onDone={done} top={insets.top + 70} /> : null}

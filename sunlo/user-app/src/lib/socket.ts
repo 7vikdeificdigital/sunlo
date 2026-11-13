@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { io, type Socket } from 'socket.io-client';
 import { API_URL, api } from './api';
 import { useAuth } from './auth';
@@ -24,6 +25,11 @@ export function getSocket(): Socket {
         /* signOut ho chuka hoga */
       }
     }
+  });
+  socket.on('auth:revoked', () => {
+    // Number kisi doosre device par login ho gaya: yahan se logout
+    void useAuth.getState().signOut();
+    Alert.alert('Logout ho gaye', 'Aapka number kisi doosre device par login hua hai.');
   });
   return socket;
 }

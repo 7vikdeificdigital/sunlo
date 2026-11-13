@@ -2,9 +2,10 @@ import crypto from 'node:crypto';
 import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
 import { env, testLogins } from '../../config/env';
 import { db } from '../../db/client';
-import { otpCodes, refreshTokens, users, vendors, wallets } from '../../db/schema';
+import { deviceTokens, otpCodes, refreshTokens, users, vendors, wallets } from '../../db/schema';
 import { decryptField, hmac, randomOtp, randomReferralCode, randomToken, safeEqualHex, sha256, verifyPassword } from '../../lib/crypto';
 import { badRequest, forbidden, HttpError, notFound, tooMany, unauthorized } from '../../lib/errors';
+import { kickUserSockets } from '../../lib/realtime';
 import { verifyTotp } from '../../lib/totp';
 import { verifyFirebasePhoneToken } from '../../lib/firebase';
 import { signAccessToken, type Role } from '../../middleware/auth';
@@ -142,8 +143,23 @@ async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; refe
     );
   }
 
-  const tokens = await issueTokens(user, input.userAgent);
+  // Ek number = ek device: naye login par purane device logout
+  const tokenVersion = await revokeOtherDevices(user.id);
+  const tokens = await issueTokens({ ...user, tokenVersion }, input.userAgent);
   return { ...tokens, isNewUser, user: publicUser(user) };
+}
+
+/** Ek number = ek device: naye login par purane sab device ka login, refresh token, push token aur socket band */
+async function revokeOtherDevices(userId: string): Promise<number> {
+  const [row] = await db
+    .update(users)
+    .set({ tokenVersion: sql`${users.tokenVersion} + 1` })
+    .where(eq(users.id, userId))
+    .returning({ tokenVersion: users.tokenVersion });
+  await db.update(refreshTokens).set({ revokedAt: new Date() }).where(and(eq(refreshTokens.userId, userId), isNull(refreshTokens.revokedAt)));
+  await db.delete(deviceTokens).where(eq(deviceTokens.userId, userId));
+  void kickUserSockets(userId);
+  return row.tokenVersion;
 }
 
 export async function adminLogin(email: string, password: string, userAgent?: string, totp?: string) {
