@@ -9,6 +9,7 @@ import { logger } from '../../lib/logger';
 export const devOtpOutbox = new Map<string, string>();
 
 export async function sendOtpSms(phone: string, code: string): Promise<void> {
+  logger.info({ provider: env.SMS_PROVIDER, hasKey: Boolean(env.MSG91_AUTH_KEY), hasTemplate: Boolean(env.MSG91_TEMPLATE_ID) }, 'sendOtpSms start');
   if (env.SMS_PROVIDER === 'console') {
     if (isProd) throw unavailable('SMS_NOT_CONFIGURED', 'SMS service set nahi hai');
     devOtpOutbox.set(phone, code);
@@ -37,4 +38,13 @@ export async function sendOtpSms(phone: string, code: string): Promise<void> {
     logger.error({ status: res?.status }, 'MSG91 returned error');
     throw unavailable('SMS_FAILED', 'OTP bhejne mein dikkat aayi. Thodi der baad koshish karein.');
   }
+  // MSG91 kabhi HTTP 200 ke saath body mein {"type":"error","message":...} bhejta hai: usse bhi pakdo (OTP/phone kabhi log nahi hota)
+  const bodyText = await res.text().catch(() => '');
+  let parsed: { type?: string; message?: string } = {};
+  try { parsed = JSON.parse(bodyText) as { type?: string; message?: string }; } catch { /* plain text */ }
+  if (parsed.type && parsed.type !== 'success') {
+    logger.error({ type: parsed.type, message: parsed.message }, 'MSG91 rejected the request');
+    throw unavailable('SMS_FAILED', 'OTP bhejne mein dikkat aayi. Thodi der baad koshish karein.');
+  }
+  logger.info({ msg91: bodyText.slice(0, 200) }, 'MSG91 accepted OTP request');
 }
