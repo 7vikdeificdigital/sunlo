@@ -75,15 +75,28 @@ function devaFont(base: TextStyle, style: StyleProp<TextStyle>): TextStyle {
   return { fontFamily: DEVA_FONT[f.fontFamily ?? ''] ?? DEVA_FONT[font.regular], fontWeight: 'normal' };
 }
 
+/**
+ * Line-height font-size se chhoti ho to Android akshar ke upar/neeche ka hissa kaat deta hai
+ * (jaise "bondty" ka y "bondtv" dikhna). Isliye line-height kam se kam 1.4x rakhte hain.
+ */
+function safeLine(base: TextStyle, style: StyleProp<TextStyle>): TextStyle | null {
+  const f = StyleSheet.flatten([base, style]) ?? {};
+  const fs = f.fontSize;
+  if (typeof fs !== 'number') return null;
+  const lh = typeof f.lineHeight === 'number' ? f.lineHeight : 0;
+  return lh >= fs * 1.4 ? null : { lineHeight: Math.round(fs * 1.4) };
+}
+
 /** raw = user ka likha hua text (chat, review): kabhi translate nahi hota */
 export function Text({ variant = 'body', style, color, raw, children, ...p }: TextProps & { variant?: Variant; color?: string; raw?: boolean }) {
   const lang = useLang((st) => st.lang);
   const content = raw || lang === 'hinglish' ? children : trChildren(children, lang);
   const deva = hasDeva(content);
+  const fixLine = safeLine(variants[variant], style);
   const hiLine = lang === 'hi' || deva ? hindiLine(variants[variant], style) : null;
   const hiFont = deva ? devaFont(variants[variant], style) : null;
   return (
-    <RNText {...p} style={[variants[variant], color ? { color } : null, style, hiLine, hiFont]}>
+    <RNText {...p} style={[variants[variant], color ? { color } : null, style, fixLine, hiLine, hiFont]}>
       {content}
     </RNText>
   );
