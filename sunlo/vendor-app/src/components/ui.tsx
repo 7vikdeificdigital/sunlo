@@ -54,13 +54,32 @@ function hindiLine(base: TextStyle, style: StyleProp<TextStyle>): TextStyle {
   return { lineHeight: Math.round(Math.max(lh, fs * 1.6)) };
 }
 
+const DEVA = /[\u0900-\u097F]/;
+function hasDeva(n: ReactNode): boolean {
+  if (typeof n === 'string') return DEVA.test(n);
+  if (Array.isArray(n)) return n.some(hasDeva);
+  return false;
+}
+const WEIGHTS: Record<string, TextStyle['fontWeight']> = { [font.regular]: '400', [font.medium]: '500', [font.semibold]: '600', [font.bold]: '700' };
+/**
+ * Poppins mein Devanagari (Hindi) ke akshar nahi hote, isliye Android kate-kate fallback font dikhata hai.
+ * Hindi text par system font (Noto Sans Devanagari) lagate hain, wahi weight ke saath.
+ */
+function devaFont(base: TextStyle, style: StyleProp<TextStyle>): TextStyle {
+  const f = StyleSheet.flatten([base, style]) ?? {};
+  return { fontFamily: Platform.OS === 'android' ? 'sans-serif' : 'System', fontWeight: WEIGHTS[f.fontFamily ?? ''] ?? '400' };
+}
+
 /** raw = user ka likha hua text (chat, review): kabhi translate nahi hota */
 export function Text({ variant = 'body', style, color, raw, children, ...p }: TextProps & { variant?: Variant; color?: string; raw?: boolean }) {
   const lang = useLang((st) => st.lang);
-  const hiLine = lang === 'hi' ? hindiLine(variants[variant], style) : null;
+  const content = raw || lang === 'hinglish' ? children : trChildren(children, lang);
+  const deva = hasDeva(content);
+  const hiLine = lang === 'hi' || deva ? hindiLine(variants[variant], style) : null;
+  const hiFont = deva ? devaFont(variants[variant], style) : null;
   return (
-    <RNText {...p} style={[variants[variant], color ? { color } : null, style, hiLine]}>
-      {raw || lang === 'hinglish' ? children : trChildren(children, lang)}
+    <RNText {...p} style={[variants[variant], color ? { color } : null, style, hiLine, hiFont]}>
+      {content}
     </RNText>
   );
 }
