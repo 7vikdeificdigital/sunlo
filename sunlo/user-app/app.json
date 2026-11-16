@@ -22,7 +22,7 @@
     "android": {
       "package": "com.bondty.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E3F4F1",
+        "backgroundColor": "#0A0618",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
