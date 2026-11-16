@@ -1,10 +1,10 @@
 /**
  * Bondty Terms of Use: sections (title + points).
- * DHYAN: ise lagane se pehle kisi vakeel se dikhwa lein aur niche ke COMPANY wale fields bharein.
+ * NOTE: Have a lawyer review this text before release, and fill in the COMPANY fields below.
  */
 export const COMPANY = {
   name: 'Bondty',
-  // Registered company ka naam/pata aur court ka shehar yahan bharein (khaali rahe to line nahi dikhti)
+  // Registered company name/address and the city of jurisdiction (a line is hidden when left empty)
   legalName: '',
   address: '',
   jurisdictionCity: '',
@@ -16,177 +16,177 @@ export type LegalSection = { title: string; points: string[] };
 export const LAST_UPDATED = '10 November 2026';
 
 export const TERMS_INTRO =
-  'Yeh Terms of Use ("Terms") Bondty app aur usse jude saare features ke istemaal par lagu hote hain. App istemaal karne se pehle inhe dhyan se padhein. App istemaal karna yaani in Terms ko maan lena.';
+  "These Terms of Use (the \"Terms\") govern your use of the Bondty app and all related features. Please read them carefully before using the app. By using the app, you agree to be bound by these Terms.";
 
 export const TERMS_SECTIONS: LegalSection[] = [
   {
-    title: 'Bondty kya hai (seva ka swaroop)',
+    title: 'About Bondty (nature of the service)',
     points: [
-      'Bondty ek baat-cheet (interaction) ka platform hai. Yahan aap "Listeners" aur "Experts" (jinhe aage "Vendor" kaha gaya hai) se chat, audio call ya video call par baat kar sakte hain.',
-      'Bondty sirf aapko doosre insaan se jodne ka madhyam hai. Vendor Bondty ke karmchari nahi, swatantra vyakti hain.',
-      'Yeh app sirf baat-cheet, sunne-sunane aur halka mehsoos karne ke liye hai. Yeh dating, shaadi, rozgar, loan ya kisi aur sauda-banane ki seva nahi hai.',
+      "Bondty is a conversation platform. It lets you talk to \"Listeners\" and \"Experts\" (referred to below as \"Vendors\") through chat, audio calls or video calls.",
+      "Bondty only connects you with another person. Vendors are independent individuals and are not employees of Bondty.",
+      "The app is meant only for conversation, listening and feeling a little better. It is not a dating, matrimonial, employment, loan or any other deal-making service.",
     ],
   },
   {
-    title: 'Aap apni marzi se aa rahe hain',
+    title: 'You are using the app voluntarily',
     points: [
-      'Aap yeh app poori tarah apni swechha se istemaal kar rahe hain. Kisi ne aap par dabaav, laalach, dhokha ya zabardasti nahi ki hai.',
-      'Aap samajhte hain ki yahan jo bhi baat-cheet hogi wo aapke apne faisle aur zimmedari par hogi.',
-      'Aap kabhi bhi app istemaal karna band kar sakte hain.',
+      "You are using this app entirely of your own free will. No one has pressured, induced, deceived or forced you to do so.",
+      "You understand that any conversation on the app takes place at your own discretion and responsibility.",
+      "You may stop using the app at any time.",
     ],
   },
   {
-    title: 'Paatrata (kaun istemaal kar sakta hai)',
+    title: 'Eligibility (who can use the app)',
     points: [
-      'App istemaal karne ke liye aapki umar kam se kam 18 saal honi chahiye. 18 saal se kam umar ke log app istemaal na karein.',
-      'Aap kaanoon ke hisaab se anubandh karne yogya hon, aur pehle kabhi Bondty se prathibandhit (ban) na kiye gaye hon.',
-      'Aapko apna sahi mobile number aur sahi jaankari deni hogi. Doosre ke number ya naam se account na banayein.',
+      "You must be at least 18 years old to use the app. People under 18 must not use it.",
+      "You must be legally capable of entering into a contract and must not have been previously banned from Bondty.",
+      "You must provide your own correct mobile number and accurate information. Do not create an account using someone else's number or name.",
     ],
   },
   {
-    title: 'Yeh professional salah nahi hai',
+    title: 'Not professional advice',
     points: [
-      'Listeners aur Experts jo kehte hain wo unka apna vyaktigat vichar hai. Yeh doctor, mansik swasthya visheshagya (therapist/counsellor), vakeel, chartered accountant ya kisi bhi licensed professional ki salah ka vikalp nahi hai.',
-      'Medical, kanooni, vitteey ya kisi bhi gambhir faisle ke liye hamesha yogya professional se milein. Bondty ki baat-cheet par bharosa karke liye gaye faisle ki zimmedari aapki hogi.',
-      'Bondty emergency seva nahi hai. Agar aap ya koi aur khatre mein hai, ya aapko khud ko nuksan pahunchane ke vichar aa rahe hain, to turant 112 par call karein ya apne najdeeki aspataal jayein. Mansik swasthya madad ke liye Tele-MANAS helpline 14416 par sampark kar sakte hain.',
+      "What Listeners and Experts say is their personal opinion. It is not a substitute for the advice of a doctor, mental health professional (therapist or counsellor), lawyer, chartered accountant or any other licensed professional.",
+      "For medical, legal, financial or any other serious decision, always consult a qualified professional. You are solely responsible for any decision you make based on conversations on Bondty.",
+      "Bondty is not an emergency service. If you or someone else is in danger, or you are having thoughts of harming yourself, call 112 immediately or go to the nearest hospital. For mental health support, you can contact the Tele-MANAS helpline at 14416.",
     ],
   },
   {
-    title: 'Aapka account aur suraksha',
+    title: 'Your account and security',
     points: [
-      'Login mobile number aur OTP se hota hai. OTP kisi ko na batayein. Aapke account se hui har gatividhi ke liye aap zimmedar hain.',
-      'Agar aapko lage ki aapka account koi aur chala raha hai, to turant Help section se humein batayein.',
-      'Ek vyakti ke liye ek hi account. Jhoota ya nakli account banana mana hai.',
+      "You log in with your mobile number and an OTP. Never share your OTP with anyone. You are responsible for all activity on your account.",
+      "If you believe someone else is using your account, tell us immediately through the Help section.",
+      "One person may hold only one account. Creating a false or fake account is not allowed.",
     ],
   },
   {
-    title: 'Wallet, coins aur payment',
+    title: 'Wallet, coins and payments',
     points: [
-      'Bondty mein sabhi sevayein wallet ke coins se hoti hain. 1 coin ki keemat ₹1 maani jaati hai.',
-      'Coins sirf Bondty ke andar istemaal ho sakte hain. Inhe kisi doosre account mein bheja, becha ya bank mein nahi nikala ja sakta, aur inpar byaaj nahi milta.',
-      'Recharge ke liye payment doosri adhikrit payment company ke zariye hota hai. Payment fail hone par ya paisa kat kar coins na aane par humein Help section mein batayein, hum jaanch karke theek karenge.',
-      'Refund Bondty ki refund niti ke anusaar hi hoga. Jo samay baat-cheet mein pehle hi istemaal ho chuka hai uska paisa wapas nahi hoga.',
-      'Bina istemaal hue recharge ka refund sirf usi card/UPI/bank account mein jata hai jisse payment hua tha. Coins kabhi cash mein nahi badle jaate.',
-      'Coins ki keemat GST se pehle ki hai. 18% GST recharge ke waqt lagta hai, isliye "₹10/min" ka matlab GST sahit ₹11.80/min hai. Yeh keemat har call se pehle dikhayi jaati hai.',
+      "All services on Bondty are paid for with wallet coins. One coin is valued at ₹1.",
+      "Coins can be used only within Bondty. They cannot be transferred to another account, sold or withdrawn to a bank account, and they do not earn interest.",
+      "Recharge payments are processed through authorised third-party payment providers. If a payment fails, or money is debited but coins are not credited, please tell us through the Help section and we will investigate and resolve it.",
+      "Refunds are governed by Bondty's refund policy. Time that has already been used in a conversation is not refundable.",
+      "A refund for an unused recharge is made only to the same card, UPI or bank account that was used for the payment. Coins are never exchanged for cash.",
+      "Coin prices are shown before GST. 18% GST is charged at the time of recharge, so a rate of \"₹10/min\" means ₹11.80/min including GST. The rate is shown before every call.",
     ],
   },
   {
-    title: 'Call/chat ka billing',
+    title: 'Call and chat billing',
     points: [
-      'Har Vendor ka rate "coins per minute" mein dikhta hai. Baat-cheet shuru hote hi samay ginna shuru ho jata hai.',
-      'Billing minute ke hisaab se hoti hai. Adha minute bhi poora ek minute ginaa jaata hai.',
-      'Aapke wallet ke balance jitne hi minute ki baat ho sakti hai. Balance khatam hone par call/chat apne aap band ho jaati hai. Isliye lambi baat se pehle wallet mein kaafi coins rakhein.',
-      'Agar Vendor ne request accept nahi ki, ya baat-cheet shuru nahi hui, to koi paisa nahi katta.',
-      'Naye user ko pehle kuch minute free mil sakte hain (har mobile number par ek hi baar). Free minute ki shart call se pehle saaf dikhayi jaati hai.',
-      'Balance khatam hone se lagbhag 1 minute pehle aapko chetavani milti hai, aur har session ke baad raseed (kitne minute, rate, kitna kata) dikhti hai.',
+      "Each Vendor's rate is shown in coins per minute. The clock starts as soon as the conversation begins.",
+      "Billing is per minute. Any part of a minute is counted as a full minute.",
+      "You can talk only for as many minutes as your wallet balance allows. When your balance runs out, the call or chat ends automatically, so please keep enough coins in your wallet before a long conversation.",
+      "If a Vendor does not accept your request, or the conversation does not start, you are not charged.",
+      "New users may receive a few free minutes (once per mobile number). The conditions of any free minutes are clearly shown before the call.",
+      "You receive a warning about 1 minute before your balance runs out, and a receipt (minutes, rate and amount charged) is shown after every session.",
     ],
   },
   {
     title: 'Gifts',
     points: [
-      'Aap baat-cheet ke dauran Vendor ko coins se gift bhej sakte hain. Gift bhejna poori tarah aapki marzi hai.',
-      'Bheja hua gift wapas nahi hota aur uske coins refund nahi hote. Galti se bheje gift ke liye bhi yehi niyam lagu hai.',
-      'Har gift par Bondty apna commission kaat-ta hai aur bacha hua hissa Vendor ko milta hai. Commission ka percentage Bondty samay-samay par badal sakta hai.',
-      'Gift koi jua, lottery ya inaam ki yojana nahi hai. Gift se aapko koi aarthik laabh ka haq nahi banta.',
+      "You may send coin gifts to a Vendor during a conversation. Sending a gift is entirely your choice.",
+      "A gift cannot be taken back and its coins are not refundable. This also applies to gifts sent by mistake.",
+      "Bondty deducts a commission on every gift and the remaining amount goes to the Vendor. Bondty may change the commission percentage from time to time.",
+      "Gifts are not gambling, a lottery or a prize scheme. Sending a gift gives you no right to any financial benefit.",
     ],
   },
   {
-    title: 'Aapke liye niyam (kya mana hai)',
+    title: 'Rules for you (what is not allowed)',
     points: [
-      'Gaali-galoch, dhamki, pareshaan karna, peecha karna, apmaan, ya kisi dharm, jaati, ling ya kshetra ke khilaaf nafrat failana.',
-      'Ashleel, yaun ya nagn baatein/tasveerein/video maangna ya bhejna. Bondty yaun sambandhi seva ke liye nahi hai.',
-      'Kisi bhi naabalig (18 saal se kam) ke saath galat vyavhaar. Aisa kuch dikhe to turant report karein.',
-      'Dhokha, thagi, paise maangna, nivesh/loan/lottery ka laalach, ya kisi ko bahkana.',
-      'Vendor ya kisi aur ka number, UPI, address ya social media maangna ya Bondty se bahar paise ka len-den karna.',
-      'Nashe, hathiyaar, jua ya kisi bhi gair-kanooni cheez ki baat ya prachaar.',
-      'Kisi ki ijazat ke bina uski baat-cheet record karna, screenshot ya recording failana, ya kisi ki nijta bhang karna.',
-      'Kisi aur ka roop dharna, app mein hack/chhed-chhaad karna, bots ya anya automatic tareeke se app chalana.',
-      'Bharat ke kisi bhi kaanoon ke khilaaf kuch bhi karna.',
+      "Abusing, threatening, harassing, stalking or insulting anyone, or spreading hatred against any religion, caste, gender or region.",
+      "Asking for or sending obscene, sexual or nude messages, photos or videos. Bondty is not meant for any sexual service.",
+      "Any inappropriate conduct involving a minor (under 18). If you see anything of this kind, report it immediately.",
+      "Fraud, cheating, asking for money, luring anyone with investment, loan or lottery offers, or misleading anyone.",
+      "Asking for a Vendor's or anyone's number, UPI ID, address or social media details, or making any payment outside Bondty.",
+      "Discussing or promoting drugs, weapons, gambling or anything illegal.",
+      "Recording someone's conversation without their permission, sharing screenshots or recordings, or violating anyone's privacy.",
+      "Impersonating another person, hacking or tampering with the app, or running the app using bots or other automated means.",
+      "Doing anything that violates any law of India.",
     ],
   },
   {
-    title: 'Vendors ke baare mein',
+    title: 'About Vendors',
     points: [
-      'Vendor ki profile par likhi jaankari (jaise anubhav, vishay, rating) unhi ki di hui ya users ke feedback par aadhaarit hoti hai. Hum kisi Vendor ke vichar, salah ya parinaam ki guarantee nahi dete.',
-      'Vendor aur user ke beech ki baat-cheet ke liye dono khud zimmedar hain. Bondty kisi vivaad mein sirf madhyastha ki bhoomika nibha sakta hai, bandhan nahi.',
+      "The information on a Vendor's profile (such as experience, topics and ratings) is provided by the Vendor or based on user feedback. We do not guarantee any Vendor's views, advice or results.",
+      "The user and the Vendor are each responsible for their own conversation. In any dispute, Bondty may act only as a mediator and is not bound by either party's position.",
     ],
   },
   {
-    title: 'Chat ki nigrani aur suraksha',
+    title: 'Chat monitoring and safety',
     points: [
-      'Surakshit mahaul banaye rakhne ke liye chat mein phone number, link jaisi jaankari apne aap chhupayi ja sakti hai.',
-      'Report kiye gaye ya sandehaspad maamlon mein Bondty ki team chat ka record dekh sakti hai. Isse sirf suraksha, dhokhadhadi rokne aur kaanoon ke paalan ke liye hi istemaal kiya jaata hai.',
+      "To keep the platform safe, information such as phone numbers and links may be hidden automatically in chats.",
+      "In reported or suspicious cases, the Bondty team may review chat records. This is done only for safety, fraud prevention and legal compliance.",
     ],
   },
   {
-    title: 'Report aur karwai',
+    title: 'Reports and enforcement',
     points: [
-      'Koi bhi baat-cheet ya Vendor galat lage to app mein "Report" ka option istemaal karein. Hum 36 ghante ke andar jaanch karke zaroorat par warning, rok ya account band karne jaisi karwai karenge.',
-      'Jhoothi ya durbhavna se ki gayi report karna Terms ka ullanghan hai.',
+      "If any conversation or Vendor seems wrong to you, use the \"Report\" option in the app. We will investigate within 36 hours and, where needed, take action such as a warning, a suspension or closing the account.",
+      "Making a false or malicious report is a violation of these Terms.",
     ],
   },
   {
-    title: 'Aapki jaankari aur privacy',
+    title: 'Your information and privacy',
     points: [
-      'Hum aapka mobile number, naam, janm-tithi (18+ ki jaanch ke liye), profile ki jaankari, wallet len-den, baat-cheet ka record (sampark ka samay, avadhi, chat sandesh) aur device ki zaroori jaankari jama karte hain.',
-      'Audio/video call record nahi hoti. Chat sandesh lagbhag 90 din baad apne aap mita diye jaate hain; sirf wahi rakhe jaate hain jinpar shikayat ki jaanch chal rahi ho.',
-      'Mood check-in aur uska note sirf aapko dikhta hai, encrypted rehta hai, aur ads ya kisi doosre kaam mein istemaal nahi hota.',
-      'Yeh jaankari app chalane, login/OTP bhejne, payment karne, calls jodne, suraksha banaye rakhne, dhokhadhadi rokne aur seva behtar karne ke liye istemaal hoti hai. Hum aapki jaankari bechte nahi hain.',
-      'Seva dene ke liye hum bharosemand teesre paksh jaise OTP/login, payment, aur call (audio/video) seva dene wali companies ki madad lete hain. Unhe sirf zaroori jaankari hi milti hai.',
-      'Kaanoon ya adaalat ke aadesh par, ya kisi ki suraksha ke liye zaroori hone par hum sarkari agencies ko jaankari de sakte hain.',
-      'Aapko apni jaankari dekhne, lene (download), sudharne, sahmati wapas lene aur account hatane ka adhikaar hai (Digital Personal Data Protection Act, 2023 aur Rules, 2025 ke anusaar). App mein Account > Data aur privacy se yeh khud kar sakte hain. Kaanoon (jaise tax) ke liye zaroori len-den ka record bina naam ke rakha ja sakta hai.',
-      'Aapki baat-cheet aapke aur Vendor ke beech ki hai, lekin intezaam aur suraksha ke liye Bondty ke paas uska record reh sakta hai.',
+      "We collect your mobile number, name, date of birth (to verify that you are 18+), profile details, wallet transactions, conversation records (contact time, duration and chat messages) and essential device information.",
+      "Audio and video calls are not recorded. Chat messages are deleted automatically after about 90 days, except those under review in a complaint.",
+      "Your mood check-ins and notes are visible only to you, are stored encrypted, and are never used for advertising or any other purpose.",
+      "We use this information to run the app, send login OTPs, process payments, connect calls, keep the platform safe, prevent fraud and improve the service. We do not sell your information.",
+      "To provide the service, we use trusted third parties such as providers of OTP/login, payments and calls (audio/video). They receive only the information they need.",
+      "We may share information with government agencies where required by law or a court order, or where necessary to protect someone's safety.",
+      "Under the Digital Personal Data Protection Act, 2023 and the Rules, 2025, you have the right to view, download and correct your information, withdraw consent and delete your account. You can do all of this yourself in the app under Account > Data aur privacy. Transaction records that the law requires us to keep (for example for tax) may be retained in de-identified form.",
+      "Your conversation is between you and the Vendor, but Bondty may keep a record of it for administration and safety.",
     ],
   },
   {
     title: 'Intellectual property',
     points: [
-      'Bondty ka naam, logo, design, software, gifts ki animation aur baaki saari samagri Bondty ya uske licence dene walon ki hai. Bina likhit ijazat ke inhe copy, badalna ya vyavsayik istemaal mana hai.',
-      'Aap jo likhte ya bhejte hain uske liye aap khud zimmedar hain.',
+      "The Bondty name, logo, design, software, gift animations and all other content belong to Bondty or its licensors. You may not copy, modify or use them commercially without written permission.",
+      "You are solely responsible for what you write or send.",
     ],
   },
   {
-    title: 'Zimmedari ki seema (Disclaimer)',
+    title: 'Limitation of liability (disclaimer)',
     points: [
-      'Bondty app "jaisa hai waisa" aur "jaisa uplabdh hai" ke aadhaar par diya jaata hai. Hum yeh guarantee nahi dete ki app hamesha bina rukawat ya galti ke chalega, ya network/call hamesha sahi hogi.',
-      'Kaanoon ki anumati ki seema tak, Bondty kisi Vendor ki salah, vyavhaar ya baat-cheet se hone wale nuksan, bhaavnaatmak ya aarthik haani, ya teesre paksh ki galti ke liye zimmedar nahi hoga.',
-      'Kisi bhi sthiti mein Bondty ki kul zimmedari aapke dwara pichle 3 mahine mein diye gaye paise tak hi seemit rahegi, jahan kaanoon isse rokta nahi.',
+      "The Bondty app is provided on an \"as is\" and \"as available\" basis. We do not guarantee that the app will always run without interruption or errors, or that the network or calls will always work properly.",
+      "To the extent permitted by law, Bondty is not liable for any loss arising from a Vendor's advice, conduct or conversation, any emotional or financial harm, or the fault of any third party.",
+      "In any case, Bondty's total liability to you is limited to the amount you paid in the previous 3 months, except where the law does not permit such a limit.",
     ],
   },
   {
-    title: 'Aapki zimmedari (Indemnity)',
+    title: 'Your responsibility (indemnity)',
     points: [
-      'Agar aapke Terms todne, kaanoon todne ya doosron ke adhikar todne se Bondty ko koi nuksan, daava ya kharcha hota hai, to uski bharpai karne ki zimmedari aapki hogi.',
+      "If Bondty suffers any loss, claim or expense because you broke these Terms, broke the law or violated anyone else's rights, you are responsible for compensating Bondty.",
     ],
   },
   {
-    title: 'Account band karna',
+    title: 'Account closure and termination',
     points: [
-      'Aap kabhi bhi account hatane ka anurodh kar sakte hain. Bacha hua wallet balance Bondty ki refund niti ke anusaar hi lautaya jayega.',
-      'Terms todne, dhokhadhadi, galat vyavhaar ya kaanoon ke paalan ke liye zaroori hone par Bondty bina poorv suchna ke aapka account rok sakta hai ya hata sakta hai. Aisi sthiti mein bacha hua balance jaanch ke baad hi lautaya jayega, aur gambhir ullanghan mein roka bhi ja sakta hai.',
+      "You may request deletion of your account at any time. Any remaining wallet balance will be returned only in accordance with Bondty's refund policy.",
+      "Bondty may suspend or delete your account without prior notice if you breach these Terms, commit fraud or misconduct, or where required to comply with the law. In such cases, any remaining balance will be returned only after investigation, and may be withheld in serious violations.",
     ],
   },
   {
-    title: 'Terms mein badlav',
+    title: 'Changes to these Terms',
     points: [
-      'Hum samay-samay par in Terms ko badal sakte hain. Bade badlav hone par app mein dobara aapki sahmati maangi ja sakti hai. Badlav ke baad app istemaal karte rehne ka matlab hai ki aap naye Terms maante hain.',
+      "We may change these Terms from time to time. For major changes, we may ask for your consent again in the app. By continuing to use the app after a change, you accept the updated Terms.",
     ],
   },
   {
-    title: 'Lagu kanoon aur shikayat',
+    title: 'Governing law and complaints',
     points: [
-      'Yeh Terms Bharat ke kaanoon ke adheen hain. Kisi bhi vivaad ke liye Bharat ki adaalatein adhikar kshetra rakhti hain.',
-      'Kisi bhi shikayat ke liye app mein Account > Shikayat / Grievance Officer dekhein. Grievance Officer ka naam aur sampark wahan diya hai.',
-      'Shikayat milte hi ticket number milta hai. Aam shikayat ka samadhan 7 din mein, aur ashleel/ghair-kanooni content ki shikayat par 36 ghante mein karwai hoti hai (Information Technology (Intermediary Guidelines) Amendment Rules, 2026).',
-      'Jawab se santusht na hon to 30 din ke andar Grievance Appellate Committee (gac.gov.in) mein appeal kar sakte hain.',
-      'Hum kam se kam har 3 mahine aapko in niyamon aur unke todne ke nateejon ki yaad dilayenge.',
+      "These Terms are governed by the laws of India, and the courts in India have jurisdiction over any dispute.",
+      "For any complaint, see Account > Shikayat / Grievance Officer in the app. The Grievance Officer's name and contact details are provided there.",
+      "You receive a ticket number as soon as you file a complaint. Ordinary complaints are resolved within 7 days, and complaints about obscene or illegal content are acted on within 36 hours (Information Technology (Intermediary Guidelines) Amendment Rules, 2026).",
+      "If you are not satisfied with the response, you may appeal to the Grievance Appellate Committee (gac.gov.in) within 30 days.",
+      "At least once every 3 months, we will remind you of these rules and the consequences of breaking them.",
     ],
   },
 ];
 
-/** Sahmati ke 3 tick-box */
+/** The 3 consent checkboxes */
 export const CONSENTS = [
-  'Main apni marzi se yeh app istemaal kar raha/rahi hoon. Mujh par kisi ka dabaav ya laalach nahi hai.',
-  'Meri umar 18 saal ya usse zyada hai.',
-  'Main samajhta/samajhti hoon ki Bondty sirf baat-cheet (interaction) ke liye hai, koi professional salah ya emergency seva nahi, aur maine saare Terms padh kar maan liye hain.',
+  "I am using this app of my own free will. No one has pressured or induced me.",
+  "I am 18 years of age or older.",
+  "I understand that Bondty is only for conversation, and is not a professional advice or emergency service. I have read and accept all of these Terms.",
 ];

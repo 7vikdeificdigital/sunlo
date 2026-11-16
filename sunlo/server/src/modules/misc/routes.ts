@@ -51,7 +51,7 @@ export function grievanceInfo(s: S) {
     acknowledgeWithinHours: 24,
     resolveWithinDays: 7,
     unlawfulContentWithinHours: 36,
-    appealNote: 'Jawab se santusht na hon to Grievance Appellate Committee (gac.gov.in) mein 30 din ke andar appeal kar sakte hain.',
+    appealNote: 'If you are not satisfied with the response, you can appeal to the Grievance Appellate Committee (gac.gov.in) within 30 days.',
     policyVersion: s.policyVersion,
   };
 }

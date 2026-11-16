@@ -33,8 +33,8 @@ async function contactBox() {
     g.phone && `Phone: ${esc(g.phone)}`,
     g.address && `Address: ${esc(g.address)}`,
   ].filter(Boolean);
-  return `<div class="box"><b>Sampark / Contact</b><br>${rows.length ? rows.join('<br>') : 'Admin panel &gt; Setup mein Grievance Officer ki jaankari bharein.'}
-<br><span class="muted">Shikayat ki pavti ${g.acknowledgeWithinHours} ghante mein, samadhan ${g.resolveWithinDays} din mein. ${esc(g.appealNote)}</span></div>`;
+  return `<div class="box"><b>Contact</b><br>${rows.length ? rows.join('<br>') : 'Contact details will be published here shortly.'}
+<br><span class="muted">Complaints are acknowledged within ${g.acknowledgeWithinHours} hours and resolved within ${g.resolveWithinDays} days. ${esc(g.appealNote)}</span></div>`;
 }
 
 legalPublic.get('/legal/terms', async (_req, res) => {
@@ -42,7 +42,7 @@ legalPublic.get('/legal/terms', async (_req, res) => {
 });
 
 legalPublic.get('/legal/privacy', async (_req, res) => {
-  const privacy = TERMS_SECTIONS.filter((s) => /privacy|nigrani|Account band/i.test(s.title));
+  const privacy = TERMS_SECTIONS.filter((s) => /privacy|monitoring|account closure/i.test(s.title));
   const en = `<div class="box"><b>Summary (English)</b><ul>
 <li>We collect: mobile number, name, date of birth (18+ check), profile details, wallet transactions, session records (time, duration, chat messages) and basic device information. Listeners additionally share PAN and bank details for payouts (stored encrypted).</li>
 <li>Audio and video calls are not recorded. Chat messages are deleted automatically after about 90 days, except where a complaint is under review.</li>
@@ -54,17 +54,17 @@ legalPublic.get('/legal/privacy', async (_req, res) => {
 });
 
 legalPublic.get('/legal/delete-account', async (_req, res) => {
-  const body = `<p>Bondty aur Bondty Partner app ka account aur uska data hatane ka tareeka. / How to delete your Bondty or Bondty Partner account and data.</p>
-<h2>App se (sabse tez) / In the app</h2><ol>
-<li>App kholein aur login karein. / Open the app and sign in.</li>
-<li>Neeche <b>Account</b> tab mein <b>Account delete karein</b> dabayein. / Open the Account tab and tap Delete account.</li>
-<li>Confirm karein. Account turant band ho jaata hai. / Confirm. The account is closed immediately.</li></ol>
-<h2>App ke bina / Without the app</h2>
-<p>Apne registered mobile number se neeche diye email par "Delete my Bondty account" likh kar bhejein. Hum number verify karke 7 din mein account hata denge. / Email us from the contact below with your registered mobile number and the subject "Delete my Bondty account". We will verify and delete it within 7 days.</p>
-<h2>Kya hatta hai, kya rehta hai / What is deleted and kept</h2><ul>
-<li>Turant hatta hai: mobile number, naam, photo, janm-tithi, mood check-in, push token; listener profile band. Chat sandesh lagbhag 90 din mein apne aap mit jaate hain. / Deleted immediately: phone number, name, photo, date of birth, mood check-ins, push tokens; listener profile closed. Chat messages are erased automatically within about 90 days.</li>
-<li>Rehta hai (kaanoon ke liye, bina naam ke): payment aur tax (TDS) ke len-den ka record, jitne samay tak kaanoon kahe. / Kept as legally required, de-identified: payment and tax (TDS) records, for the period the law requires.</li>
-<li>Bacha hua wallet balance account hatne par khatam ho jaata hai; listener pehle apni kamai withdraw kar lein. / Remaining wallet balance is lost on deletion; listeners should withdraw earnings first.</li></ul>
+  const body = `<p>How to delete your Bondty or Bondty Partner account and data.</p>
+<h2>In the app (fastest)</h2><ol>
+<li>Open the app and sign in.</li>
+<li>Go to the <b>Account</b> tab and tap <b>Account delete karein</b> (Delete account).</li>
+<li>Confirm. The account is closed immediately.</li></ol>
+<h2>Without the app</h2>
+<p>Email us from the contact below with your registered mobile number and the subject "Delete my Bondty account". We will verify and delete it within 7 days.</p>
+<h2>What is deleted and what is kept</h2><ul>
+<li>Deleted immediately: phone number, name, photo, date of birth, mood check-ins and push tokens; the listener profile is closed. Chat messages are erased automatically within about 90 days.</li>
+<li>Kept as legally required, in de-identified form: payment and tax (TDS) records, for the period the law requires.</li>
+<li>Any remaining wallet balance is lost on deletion. Listeners should withdraw their earnings first.</li></ul>
 ${await contactBox()}`;
   res.type('html').send(page('Delete your account', body));
 });
