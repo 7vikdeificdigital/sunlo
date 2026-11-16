@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Coin, coinsOf } from '@/components/Coin';
 import { Button, ErrorBox, Header, Input, Loader, Row, Screen, Text } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -67,11 +68,8 @@ export default function Wallet() {
         refreshMoney();
         return;
       }
-      const r = await api<{ paymentId: string; checkoutPath: string }>('/wallet/recharge', {
-        method: 'POST',
-        body: pack ? { packId: pack.id } : { amount: customPaise },
-      });
-      router.push({ pathname: '/payment', params: { paymentId: r.paymentId, path: r.checkoutPath } });
+      // Razorpay: ab payment screen (order summary + UPI/Wallet/Card) par jao; wahin se order banta hai
+      router.push({ pathname: '/checkout', params: pack ? { packId: pack.id } : { amount: String(customPaise) } });
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -100,42 +98,49 @@ export default function Wallet() {
             </LinearGradient>
 
             <Text variant="h3">Recharge chunein</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md, rowGap: space.lg }}>
               {w.data!.packs.map((p) => {
                 const on = p.id === packId;
                 return (
                   <Pressable
                     key={p.id}
                     onPress={() => {
-                      setPackId(p.id);
                       setCustom('');
+                      setError(null);
+                      if (play) setPackId(p.id);
+                      else router.push({ pathname: '/checkout', params: { packId: p.id } });
                     }}
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: on }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${coinsOf(p.amount)} coins, ${rupees(p.amount)}`}
                     style={{
                       width: '30.5%',
-                      paddingVertical: space.lg,
-                      borderRadius: radius.md,
-                      alignItems: 'center',
-                      backgroundColor: on ? colors.primarySoft : colors.surface,
+                      borderRadius: radius.lg,
+                      overflow: 'hidden',
+                      backgroundColor: colors.surface,
                       borderWidth: 1.5,
                       borderColor: on ? colors.primary : colors.border,
                       ...shadow.card,
                     }}
                   >
+                    <View style={{ alignItems: 'center', paddingTop: space.lg, paddingBottom: space.md, gap: 6, backgroundColor: on ? colors.primarySoft : colors.surface }}>
+                      <Coin size={26} />
+                      <Text style={{ fontFamily: font.bold, fontSize: 18 }}>{coinsOf(p.amount)}</Text>
+                      {p.bonusPct ? (
+                        <View style={{ backgroundColor: colors.successSoft, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 1 }}>
+                          <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: colors.success }}>+{p.bonusPct}% extra</Text>
+                        </View>
+                      ) : (
+                        <Text style={{ fontSize: 10.5 }}> </Text>
+                      )}
+                    </View>
+                    <View style={{ backgroundColor: colors.primary, paddingVertical: 7, alignItems: 'center' }}>
+                      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: colors.white }}>{rupees(p.amount)}</Text>
+                    </View>
                     {p.isPopular ? (
-                      <View style={{ position: 'absolute', top: -9, backgroundColor: colors.primary, borderRadius: 6, paddingHorizontal: 6 }}>
-                        <Text style={{ fontFamily: font.semibold, fontSize: 9.5, color: colors.white }}>POPULAR</Text>
+                      <View style={{ position: 'absolute', top: 0, left: 0, backgroundColor: colors.accent, borderBottomRightRadius: 10, paddingHorizontal: 7, paddingVertical: 2 }}>
+                        <Text style={{ fontFamily: font.semibold, fontSize: 9, color: colors.white }}>POPULAR</Text>
                       </View>
                     ) : null}
-                    <Text style={{ fontFamily: font.semibold, fontSize: 17 }}>{rupees(p.amount)}</Text>
-                    {p.bonusPct ? (
-                      <Text variant="caption" color={colors.success}>
-                        +{p.bonusPct}% extra
-                      </Text>
-                    ) : (
-                      <Text variant="caption"> </Text>
-                    )}
                   </Pressable>
                 );
               })}
@@ -154,6 +159,13 @@ export default function Wallet() {
               left={<Text variant="bodyStrong">₹</Text>}
             />
             ) : null}
+            {!play && !pack && Number(custom) > 0 ? (
+              Number(custom) >= minRupees ? (
+                <Button title={`${rupees(customPaise)} ka recharge — aage badhein`} onPress={proceed} />
+              ) : (
+                <Text variant="small" color={colors.danger}>Kam se kam ₹{minRupees} ka recharge karein</Text>
+              )
+            ) : null}
             {notice ? (
               <View style={{ backgroundColor: colors.successSoft, borderRadius: radius.md, padding: space.md }}>
                 <Text variant="small" color={colors.success}>{notice}</Text>
@@ -168,7 +180,7 @@ export default function Wallet() {
             ) : null}
           </ScrollView>
 
-          {amount > 0 && valid && (!play || !!pack) ? (
+          {play && amount > 0 && valid && !!pack ? (
             <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.surface, padding: space.lg, paddingBottom: space.lg + insets.bottom, gap: 6, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, ...shadow.raised }}>
               <Row style={{ justifyContent: 'space-between' }}>
                 <Text variant="small">Recharge</Text>

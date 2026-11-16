@@ -98,7 +98,11 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
  */
 paymentsPublic.get('/pay/:id', async (req, res) => {
   const { id } = params(req, z.object({ id: z.string().uuid() }));
-  const { t } = query(req, z.object({ t: z.string().min(10).max(1000) }));
+  const { t, m, a } = query(req, z.object({
+    t: z.string().min(10).max(1000),
+    m: z.enum(['upi', 'wallet', 'card', 'netbanking']).optional(),
+    a: z.enum(['google_pay', 'phonepe', 'paytm']).optional(),
+  }));
   const claims = pay.verifyCheckoutToken(id, t);
   const p = await pay.getPaymentForCheckout(id);
   if (p.userId !== claims.uid) throw forbidden('Yeh payment link aapka nahi hai');
@@ -128,14 +132,16 @@ paymentsPublic.get('/pay/:id', async (req, res) => {
     orderId: p.providerOrderId,
     amount: p.totalPayable,
     status: p.status,
+    method: m ?? null,
+    upiApp: m === 'upi' ? (a ?? null) : null,
   }).replace(/</g, '\\u003c');
   res.type('html').send(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Payment</title>
-<style>body{font-family:system-ui,sans-serif;background:#FFF8EE;color:#2B2118;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
+<style>body{font-family:system-ui,sans-serif;background:#F7F6FB;color:#18133C;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
 .card{background:#fff;border-radius:20px;padding:28px 24px;width:min(360px,90vw);box-shadow:0 8px 30px rgba(0,0,0,.08);text-align:center}
 h1{font-size:18px;margin:0 0 6px}.amt{font-size:32px;font-weight:700;margin:12px 0 20px}
 button{width:100%;padding:14px;border:0;border-radius:12px;font-size:16px;font-weight:600;margin-top:10px;cursor:pointer}
-.pay{background:#F28C00;color:#fff}.fail{background:#F1E7DA;color:#6B5B4B}.note{font-size:12px;color:#8A7A6A;margin-top:14px}</style></head>
+.pay{background:#6B4CFF;color:#fff}.fail{background:#F1E7DA;color:#6B5B4B}.note{font-size:12px;color:#8A7A6A;margin-top:14px}</style></head>
 <body><div class="card"><h1>Wallet Recharge</h1><div class="amt">&#8377; ${esc(rupees)}</div>
 <div id="actions"></div><p class="note" id="note">GST sahit. Payment ke baad aap app par wapas pahunch jayenge.</p></div>
 <script nonce="${nonce}">window.__PAY=${data};</script>
@@ -150,9 +156,11 @@ document.getElementById('note').textContent='DEMO MODE: asli paisa nahi katega. 
 document.getElementById('ok').onclick=function(){send({result:'success',mockResult:'success'})};
 document.getElementById('no').onclick=function(){send({result:'failure',mockResult:'failure'})};return}
 var b=document.createElement('button');b.className='pay';b.textContent='Pay Now';a.appendChild(b);
-function open(){var r=new Razorpay({key:P.key,order_id:P.orderId,amount:P.amount,currency:'INR',name:'Wallet Recharge',theme:{color:'#F28C00'},
+function open(){var opt={key:P.key,order_id:P.orderId,amount:P.amount,currency:'INR',name:'Bondty Coins',theme:{color:'#6B4CFF'},
 handler:function(x){send({result:'success',providerPaymentId:x.razorpay_payment_id,signature:x.razorpay_signature})},
-modal:{ondismiss:function(){send({result:'dismissed'})}}});r.on('payment.failed',function(){send({result:'failure'})});r.open()}
+modal:{ondismiss:function(){send({result:'dismissed'})}}};
+if(P.method){var ins={method:P.method};if(P.method==='upi'&&P.upiApp)ins.apps=[P.upiApp];opt.prefill={method:P.method};opt.config={display:{blocks:{b:{name:'Payment',instruments:[ins]}},sequence:['block.b'],preferences:{show_default_blocks:false}}}}
+var r=new Razorpay(opt);r.on('payment.failed',function(){send({result:'failure'})});r.open()}
 b.onclick=open;open()})();
 </script></body></html>`);
 });

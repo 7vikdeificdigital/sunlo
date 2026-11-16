@@ -27,7 +27,7 @@ export default function Payment() {
         return;
       }
       if (m.type !== 'sunlo-payment' || m.paymentId !== paymentId || handled.current) return;
-      if (m.result === 'dismissed') return; // user ne Razorpay band kiya; page par "Pay Now" phir se hai
+      if (m.result === 'dismissed') { router.back(); return; } // user ne Razorpay band kiya: payment method screen par wapas
       handled.current = true;
       if (m.result !== 'success') {
         if (m.mockResult === 'failure') await api('/wallet/recharge/verify', { method: 'POST', body: { paymentId, mockResult: 'failure' } }).catch(() => undefined);
@@ -64,7 +64,7 @@ export default function Payment() {
 
   return (
     <Screen edges={['top', 'bottom']}>
-      <Header title="Payment" />
+      <Header title="Secure payment" subtitle={state === 'paying' ? 'Back mat dabayein' : undefined} />
       {state === 'paying' ? (
         <PaymentFrame url={url} onMessage={onMessage} />
       ) : state === 'verifying' ? (
