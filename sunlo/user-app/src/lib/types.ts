@@ -100,7 +100,7 @@ export interface ChatMessage {
 
 export interface WalletTxn {
   id: string;
-  type: 'RECHARGE' | 'RECHARGE_BONUS' | 'SESSION_CHARGE' | 'SESSION_EARNING' | 'REFUND' | 'WITHDRAWAL' | 'ADJUSTMENT' | 'TDS' | 'PAYMENT_REFUND';
+  type: 'RECHARGE' | 'RECHARGE_BONUS' | 'SESSION_CHARGE' | 'SESSION_EARNING' | 'REFUND' | 'WITHDRAWAL' | 'ADJUSTMENT' | 'TDS' | 'PAYMENT_REFUND' | 'REFERRAL_BONUS';
   amount: number;
   balanceAfter: number;
   note: string | null;

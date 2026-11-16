@@ -8,7 +8,11 @@ import * as phoneAuth from './phoneAuth';
  * Screens ko farak nahi padta; woh sirf yeh functions bulate hain.
  */
 export type AuthMode = 'otp' | 'firebase';
-export type LoginTokens = { accessToken: string; refreshToken: string };
+export type LoginTokens = { accessToken: string; refreshToken: string; referralBonusPaise?: number };
+
+/** Login se pehle referral code check: galat ho to app turant bata de */
+export const checkReferral = (code: string) =>
+  api<{ valid: boolean; bonusPaise: number }>(`/auth/referral/${encodeURIComponent(code)}`, { auth: false });
 
 const APP_KIND = 'user' as const;
 let cachedMode: AuthMode | undefined;
@@ -30,19 +34,19 @@ export async function sendLoginCode(phone: string, opts: { resend?: boolean } = 
   await api('/auth/otp/request', { method: 'POST', auth: false, body: { phone } });
 }
 
-const exchange = (idToken: string) =>
-  api<LoginTokens>('/auth/firebase', { method: 'POST', auth: false, body: { idToken, app: APP_KIND } });
+const exchange = (idToken: string, referralCode?: string) =>
+  api<LoginTokens>('/auth/firebase', { method: 'POST', auth: false, body: { idToken, app: APP_KIND, referralCode: referralCode || undefined } });
 
 let exchanging = false; // haath se OTP aur auto-verify ek saath ho to ek hi baar login
 
-export async function verifyLoginCode(phone: string, code: string): Promise<LoginTokens> {
+export async function verifyLoginCode(phone: string, code: string, referralCode?: string): Promise<LoginTokens> {
   if ((await getAuthMode()) !== 'firebase') {
-    return api<LoginTokens>('/auth/otp/verify', { method: 'POST', auth: false, body: { phone, code, app: APP_KIND } });
+    return api<LoginTokens>('/auth/otp/verify', { method: 'POST', auth: false, body: { phone, code, app: APP_KIND, referralCode: referralCode || undefined } });
   }
   const idToken = await phoneAuth.confirmPhoneCode(code);
   exchanging = true;
   try {
-    return await exchange(idToken);
+    return await exchange(idToken, referralCode);
   } finally {
     exchanging = false;
     await phoneAuth.finishPhoneAuth();
@@ -53,7 +57,7 @@ export async function verifyLoginCode(phone: string, code: string): Promise<Logi
  * Android auto-verify: user ke OTP dale bina Firebase verify kar de to seedha login.
  * Sirf firebase mode mein chalta hai; otp mode mein Firebase ko chhua hi nahi jaata.
  */
-export function watchAutoVerify(onTokens: (t: LoginTokens) => void): () => void {
+export function watchAutoVerify(onTokens: (t: LoginTokens) => void, referralCode?: string): () => void {
   let stop: (() => void) | undefined;
   let cancelled = false;
   getAuthMode()
@@ -63,7 +67,7 @@ export function watchAutoVerify(onTokens: (t: LoginTokens) => void): () => void 
         if (exchanging) return;
         exchanging = true;
         try {
-          onTokens(await exchange(idToken));
+          onTokens(await exchange(idToken, referralCode));
         } catch {
           // user haath se OTP daal sakta hai
         } finally {

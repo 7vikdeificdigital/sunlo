@@ -589,6 +589,9 @@ const settingsSchema = z
     tdsNoPanBps: z.number().int().min(0).max(3000),
     freeTrialMinutes: z.number().int().min(0).max(15),
     freeTrialMaxRatePaise: z.number().int().min(0).max(100_000),
+    referralEnabled: z.boolean(),
+    referralBonusPaise: z.number().int().min(0).max(100_000),
+    referrerBonusPaise: z.number().int().min(0).max(100_000),
   })
   .partial()
   .strict();

@@ -48,6 +48,11 @@ export const DEFAULT_SETTINGS = {
   // ---- Free trial ----
   freeTrialMinutes: 5, // 0 = band
   freeTrialMaxRatePaise: 2000, // sirf Rs 20/min tak ke listener ke saath free trial
+
+  // ---- Referral code (login par) ----
+  referralEnabled: true, // band karne par code ka bonus nahi milta
+  referralBonusPaise: 5000, // naye user ko Rs 50 = 50 coins
+  referrerBonusPaise: 0, // code dene wale ko (0 = kuch nahi)
 };
 
 export type Settings = typeof DEFAULT_SETTINGS;
@@ -76,6 +81,8 @@ export const PUBLIC_SETTING_KEYS: SettingKey[] = [
   'chatRetentionDays',
   'freeTrialMinutes',
   'freeTrialMaxRatePaise',
+  'referralEnabled',
+  'referralBonusPaise',
 ];
 
 let cache: { at: number; value: Settings } | null = null;

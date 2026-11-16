@@ -8,7 +8,9 @@ import { badRequest, forbidden, HttpError, notFound, tooMany, unauthorized } fro
 import { kickUserSockets } from '../../lib/realtime';
 import { verifyTotp } from '../../lib/totp';
 import { verifyFirebasePhoneToken } from '../../lib/firebase';
+import { getSettings } from '../../lib/settings';
 import { signAccessToken, type Role } from '../../middleware/auth';
+import { postTxn } from '../wallet/ledger';
 import { sendOtpSms } from './sms';
 
 const OTP_TTL_MS = 5 * 60_000;
@@ -79,6 +81,19 @@ export function assertOtpMode() {
   if (env.AUTH_MODE !== 'otp') throw notFound('Yeh login tareeka');
 }
 
+/** Login se pehle: referral code sahi hai ya nahi (app turant "code galat hai" dikha sake) */
+export async function checkReferralCode(raw: string) {
+  const code = raw.trim().toUpperCase();
+  const cfg = await getSettings();
+  if (!cfg.referralEnabled || !/^[A-Z0-9]{4,20}$/.test(code)) return { valid: false, bonusPaise: 0 };
+  const [ref] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.referralCode, code), eq(users.role, 'USER'), eq(users.status, 'ACTIVE'), isNull(users.deletedAt)))
+    .limit(1);
+  return { valid: Boolean(ref), bonusPaise: ref ? cfg.referralBonusPaise : 0 };
+}
+
 export async function verifyOtpAndLogin(input: {
   phone: string;
   code: string;
@@ -106,6 +121,7 @@ export async function firebaseLogin(input: { idToken: string; app: AppKind; refe
 async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; referralCode?: string; userAgent?: string }) {
   let [user] = await db.select().from(users).where(eq(users.phone, input.phone)).limit(1);
   let isNewUser = false;
+  let referralBonusPaise = 0;
 
   if (!user) {
     let referredById: string | null = null;
@@ -113,11 +129,14 @@ async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; refe
       const [ref] = await db
         .select({ id: users.id })
         .from(users)
-        .where(eq(users.referralCode, input.referralCode.toUpperCase()))
+        .where(
+          and(eq(users.referralCode, input.referralCode.trim().toUpperCase()), eq(users.role, 'USER'), eq(users.status, 'ACTIVE'), isNull(users.deletedAt)),
+        )
         .limit(1);
       referredById = ref?.id ?? null;
     }
     const role = input.app === 'vendor' ? ('VENDOR' as const) : ('USER' as const);
+    const cfg = await getSettings();
     user = await db.transaction(async (tx) => {
       const [u] = await tx
         .insert(users)
@@ -126,6 +145,30 @@ async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; refe
       await tx.insert(wallets).values({ userId: u.id });
       // Vendor ka khaali (DRAFT) profile: vendor app mein bhar kar approval ke liye bhejega
       if (role === 'VENDOR') await tx.insert(vendors).values({ userId: u.id });
+      // Referral bonus: sirf naye user ko, ek hi baar (ledger mein (wallet, type, reference) unique hai)
+      if (referredById && cfg.referralEnabled) {
+        if (cfg.referralBonusPaise > 0) {
+          await postTxn(tx, {
+            userId: u.id,
+            type: 'REFERRAL_BONUS',
+            amount: cfg.referralBonusPaise,
+            referenceType: 'referral',
+            referenceId: u.id,
+            note: 'Referral bonus (welcome)',
+          });
+          referralBonusPaise = cfg.referralBonusPaise;
+        }
+        if (cfg.referrerBonusPaise > 0) {
+          await postTxn(tx, {
+            userId: referredById,
+            type: 'REFERRAL_BONUS',
+            amount: cfg.referrerBonusPaise,
+            referenceType: 'referral_referrer',
+            referenceId: u.id,
+            note: 'Referral bonus (dost ne join kiya)',
+          });
+        }
+      }
       return u;
     });
     isNewUser = true;
@@ -146,7 +189,7 @@ async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; refe
   // Ek number = ek device: naye login par purane device logout
   const tokenVersion = await revokeOtherDevices(user.id);
   const tokens = await issueTokens({ ...user, tokenVersion }, input.userAgent);
-  return { ...tokens, isNewUser, user: publicUser(user) };
+  return { ...tokens, isNewUser, referralBonusPaise, user: publicUser(user) };
 }
 
 /** Ek number = ek device: naye login par purane sab device ka login, refresh token, push token aur socket band */

@@ -14,6 +14,11 @@ authPublic.get('/auth/config', (_req, res) => {
   res.json({ mode: env.AUTH_MODE });
 });
 
+/** Login se pehle referral code check: { valid, bonusPaise } */
+authPublic.get('/auth/referral/:code', authLimiter, async (req, res) => {
+  res.json(await auth.checkReferralCode(String(req.params.code ?? '')));
+});
+
 authPublic.post('/auth/otp/request', authLimiter, async (req, res) => {
   auth.assertOtpMode();
   const { phone } = body(req, z.object({ phone: phoneSchema }));

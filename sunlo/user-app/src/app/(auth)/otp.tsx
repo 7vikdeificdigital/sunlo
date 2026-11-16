@@ -1,14 +1,14 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Alert, Pressable, TextInput, View } from 'react-native';
 import { Button, Header, Screen, Text } from '@/components/ui';
 import { errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { sendLoginCode, verifyLoginCode, watchAutoVerify } from '@/lib/loginFlow';
+import { sendLoginCode, verifyLoginCode, watchAutoVerify, type LoginTokens } from '@/lib/loginFlow';
 import { colors, font, radius, space } from '@/theme';
 
 export default function Otp() {
-  const { phone } = useLocalSearchParams<{ phone: string }>();
+  const { phone, ref } = useLocalSearchParams<{ phone: string; ref?: string }>();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,17 +21,33 @@ export default function Otp() {
     return () => clearInterval(t);
   }, []);
 
+  // Referral code se bonus mila ho to ek chhota badhai ka popup
+  function welcomeBonus(r: LoginTokens) {
+    if (r.referralBonusPaise && r.referralBonusPaise > 0) {
+      Alert.alert('Badhai ho!', `Referral bonus: ${Math.round(r.referralBonusPaise / 100)} coins aapke wallet mein jod diye gaye`);
+    }
+  }
+
   // Firebase mode mein Android kabhi khud verify kar deta hai: tab OTP dalna nahi padta
-  useEffect(() => watchAutoVerify((r) => void setTokens(r.accessToken, r.refreshToken)), [setTokens]);
+  useEffect(
+    () =>
+      watchAutoVerify((r) => {
+        void setTokens(r.accessToken, r.refreshToken);
+        welcomeBonus(r);
+      }, ref),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setTokens, ref],
+  );
 
   async function verify(c = code) {
     if (c.length !== 6) return;
     setLoading(true);
     setError(null);
     try {
-      const r = await verifyLoginCode(phone, c);
+      const r = await verifyLoginCode(phone, c, ref);
       // Token save hote hi root layout khud app ke andar le jaata hai
       await setTokens(r.accessToken, r.refreshToken);
+      welcomeBonus(r);
     } catch (e) {
       setError(errorMessage(e));
       setCode('');

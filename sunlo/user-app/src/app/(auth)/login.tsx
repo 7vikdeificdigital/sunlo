@@ -6,13 +6,16 @@ import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
 import { LogoMark } from '@/components/Logo';
 import { Button, Input, Row, Screen, Text } from '@/components/ui';
 import { errorMessage } from '@/lib/api';
-import { sendLoginCode } from '@/lib/loginFlow';
+import { checkReferral, sendLoginCode } from '@/lib/loginFlow';
 import { brand, colors, font, gradient, radius, space } from '@/theme';
 
 export default function Login() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [showRef, setShowRef] = useState(false);
+  const [ref, setRef] = useState('');
+  const [refError, setRefError] = useState<string | undefined>();
   const digits = phone.replace(/\D/g, '');
   const valid = /^[6-9]\d{9}$/.test(digits);
 
@@ -20,10 +23,19 @@ export default function Login() {
     if (!valid) return setError('10 ankon ka sahi mobile number dalein');
     setLoading(true);
     setError(undefined);
+    setRefError(undefined);
     const full = `+91${digits}`;
+    const refCode = ref.trim().toUpperCase();
     try {
+      if (refCode) {
+        const chk = await checkReferral(refCode);
+        if (!chk.valid) {
+          setRefError('Referral code galat hai');
+          return;
+        }
+      }
       await sendLoginCode(full);
-      router.push({ pathname: '/otp', params: { phone: full } });
+      router.push({ pathname: '/otp', params: refCode ? { phone: full, ref: refCode } : { phone: full } });
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -69,6 +81,26 @@ export default function Login() {
                   </Row>
                 }
               />
+              {showRef ? (
+                <Input
+                  label="Referral code"
+                  value={ref}
+                  onChangeText={(t) => {
+                    setRef(t.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 12));
+                    setRefError(undefined);
+                  }}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  placeholder="ABCD2345"
+                  maxLength={12}
+                  error={refError}
+                />
+              ) : (
+                <Text variant="label" color={colors.primary} onPress={() => setShowRef(true)} style={{ fontFamily: font.semibold }}>
+                  Referral code hai? (optional)
+                </Text>
+              )}
+              {showRef && !refError ? <Text variant="caption">Naye account par bonus coins milte hain</Text> : null}
               <Button title="OTP bhejein" onPress={send} loading={loading} disabled={!valid} />
             </View>
 

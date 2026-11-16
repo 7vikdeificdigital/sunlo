@@ -52,6 +52,7 @@ export const txnTypeEnum = pgEnum('txn_type', [
   'ADJUSTMENT',
   'TDS', // vendor ki kamai se TDS (Income-tax Act 2025 Sec 393, purana 194-O)
   'PAYMENT_REFUND', // recharge ka paisa original payment source par wapas (coins wallet se ghatte hain)
+  'REFERRAL_BONUS', // referral code se mile bonus coins
 ]);
 export const paymentStatusEnum = pgEnum('payment_status', ['CREATED', 'PAID', 'FAILED']);
 export const sessionTypeEnum = pgEnum('session_type', ['CHAT', 'AUDIO', 'VIDEO']);

@@ -1,5 +1,12 @@
 /* Extra translations (Hinglish/English source -> English, Hindi). `{}` = dynamic part; {1},{2} = numbered. */
 export const EXTRA: [string, string, string][] = [
+  ["Referral code hai? (optional)","Have a referral code? (optional)","रेफरल कोड है? (वैकल्पिक)"],
+  ["Referral code","Referral code","रेफरल कोड"],
+  ["Referral code galat hai","Referral code is invalid","रेफरल कोड गलत है"],
+  ["Naye account par bonus coins milte hain","New accounts get bonus coins","नए अकाउंट पर बोनस कॉइन्स मिलते हैं"],
+  ["Badhai ho!","Congratulations!","बधाई हो!"],
+  ["Referral bonus: {} coins aapke wallet mein jod diye gaye","Referral bonus: {} coins added to your wallet","रेफरल बोनस: {} कॉइन्स आपके वॉलेट में जोड़ दिए गए"],
+  ["Referral bonus","Referral bonus","रेफरल बोनस"],
   [". Sawaal ho to support se baat karein.",". If you have questions, talk to support.","। सवाल हो तो सपोर्ट से बात करें।"],
   ["· jawab {} tak","· reply by {}","· {} तक जवाब"],
   ["(free)","(free)","(फ्री)"],
