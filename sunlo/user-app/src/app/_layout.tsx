@@ -23,7 +23,17 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold });
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+    // Hindi (Devanagari) ke liye: Poppins mein Hindi akshar nahi hote
+    NotoSansDevanagari_400Regular: require('../assets/fonts/NotoSansDevanagari_400Regular.ttf'),
+    NotoSansDevanagari_500Medium: require('../assets/fonts/NotoSansDevanagari_500Medium.ttf'),
+    NotoSansDevanagari_600SemiBold: require('../assets/fonts/NotoSansDevanagari_600SemiBold.ttf'),
+    NotoSansDevanagari_700Bold: require('../assets/fonts/NotoSansDevanagari_700Bold.ttf'),
+  });
   const status = useAuth((s) => s.status);
   const hydrate = useAuth((s) => s.hydrate);
   const langReady = useLang((s) => s.ready);

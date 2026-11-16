@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tr, useLang } from '@/lib/i18n';
 import { colors, font } from '@/theme';
 
@@ -11,6 +12,7 @@ const icon =
 
 export default function TabLayout() {
   const lang = useLang((st) => st.lang);
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
@@ -18,7 +20,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textFaint,
         tabBarLabelStyle: { fontFamily: font.medium, fontSize: 11, lineHeight: lang === 'hi' ? 18 : 14 },
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, height: lang === 'hi' ? 72 : 64, paddingTop: 6, paddingBottom: 8 },
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, height: (lang === 'hi' ? 72 : 64) + insets.bottom, paddingTop: 6, paddingBottom: 8 + insets.bottom },
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >

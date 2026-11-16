@@ -60,14 +60,19 @@ function hasDeva(n: ReactNode): boolean {
   if (Array.isArray(n)) return n.some(hasDeva);
   return false;
 }
-const WEIGHTS: Record<string, TextStyle['fontWeight']> = { [font.regular]: '400', [font.medium]: '500', [font.semibold]: '600', [font.bold]: '700' };
+const DEVA_FONT: Record<string, string> = {
+  [font.regular]: 'NotoSansDevanagari_400Regular',
+  [font.medium]: 'NotoSansDevanagari_500Medium',
+  [font.semibold]: 'NotoSansDevanagari_600SemiBold',
+  [font.bold]: 'NotoSansDevanagari_700Bold',
+};
 /**
  * Poppins mein Devanagari (Hindi) ke akshar nahi hote, isliye Android kate-kate fallback font dikhata hai.
- * Hindi text par system font (Noto Sans Devanagari) lagate hain, wahi weight ke saath.
+ * Hindi text par Noto Sans Devanagari (app ke saath bundled) lagate hain, wahi weight ke saath.
  */
 function devaFont(base: TextStyle, style: StyleProp<TextStyle>): TextStyle {
   const f = StyleSheet.flatten([base, style]) ?? {};
-  return { fontFamily: Platform.OS === 'android' ? 'sans-serif' : 'System', fontWeight: WEIGHTS[f.fontFamily ?? ''] ?? '400' };
+  return { fontFamily: DEVA_FONT[f.fontFamily ?? ''] ?? DEVA_FONT[font.regular], fontWeight: 'normal' };
 }
 
 /** raw = user ka likha hua text (chat, review): kabhi translate nahi hota */
