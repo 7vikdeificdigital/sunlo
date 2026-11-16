@@ -42,7 +42,7 @@ miscPublic.get('/app/config', async (_req, res) => {
 
 type S = Awaited<ReturnType<typeof getSettings>>;
 /** IT Rules: Grievance Officer ka naam/sampark + shikayat ka samay (app aur website par dikhana zaroori) */
-function grievanceInfo(s: S) {
+export function grievanceInfo(s: S) {
   return {
     officerName: s.grievanceOfficerName,
     email: s.grievanceOfficerEmail || s.supportEmail,

@@ -17,6 +17,7 @@ import { randomRouter } from './modules/random/routes';
 import { miscPrivate, miscPublic } from './modules/misc/routes';
 import { sessionsRouter, vendorSessionsRouter } from './modules/sessions/routes';
 import { filesPublic, uploadsRouter } from './modules/uploads/routes';
+import { legalPublic } from './modules/legal/routes';
 import { voicePublic, voiceRouter } from './modules/voice/routes';
 import { usersRouter } from './modules/users/routes';
 import { vendorSelfRouter } from './modules/vendor/routes';
@@ -29,7 +30,7 @@ export const API_PREFIX = '/api/v1';
  * BINA LOGIN wale routers. Naya public route jodne ke liye use yahan jodna padega.
  * Baaki SAB routes neeche `requireAuth` ke peeche hain: default band, khula sirf jaan-boojh kar.
  */
-export const publicRouters = [miscPublic, authPublic, vendorsPublic, filesPublic, giftsPublic, voicePublic];
+export const publicRouters = [miscPublic, legalPublic, authPublic, vendorsPublic, filesPublic, giftsPublic, voicePublic];
 
 /** LOGIN ZAROORI wale routers (tests inki har route ko bina token check karte hain) */
 export { adminRouter };

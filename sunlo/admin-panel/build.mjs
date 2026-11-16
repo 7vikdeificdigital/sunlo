@@ -8,7 +8,7 @@ import path from 'node:path';
 
 const serve = process.argv.includes('--serve');
 const outdir = path.resolve('dist');
-const apiUrl = process.env.SUNLO_API_URL ?? 'http://localhost:4000/api/v1';
+const apiUrl = process.env.BONDTY_API_URL ?? process.env.SUNLO_API_URL ?? process.env.VITE_API_URL ?? (serve ? 'http://localhost:4000/api/v1' : 'https://api.bondty.com/api/v1');
 
 fs.rmSync(outdir, { recursive: true, force: true });
 fs.mkdirSync(outdir, { recursive: true });

@@ -34,6 +34,31 @@ export default function Account() {
     ]);
   }
 
+  async function deleteAccount() {
+    try {
+      await api('/me', { method: 'DELETE' });
+    } catch (e) {
+      const msg = (e as { message?: string })?.message ?? 'Account delete nahi ho paya. Support se sampark karein.';
+      if (Platform.OS === 'web') window.alert(msg);
+      else Alert.alert('Delete nahi hua', msg);
+      return;
+    }
+    disconnectSocket();
+    await signOut();
+  }
+  function askDelete() {
+    const title = 'Account delete karein?';
+    const msg = 'Aapki profile turant band ho jayegi aur personal jaankari hata di jayegi. Pehle apni kamai withdraw kar lein: bacha balance wapas nahi milega. Yeh wapas nahi ho sakta.';
+    if (Platform.OS === 'web') {
+      if (window.confirm(`${title}\n\n${msg}`)) void deleteAccount();
+      return;
+    }
+    Alert.alert(title, msg, [
+      { text: 'Nahi', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => void deleteAccount() },
+    ]);
+  }
+
   const items: { icon: IconName; label: string; sub?: string; href: Href }[] = [
     { icon: 'person-outline', label: 'Profile edit karein', sub: 'Naam, parichay, topics, photo', href: '/edit-profile' },
     { icon: 'pricetags-outline', label: 'Rate aur services', sub: 'Chat / call / video ka rate', href: '/rates' },
@@ -93,6 +118,16 @@ export default function Account() {
             <Ionicons name="log-out-outline" size={20} color={colors.danger} />
             <Text variant="bodyStrong" color={colors.danger}>
               Logout
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={askDelete}
+            accessibilityRole="button"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderTopWidth: 1, borderTopColor: colors.border }}
+          >
+            <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
+            <Text variant="body" color={colors.textMuted}>
+              Account delete karein
             </Text>
           </Pressable>
         </Card>

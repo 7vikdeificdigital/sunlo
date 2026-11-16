@@ -93,6 +93,13 @@ if (isProd) {
     problems.push('RAZORPAY_KEY_ID aur RAZORPAY_KEY_SECRET zaroori hain');
   if (!env.PAYOUT_ENC_KEY || Buffer.from(env.PAYOUT_ENC_KEY, 'base64').length !== 32)
     problems.push('PAYOUT_ENC_KEY (32 bytes base64) zaroori hai: openssl rand -base64 32');
+  if (!env.AGORA_APP_ID || !env.AGORA_APP_CERTIFICATE) problems.push('AGORA_APP_ID aur AGORA_APP_CERTIFICATE zaroori hain (inke bina call nahi lagegi)');
+  if (!env.TRUST_PROXY)
+    // eslint-disable-next-line no-console
+    console.warn('⚠️ TRUST_PROXY band hai. Server proxy/load balancer (Render, Railway, Nginx, Cloudflare) ke peeche hai to TRUST_PROXY=true karein, warna sab users ki rate limit ek saath lagegi.');
+  if (!env.GOOGLE_PLAY_PACKAGE_NAME || !env.GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64)
+    // eslint-disable-next-line no-console
+    console.warn('⚠️ GOOGLE_PLAY_* set nahi hai: Play Store build mein coins ki kharid verify nahi hogi.');
   if (!env.CORS_ORIGINS) problems.push('CORS_ORIGINS set karein (admin panel/website ka domain)');
   if (/change[-_]?me|example|secret123|dev_only|test_only/i.test(env.JWT_ACCESS_SECRET + env.OTP_PEPPER))
     problems.push('JWT_ACCESS_SECRET / OTP_PEPPER abhi bhi example value hain; naye random secrets banayein');

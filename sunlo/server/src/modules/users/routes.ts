@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { and, desc, eq, gt, inArray, isNull } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../../db/client';
 import {
@@ -94,6 +94,13 @@ usersRouter.post('/me/consent', async (req, res) => {
  * Wallet, payment aur TDS ka hisaab-kitaab kanoon ke liye record mein rehta hai (bina naam/phone ke).
  */
 async function eraseAccount(id: string) {
+  // Chalti/aane wali call ya pending withdrawal ke beech delete nahi (paise ka hisaab adhoora reh jaata)
+  const open = await db.execute(sql`select 1 from consult_sessions s left join vendors v on v.id = s.vendor_id
+    where (s.user_id = ${id} or v.user_id = ${id}) and s.status in ('REQUESTED','ACTIVE') limit 1`);
+  if (open.rows.length) throw new HttpError(409, 'SESSION_OPEN', 'Pehle chal rahi call/chat khatam karein, phir account delete karein');
+  const pendingW = await db.execute(sql`select 1 from withdrawals w join vendors v on v.id = w.vendor_id
+    where v.user_id = ${id} and w.status = 'PENDING' limit 1`);
+  if (pendingW.rows.length) throw new HttpError(409, 'WITHDRAWAL_PENDING', 'Aapka withdrawal abhi pending hai. Payment hone ke baad account delete karein');
   await db.transaction(async (tx) => {
     await tx
       .update(users)
