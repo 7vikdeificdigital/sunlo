@@ -1,12 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
 import { Coin, coinsOf } from '@/components/Coin';
 import { Header, Loader, Row, Screen, Text } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import { BILLING_MODE } from '@/lib/billing';
+import { buyCoins } from '@/lib/playBilling';
 import { rupees } from '@/lib/format';
-import { useAppConfig, useWallet } from '@/lib/queries';
+import { qk, useAppConfig, useWallet } from '@/lib/queries';
 import { colors, font, radius, shadow, space } from '@/theme';
 
 type Method = { key: string; m: 'upi' | 'wallet' | 'card' | 'netbanking'; app?: string; label: string; sub?: string; icon: keyof typeof Ionicons.glyphMap; tint: string };
@@ -27,6 +31,8 @@ export default function Checkout() {
   const { packId, amount } = useLocalSearchParams<{ packId?: string; amount?: string }>();
   const w = useWallet();
   const cfg = useAppConfig();
+  const qc = useQueryClient();
+  const userId = useAuth((st) => st.user?.id);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +49,24 @@ export default function Checkout() {
   const bonus = pack?.bonus ?? 0;
   const gst = pack ? pack.gstAmount : Math.round((base * gstPct) / 100);
   const total = base + gst;
+
+  // Google Play se coins (sirf BILLING=both aur jab pack ke liye Play product ho)
+  async function payPlay() {
+    if (busy || !pack?.playProductId || !userId) return;
+    setBusy('play');
+    setError(null);
+    try {
+      const r = await buyCoins(pack.playProductId, userId);
+      void qc.invalidateQueries({ queryKey: qk.me });
+      void qc.invalidateQueries({ queryKey: qk.wallet });
+      void qc.invalidateQueries({ queryKey: ['wallet', 'txns'] });
+      Alert.alert(r.status === 'PAID' ? 'Recharge safal!' : 'Payment pending', r.status === 'PAID' ? 'Coins wallet mein jod diye gaye.' : 'Payment poora hote hi coins jud jayenge.', [{ text: 'OK', onPress: () => router.back() }]);
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(null);
+    }
+  }
 
   async function pay(x: Method) {
     if (busy) return;
@@ -73,12 +97,12 @@ export default function Checkout() {
     );
   }
 
-  const Item = ({ x, last }: { x: Method; last: boolean }) => (
+  const Item = ({ x, last, onPress }: { x: Method; last: boolean; onPress?: () => void }) => (
     <Pressable
-      onPress={() => pay(x)}
+      onPress={onPress ?? (() => pay(x))}
       disabled={!!busy}
       accessibilityRole="button"
-      accessibilityLabel={`${x.label} se ${rupees(total)} pay karein`}
+      accessibilityLabel={`${x.label} ${rupees(total)}`}
       style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.md, paddingHorizontal: space.lg, borderBottomWidth: last ? 0 : 1, borderBottomColor: colors.border, backgroundColor: pressed ? colors.surfaceAlt : colors.surface, opacity: busy && busy !== x.key ? 0.5 : 1 })}
     >
       <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: `${x.tint}1A`, alignItems: 'center', justifyContent: 'center' }}>
@@ -153,6 +177,15 @@ export default function Checkout() {
 
         <Group title="UPI SE PAY KAREIN" items={UPI} />
         <Group title="AUR TARIKE" items={OTHERS} />
+
+        {BILLING_MODE === 'both' && pack?.playProductId ? (
+          <View style={{ gap: space.sm }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.8, color: colors.textMuted }}>GOOGLE PLAY</Text>
+            <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, ...shadow.card }}>
+              <Item x={{ key: 'play', m: 'upi', label: 'Google Play se pay karein', sub: 'Play Store ke payment tarike', icon: 'logo-google-playstore', tint: '#1E9E5A' }} last onPress={payPlay} />
+            </View>
+          </View>
+        ) : null}
 
         <Row gap={6} style={{ justifyContent: 'center', marginTop: space.sm }}>
           <Ionicons name="lock-closed" size={13} color={colors.textMuted} />

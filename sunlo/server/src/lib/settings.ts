@@ -1,5 +1,6 @@
 import { db } from '../db/client';
 import { settings } from '../db/schema';
+import { env } from '../config/env';
 import { HttpError } from './errors';
 
 /**
@@ -93,6 +94,8 @@ export async function getSettings(): Promise<Settings> {
   const rows = await db.select().from(settings);
   const merged: Record<string, unknown> = { ...DEFAULT_SETTINGS };
   for (const r of rows) if (r.key in DEFAULT_SETTINGS) merged[r.key] = r.value;
+  // .env GIFTING_ENABLED=false ho to admin panel ki setting kuch bhi ho, gifts band rahenge
+  if (!env.GIFTING_ENABLED) merged.giftsEnabled = false;
   cache = { at: Date.now(), value: merged as Settings };
   return cache.value;
 }

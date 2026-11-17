@@ -16,6 +16,11 @@ const schema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL zaroori hai'),
   TRUST_PROXY: bool,
+  // Gifting master switch: khaali/true = chalu; GIFTING_ENABLED=false (ya 0) = saare gifts pause (admin panel ki setting se upar)
+  GIFTING_ENABLED: z
+    .string()
+    .optional()
+    .transform((v) => !(v !== undefined && ['false', '0', 'off', 'no'].includes(v.trim().toLowerCase()))),
   CORS_ORIGINS: z.string().default(''),
 
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET kam se kam 32 characters ka ho'),

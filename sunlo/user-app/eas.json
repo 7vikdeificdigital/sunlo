@@ -37,6 +37,12 @@
       "env": {
         "EXPO_PUBLIC_BILLING": "razorpay"
       }
+    },
+    "production-both": {
+      "extends": "production",
+      "env": {
+        "EXPO_PUBLIC_BILLING": "both"
+      }
     }
   },
   "submit": {

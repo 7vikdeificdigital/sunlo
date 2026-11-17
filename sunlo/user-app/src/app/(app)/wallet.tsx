@@ -20,7 +20,8 @@ export default function Wallet() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const userId = useAuth((s) => s.user?.id);
-  const play = BILLING_MODE === 'play';
+  const play = BILLING_MODE === 'play'; // sirf Play: pack chuno + neeche ka button
+  const usesPlay = BILLING_MODE !== 'razorpay'; // Play ya both: adhoori purchase recover karni hai
   const [notice, setNotice] = useState<string | null>(null);
   const w = useWallet();
   const cfg = useAppConfig();
@@ -46,7 +47,7 @@ export default function Wallet() {
 
   // Play build: pichli adhoori purchase (app band hui thi) ho to ab settle
   useEffect(() => {
-    if (!play) return;
+    if (!usesPlay) return;
     void recoverPurchases().then((n) => {
       if (n > 0) {
         setNotice('Pichla recharge poora ho gaya, coins wallet mein jod diye gaye.');
@@ -54,7 +55,7 @@ export default function Wallet() {
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [play]);
+  }, [usesPlay]);
 
   async function proceed() {
     setLoading(true);

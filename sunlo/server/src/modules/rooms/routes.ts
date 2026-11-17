@@ -85,6 +85,7 @@ roomsRouter.post('/rooms/:id/rtc-token', async (req, res) => {
 roomsRouter.post('/rooms/:id/gifts', requireRole('USER'), async (req, res) => {
   const { id } = params(req, idParam);
   const { giftId } = body(req, z.object({ giftId: z.string().uuid() }));
+  await requireFeature('giftsEnabled');
   const userId = authId(req);
   await requireFeature('liveRoomsEnabled');
   const pct = (await getSettings()).giftCommissionPct;
