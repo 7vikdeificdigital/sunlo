@@ -351,6 +351,7 @@ interface S {
   referralEnabled: boolean;
   referralBonusPaise: number;
   referrerBonusPaise: number;
+  referralMinRechargePaise: number;
 }
 type Field = { k: keyof S; l: string; help: string; money?: boolean; text?: boolean; group?: string };
 const BOOLS: { k: keyof S; l: string; group: string }[] = [
@@ -361,7 +362,7 @@ const BOOLS: { k: keyof S; l: string; group: string }[] = [
   { k: 'giftsEnabled', l: '1:1 session mein gift', group: 'features' },
   { k: 'policyNoticeAuto', l: 'Har 90 din users ko niyamon ka notice apne aap (IT Rules 2026)', group: 'grievance' },
   { k: 'tdsEnabled', l: 'Listener ki kamai se TDS kaatein (Sec 393 / 194-O)', group: 'tds' },
-  { k: 'referralEnabled', l: 'Referral code (login par naye user ko bonus coins)', group: 'referral' },
+  { k: 'referralEnabled', l: 'Referral bonus (dost ke pehle recharge par dono ko coins)', group: 'referral' },
 ];
 const FIELDS: Field[] = [
   { k: 'appName', l: 'App ka naam', help: 'Users ko dikhta hai', text: true },
@@ -385,8 +386,9 @@ const FIELDS: Field[] = [
   { k: 'tdsNoPanBps', l: 'TDS (bina PAN) basis points', help: '500 = 5%', group: 'tds' },
   { k: 'freeTrialMinutes', l: 'Naye user ko free minute', help: '0 = band. Kharcha platform ka, listener ko poori kamai', group: 'trial' },
   { k: 'freeTrialMaxRatePaise', l: 'Free trial: listener ka max rate (₹/min)', help: 'Isse mehenge listener par trial nahi', money: true, group: 'trial' },
-  { k: 'referralBonusPaise', l: 'Naye user ko referral bonus (₹ = coins)', help: '50 = 50 coins. Sirf naye account par, ek baar', money: true, group: 'referral' },
-  { k: 'referrerBonusPaise', l: 'Code dene wale ko bonus (₹ = coins)', help: '0 = kuch nahi', money: true, group: 'referral' },
+  { k: 'referralBonusPaise', l: 'Code lagane wale (naye user) ko bonus (₹ = coins)', help: '50 = 50 coins. Uske pehle qualifying recharge par, ek baar', money: true, group: 'referral' },
+  { k: 'referrerBonusPaise', l: 'Code dene wale ko bonus (₹ = coins)', help: '0 = kuch nahi. Dost ka pehla qualifying recharge hone par', money: true, group: 'referral' },
+  { k: 'referralMinRechargePaise', l: 'Referral ke liye min recharge (₹)', help: 'Is raqam ya zyada ke recharge par hi bonus (base pack, GST alag)', money: true, group: 'referral' },
 ];
 const GROUPS: { g: string; t: string; sub?: string }[] = [
   { g: 'main', t: 'Paisa aur session' },
@@ -395,7 +397,7 @@ const GROUPS: { g: string; t: string; sub?: string }[] = [
   { g: 'data', t: 'Data (DPDP)' },
   { g: 'tds', t: 'TDS' },
   { g: 'trial', t: 'Pehle minute free' },
-  { g: 'referral', t: 'Referral code', sub: 'Login par code daalne wale naye user ko bonus coins' },
+  { g: 'referral', t: 'Referral code', sub: 'Naya user code lagaye aur pehla recharge min raqam ka kare to dono ko bonus coins' },
 ];
 
 export function Settings() {

@@ -10,7 +10,6 @@ import { verifyTotp } from '../../lib/totp';
 import { verifyFirebasePhoneToken } from '../../lib/firebase';
 import { getSettings } from '../../lib/settings';
 import { signAccessToken, type Role } from '../../middleware/auth';
-import { postTxn } from '../wallet/ledger';
 import { sendOtpSms } from './sms';
 
 const OTP_TTL_MS = 5 * 60_000;
@@ -85,13 +84,13 @@ export function assertOtpMode() {
 export async function checkReferralCode(raw: string) {
   const code = raw.trim().toUpperCase();
   const cfg = await getSettings();
-  if (!cfg.referralEnabled || !/^[A-Z0-9]{4,20}$/.test(code)) return { valid: false, bonusPaise: 0 };
+  if (!cfg.referralEnabled || !/^[A-Z0-9]{4,20}$/.test(code)) return { valid: false, bonusPaise: 0, minRechargePaise: cfg.referralMinRechargePaise };
   const [ref] = await db
     .select({ id: users.id })
     .from(users)
     .where(and(eq(users.referralCode, code), eq(users.role, 'USER'), eq(users.status, 'ACTIVE'), isNull(users.deletedAt)))
     .limit(1);
-  return { valid: Boolean(ref), bonusPaise: ref ? cfg.referralBonusPaise : 0 };
+  return { valid: Boolean(ref), bonusPaise: ref ? cfg.referralBonusPaise : 0, minRechargePaise: cfg.referralMinRechargePaise };
 }
 
 export async function verifyOtpAndLogin(input: {
@@ -121,7 +120,6 @@ export async function firebaseLogin(input: { idToken: string; app: AppKind; refe
 async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; referralCode?: string; userAgent?: string }) {
   let [user] = await db.select().from(users).where(eq(users.phone, input.phone)).limit(1);
   let isNewUser = false;
-  let referralBonusPaise = 0;
 
   if (!user) {
     let referredById: string | null = null;
@@ -136,7 +134,6 @@ async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; refe
       referredById = ref?.id ?? null;
     }
     const role = input.app === 'vendor' ? ('VENDOR' as const) : ('USER' as const);
-    const cfg = await getSettings();
     user = await db.transaction(async (tx) => {
       const [u] = await tx
         .insert(users)
@@ -145,30 +142,7 @@ async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; refe
       await tx.insert(wallets).values({ userId: u.id });
       // Vendor ka khaali (DRAFT) profile: vendor app mein bhar kar approval ke liye bhejega
       if (role === 'VENDOR') await tx.insert(vendors).values({ userId: u.id });
-      // Referral bonus: sirf naye user ko, ek hi baar (ledger mein (wallet, type, reference) unique hai)
-      if (referredById && cfg.referralEnabled) {
-        if (cfg.referralBonusPaise > 0) {
-          await postTxn(tx, {
-            userId: u.id,
-            type: 'REFERRAL_BONUS',
-            amount: cfg.referralBonusPaise,
-            referenceType: 'referral',
-            referenceId: u.id,
-            note: 'Referral bonus (welcome)',
-          });
-          referralBonusPaise = cfg.referralBonusPaise;
-        }
-        if (cfg.referrerBonusPaise > 0) {
-          await postTxn(tx, {
-            userId: referredById,
-            type: 'REFERRAL_BONUS',
-            amount: cfg.referrerBonusPaise,
-            referenceType: 'referral_referrer',
-            referenceId: u.id,
-            note: 'Referral bonus (dost ne join kiya)',
-          });
-        }
-      }
+      // Referral bonus ab signup par nahi: dost ka pehla recharge (kam se kam Rs 100) hone par dono ko milta hai (wallet/referral.ts)
       return u;
     });
     isNewUser = true;
@@ -189,7 +163,7 @@ async function loginWithVerifiedPhone(input: { phone: string; app: AppKind; refe
   // Ek number = ek device: naye login par purane device logout
   const tokenVersion = await revokeOtherDevices(user.id);
   const tokens = await issueTokens({ ...user, tokenVersion }, input.userAgent);
-  return { ...tokens, isNewUser, referralBonusPaise, user: publicUser(user) };
+  return { ...tokens, isNewUser, referralBonusPaise: 0, user: publicUser(user) };
 }
 
 /** Ek number = ek device: naye login par purane sab device ka login, refresh token, push token aur socket band */
@@ -284,6 +258,8 @@ export function publicUser(u: typeof users.$inferSelect) {
     phone: u.phone,
     email: u.email,
     name: u.name,
+    publicId: u.publicId,
+    username: u.username,
     gender: u.gender,
     avatarUrl: u.avatarUrl,
     ageConfirmed: Boolean(u.ageConfirmedAt),

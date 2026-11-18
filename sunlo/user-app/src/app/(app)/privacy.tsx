@@ -98,6 +98,28 @@ export default function Privacy() {
             </Text>
           </Pressable>
         </View>
+
+        <Pressable
+          onPress={() =>
+            confirm('Account delete karein?', 'Aapki personal jaankari hata di jayegi. Wallet ka bacha balance wapas nahi milega. Yeh wapas nahi ho sakta.', 'Delete', async () => {
+              try {
+                await api('/me', { method: 'DELETE' });
+              } catch (e) {
+                setMsg(errorMessage(e));
+                return;
+              }
+              disconnectSocket();
+              await signOut();
+            })
+          }
+          accessibilityRole="button"
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: space.md }}
+        >
+          <Ionicons name="trash-outline" size={16} color={colors.textMuted} />
+          <Text variant="small" color={colors.textMuted}>
+            Account delete karein
+          </Text>
+        </Pressable>
       </ScrollView>
     </Screen>
   );

@@ -69,12 +69,42 @@ usersRouter.patch('/me', async (req, res) => {
     // Naabaalig ki janm-tithi save nahi karte; app sirf 18+ ke liye hai
     throw new HttpError(403, 'AGE_BELOW_18', 'Bondty sirf 18 saal ya usse bade logon ke liye hai');
   }
-  const [u] = await db
-    .update(users)
-    .set({ ...data, ...(dateOfBirth ? { dateOfBirth } : {}), ...(ageConfirmed || dateOfBirth ? { ageConfirmedAt: new Date() } : {}) })
-    .where(eq(users.id, id))
-    .returning();
+  // Naam ek baar save hone ke baad nahi badalta (username badal sakta hai: PATCH /me/username)
+  if (data.name !== undefined) {
+    const [cur] = await db.select({ name: users.name }).from(users).where(eq(users.id, id)).limit(1);
+    if (cur?.name) delete data.name;
+  }
+  const set = { ...data, ...(dateOfBirth ? { dateOfBirth } : {}), ...(ageConfirmed || dateOfBirth ? { ageConfirmedAt: new Date() } : {}) };
+  if (Object.keys(set).length === 0) {
+    // Sirf naam bheja tha jo lock hai: kuch badalna nahi, user jaisa hai waisa lautao
+    const [cur] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    res.json({ user: publicUser(cur) });
+    return;
+  }
+  const [u] = await db.update(users).set(set).where(eq(users.id, id)).returning();
   res.json({ user: publicUser(u) });
+});
+
+/** Username: 3-20 akshar, a-z 0-9 _ . (pehla akshar letter). Badal sakta hai; ID (publicId) kabhi nahi badalti */
+const usernameSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z][a-z0-9_.]{2,19}$/, 'Username 3 se 20 akshar ka ho: a-z, 0-9, _ ya . (shuru mein letter)');
+const RESERVED_USERNAMES = new Set(['admin', 'administrator', 'bondty', 'support', 'help', 'official', 'moderator', 'system', 'staff', 'team', 'root']);
+
+usersRouter.patch('/me/username', async (req, res) => {
+  const id = authId(req);
+  const { username } = body(req, z.object({ username: usernameSchema }).strict());
+  if (RESERVED_USERNAMES.has(username)) throw badRequest('USERNAME_RESERVED', 'Yeh username available nahi hai');
+  try {
+    const [u] = await db.update(users).set({ username }).where(eq(users.id, id)).returning();
+    res.json({ user: publicUser(u) });
+  } catch (e) {
+    const err = e as { code?: string; cause?: { code?: string } };
+    if ((err.cause ?? err)?.code === '23505') throw new HttpError(409, 'USERNAME_TAKEN', 'Yeh username pehle se kisi ka hai, doosra chunein');
+    throw e;
+  }
 });
 
 // ---------------- DPDP: sahmati (consent) ----------------
@@ -108,6 +138,7 @@ async function eraseAccount(id: string) {
         phone: null,
         email: null,
         name: null,
+        username: null,
         avatarUrl: null,
         dateOfBirth: null,
         totpSecretEnc: null,

@@ -100,7 +100,7 @@ export default function Login() {
                   Referral code hai? (optional)
                 </Text>
               )}
-              {showRef && !refError ? <Text variant="caption">Naye account par bonus coins milte hain</Text> : null}
+              {showRef && !refError ? <Text variant="caption">Pehle ₹100 ke recharge par 50 coins bonus milega</Text> : null}
               <Button title="OTP bhejein" onPress={send} loading={loading} disabled={!valid} />
             </View>
 

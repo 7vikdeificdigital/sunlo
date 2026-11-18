@@ -11,7 +11,7 @@ export const DEFAULT_SETTINGS = {
   appName: 'Bondty',
   currency: 'INR',
   gstPct: 18, // recharge par GST
-  giftCommissionPct: 30, // har gift mein platform ka hissa (%)
+  giftCommissionPct: 50, // har gift mein platform ka hissa (%): listener ko 50%
   commissionPct: 30, // har session mein platform ka hissa (%)
   minSessionMinutes: 5, // session shuru karne ke liye kam se kam itne minute ka balance
   requestTimeoutSec: 60, // vendor itne second mein accept na kare to MISSED
@@ -52,8 +52,9 @@ export const DEFAULT_SETTINGS = {
 
   // ---- Referral code (login par) ----
   referralEnabled: true, // band karne par code ka bonus nahi milta
-  referralBonusPaise: 5000, // naye user ko Rs 50 = 50 coins
-  referrerBonusPaise: 0, // code dene wale ko (0 = kuch nahi)
+  referralBonusPaise: 5000, // code lagane wale ko Rs 50 = 50 coins (uske pehle recharge par)
+  referrerBonusPaise: 5000, // code dene wale ko Rs 50 = 50 coins (dost ke pehle recharge par)
+  referralMinRechargePaise: 10000, // bonus ke liye dost ka kam se kam recharge: Rs 100
 };
 
 export type Settings = typeof DEFAULT_SETTINGS;
@@ -84,6 +85,8 @@ export const PUBLIC_SETTING_KEYS: SettingKey[] = [
   'freeTrialMaxRatePaise',
   'referralEnabled',
   'referralBonusPaise',
+  'referrerBonusPaise',
+  'referralMinRechargePaise',
 ];
 
 let cache: { at: number; value: Settings } | null = null;

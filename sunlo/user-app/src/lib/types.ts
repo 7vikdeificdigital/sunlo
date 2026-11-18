@@ -5,6 +5,8 @@ export interface User {
   phone: string | null;
   email: string | null;
   name: string | null;
+  publicId?: number;
+  username?: string | null;
   gender: Gender | null;
   avatarUrl: string | null;
   language: string;

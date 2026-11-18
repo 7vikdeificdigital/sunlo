@@ -53,7 +53,7 @@ vendorSelfRouter.get('/vendor/me', async (req, res) => {
     db.select({ id: categories.id, name: categories.name }).from(vendorCategories).innerJoin(categories, eq(categories.id, vendorCategories.categoryId)).where(eq(vendorCategories.vendorId, v.id)),
     db.select().from(payoutAccounts).where(eq(payoutAccounts.vendorId, v.id)),
     db.select({ balance: wallets.balance }).from(wallets).where(eq(wallets.userId, userId)),
-    db.select({ phone: users.phone }).from(users).where(eq(users.id, userId)),
+    db.select({ phone: users.phone, publicId: users.publicId, username: users.username }).from(users).where(eq(users.id, userId)),
     getSettings(),
   ]);
   const { kycUploadId, panEnc, ...rest } = v;
@@ -62,6 +62,8 @@ vendorSelfRouter.get('/vendor/me', async (req, res) => {
     pan: v.panLast4 ? { last4: v.panLast4, name: v.panName, addedAt: v.panAddedAt } : null,
     tds: { enabled: s.tdsEnabled, pctWithPan: s.tdsBps / 100, pctWithoutPan: s.tdsNoPanBps / 100 },
     phone: u?.phone,
+    publicId: u?.publicId,
+    username: u?.username ?? null,
     hasKyc: Boolean(kycUploadId),
     categories: cats,
     payout: maskedPayout(payout),

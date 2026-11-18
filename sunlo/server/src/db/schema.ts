@@ -6,6 +6,7 @@
  */
 import { sql } from 'drizzle-orm';
 import {
+  bigint,
   boolean,
   check,
   customType,
@@ -72,7 +73,9 @@ export const users = pgTable(
     phone: text('phone').unique(), // E.164
     email: text('email').unique(),
     passwordHash: text('password_hash'), // sirf ADMIN (scrypt)
-    name: text('name'),
+    name: text('name'), // ek baar save hone ke baad badalta nahi (users/routes.ts)
+    publicId: bigint('public_id', { mode: 'number' }).notNull().default(sql`nextval('user_public_id_seq')`), // har user ki unique ID
+    username: text('username'), // badal sakta hai; default 'user<ID>' (DB trigger)
     gender: genderEnum('gender'),
     avatarUrl: text('avatar_url'),
     language: text('language').notNull().default('en'),
@@ -93,7 +96,12 @@ export const users = pgTable(
     updatedAt: updatedAt(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
-  (t) => [index('users_role_status_idx').on(t.role, t.status), index('users_created_idx').on(t.createdAt)],
+  (t) => [
+    index('users_role_status_idx').on(t.role, t.status),
+    index('users_created_idx').on(t.createdAt),
+    uniqueIndex('users_public_id_uniq').on(t.publicId),
+    uniqueIndex('users_username_uniq').on(sql`lower(${t.username})`),
+  ],
 );
 
 export const otpCodes = pgTable(

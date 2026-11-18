@@ -66,7 +66,8 @@ export default function Account() {
             <Avatar name={u?.name ?? 'U'} size={58} />
             <View style={{ flex: 1 }}>
               <Text variant="h3">{u?.name}</Text>
-              <Text variant="small">{u?.phone}</Text>
+              {u?.username ? <Text variant="small">@{u.username}</Text> : <Text variant="small">{u?.phone}</Text>}
+              {u?.publicId ? <Text variant="caption">ID: {u.publicId}</Text> : null}
               <Text variant="label" color={colors.primaryDark}>
                 Profile edit karein
               </Text>
@@ -116,21 +117,6 @@ export default function Account() {
             <Ionicons name="log-out-outline" size={20} color={colors.danger} />
             <Text variant="bodyStrong" color={colors.danger}>
               Logout
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() =>
-              ask('Account delete karein?', 'Aapki personal jaankari hata di jayegi. Wallet ka bacha balance wapas nahi milega. Yeh wapas nahi ho sakta.', 'Delete', async () => {
-                await api('/me', { method: 'DELETE' });
-                disconnectSocket();
-                await signOut();
-              })
-            }
-            style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderTopWidth: 1, borderTopColor: colors.border }}
-          >
-            <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
-            <Text variant="body" color={colors.textMuted}>
-              Account delete karein
             </Text>
           </Pressable>
         </Card>

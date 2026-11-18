@@ -267,7 +267,7 @@ adminRouter.get('/admin/users', async (req, res) => {
   if (q.search) conds.push(or(ilike(users.name, like(q.search)), ilike(users.phone, like(q.search)), ilike(users.email, like(q.search)))!);
   const where = and(...conds);
   const items = await db
-    .select({ id: users.id, name: users.name, phone: users.phone, email: users.email, status: users.status, createdAt: users.createdAt, balance: wallets.balance })
+    .select({ id: users.id, publicId: users.publicId, username: users.username, name: users.name, phone: users.phone, email: users.email, status: users.status, createdAt: users.createdAt, balance: wallets.balance })
     .from(users)
     .leftJoin(wallets, eq(wallets.userId, users.id))
     .where(where)
@@ -592,6 +592,7 @@ const settingsSchema = z
     referralEnabled: z.boolean(),
     referralBonusPaise: z.number().int().min(0).max(100_000),
     referrerBonusPaise: z.number().int().min(0).max(100_000),
+    referralMinRechargePaise: z.number().int().min(0).max(1_000_000),
   })
   .partial()
   .strict();

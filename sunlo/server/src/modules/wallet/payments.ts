@@ -12,6 +12,7 @@ import { logger } from '../../lib/logger';
 import { getSettings } from '../../lib/settings';
 import { refreshSessionLimit } from '../sessions/service';
 import { postTxn } from './ledger';
+import { grantReferralOnRecharge } from './referral';
 
 let rzp: Razorpay | null = null;
 function razorpay(): Razorpay {
@@ -128,6 +129,11 @@ export async function creditPayment(paymentId: string, providerPaymentId: string
     await refreshSessionLimit(result.payment.userId).catch((err) => logger.error({ err }, 'refreshSessionLimit failed'));
     const p = result.payment;
     void pushToUser(p.userId, { title: 'Recharge safal', body: `${Math.round((p.amount + p.bonus) / 100)} coins aapke wallet mein jod diye gaye`, data: { type: 'wallet' } });
+    const r = result.referral;
+    if (r) {
+      if (r.refereePaise > 0) void pushToUser(r.refereeId, { title: 'Referral bonus mila', body: `${Math.round(r.refereePaise / 100)} coins bonus from referral added to your account`, data: { type: 'wallet' } });
+      if (r.referrerId && r.referrerPaise > 0) void pushToUser(r.referrerId, { title: 'Referral bonus mila', body: `${Math.round(r.referrerPaise / 100)} coins received from referral`, data: { type: 'wallet' } });
+    }
   }
   return result;
 }
@@ -136,7 +142,7 @@ async function creditPaymentTx(paymentId: string, providerPaymentId: string, pai
   return db.transaction(async (tx) => {
     const [p] = await tx.select().from(payments).where(eq(payments.id, paymentId)).for('update').limit(1);
     if (!p) throw notFound('Payment');
-    if (p.status === 'PAID') return { alreadyCredited: true, payment: p };
+    if (p.status === 'PAID') return { alreadyCredited: true, payment: p, referral: null };
     if (paidAmount !== p.totalPayable) {
       logger.error({ paymentId, paidAmount, expected: p.totalPayable }, 'Payment amount mismatch');
       await tx.update(payments).set({ status: 'FAILED' }).where(eq(payments.id, p.id));
@@ -157,7 +163,8 @@ async function creditPaymentTx(paymentId: string, providerPaymentId: string, pai
       body: `Rs ${((p.amount + p.bonus) / 100).toFixed(2)} aapke wallet mein jod diye gaye.`,
       data: { type: 'wallet', paymentId: p.id },
     });
-    return { alreadyCredited: false, payment: updated };
+    const referral = await grantReferralOnRecharge(tx, { userId: p.userId, amount: p.amount });
+    return { alreadyCredited: false, payment: updated, referral };
   });
 }
 
