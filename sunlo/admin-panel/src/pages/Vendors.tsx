@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Avatar, Empty, ErrorBox, Loading, PageHead, Pager, ReasonDialog, Status, Tabs } from '@/components/ui';
-import { api } from '@/lib/api';
+import { api, fileUrl } from '@/lib/api';
 import { d, dt, mins, rupees } from '@/lib/format';
 
 type VStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'DRAFT';
@@ -124,6 +124,9 @@ interface VDetail {
   isOnline: boolean;
   kycDocType: string | null;
   kycUploadId: string | null;
+  panLast4: string | null;
+  panName: string | null;
+  panAddedAt: string | null;
   rejectionReason: string | null;
   submittedAt: string | null;
   approvedAt: string | null;
@@ -174,6 +177,17 @@ export function VendorDetail() {
       setErr(e);
     } finally {
       setBusy(false);
+    }
+  }
+
+  const [fullPan, setFullPan] = useState<string | null>(null);
+  async function revealPan() {
+    setErr(null);
+    try {
+      const r = await api<{ pan: string }>(`/admin/vendors/${id}/pan`);
+      setFullPan(r.pan);
+    } catch (e) {
+      setErr(e);
     }
   }
 
@@ -231,10 +245,30 @@ export function VendorDetail() {
                 </div>
               </div>
             </div>
+            {fileUrl(v.avatarUrl) ? (
+              <a href={fileUrl(v.avatarUrl) ?? '#'} target="_blank" rel="noreferrer" title="Poori photo kholein">
+                <img src={fileUrl(v.avatarUrl) ?? ''} alt={v.displayName} style={{ width: '100%', maxWidth: 360, maxHeight: 420, objectFit: 'cover', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 14, display: 'block' }} />
+              </a>
+            ) : null}
             {v.rejectionReason ? <div className="notice" style={{ marginBottom: 12 }}>Pichhla sandesh: {v.rejectionReason}</div> : null}
             <dl className="kv">
               <dt>Phone</dt>
               <dd className="mono">{v.phone}</dd>
+              <dt>PAN (TDS)</dt>
+              <dd>
+                {v.panLast4 ? (
+                  <>
+                    <span className="mono">{fullPan ?? `XXXXXX${v.panLast4}`}</span> · {v.panName ?? '—'} {v.panAddedAt ? `· ${d(v.panAddedAt)}` : ''}{' '}
+                    {fullPan ? null : (
+                      <button className="btn ghost sm" onClick={revealPan}>
+                        Poora PAN dekhein
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  'Nahi joda (TDS 5% katega)'
+                )}
+              </dd>
               <dt>Gender / Anubhav</dt>
               <dd>
                 {v.gender ?? '—'} · {v.experienceYears} saal

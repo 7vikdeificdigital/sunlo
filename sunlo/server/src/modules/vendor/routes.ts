@@ -320,8 +320,8 @@ vendorSelfRouter.put('/vendor/pan', async (req, res) => {
       name: z.string().trim().min(3).max(80),
     }),
   );
-  const [pending] = await db.select({ id: withdrawals.id }).from(withdrawals).where(and(eq(withdrawals.vendorId, v.id), eq(withdrawals.status, 'PENDING'))).limit(1);
-  if (pending) throw conflict('WITHDRAWAL_PENDING', 'Pending withdrawal ke dauran PAN nahi badal sakte');
+  // PAN ek baar juda to badla nahi ja sakta (galti ho to support/admin se)
+  if (v.panLast4) throw conflict('PAN_LOCKED', 'PAN ek baar jud jaane ke baad badla nahi ja sakta. Galti ho to support se sampark karein.');
   await db.update(vendors).set({ panEnc: encryptField(pan), panLast4: pan.slice(-4), panName: name, panAddedAt: new Date() }).where(eq(vendors.id, v.id));
   res.json({ pan: { last4: pan.slice(-4), name } });
 });

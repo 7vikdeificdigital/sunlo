@@ -57,20 +57,28 @@ export default function Pan() {
               </View>
             </Card>
           ) : null}
-          <Input label={cur ? 'Naya PAN (badalna ho to)' : 'PAN number'} value={pan} onChangeText={(t) => setPan(t.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} placeholder="ABCDE1234F" autoCapitalize="characters" maxLength={10} error={pan.length === 10 && !valid ? 'PAN sahi nahi lag raha' : undefined} />
-          <Input label="PAN par likha naam" value={name} onChangeText={setName} maxLength={80} autoCapitalize="characters" />
-          {error ? (
-            <Text variant="small" color={colors.danger}>
-              {error}
+          {cur ? (
+            <Text variant="small" color={colors.textMuted}>
+              PAN ek baar jud jaane ke baad badla nahi ja sakta. Koi galti ho to Help aur Support se sampark karein.
             </Text>
-          ) : null}
-          <Button title="PAN save karein" icon="shield-checkmark-outline" disabled={!valid || name.trim().length < 3} loading={saving} onPress={save} />
-          <Row gap={6}>
-            <Ionicons name="lock-closed-outline" size={14} color={colors.textFaint} />
-            <Text variant="caption" style={{ flex: 1 }}>
-              PAN encrypted rakha jaata hai aur sirf TDS return ke liye istemaal hota hai.
-            </Text>
-          </Row>
+          ) : (
+            <>
+            <Input label="PAN number" value={pan} onChangeText={(t) => setPan(t.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} placeholder="ABCDE1234F" autoCapitalize="characters" maxLength={10} error={pan.length === 10 && !valid ? 'PAN sahi nahi lag raha' : undefined} />
+            <Input label="PAN par likha naam" value={name} onChangeText={setName} maxLength={80} autoCapitalize="characters" />
+            {error ? (
+              <Text variant="small" color={colors.danger}>
+                {error}
+              </Text>
+            ) : null}
+            <Button title="PAN save karein" icon="shield-checkmark-outline" disabled={!valid || name.trim().length < 3} loading={saving} onPress={save} />
+            <Row gap={6}>
+              <Ionicons name="lock-closed-outline" size={14} color={colors.textFaint} />
+              <Text variant="caption" style={{ flex: 1 }}>
+                PAN encrypted rakha jaata hai aur sirf TDS return ke liye istemaal hota hai.
+              </Text>
+            </Row>
+            </>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </Screen>

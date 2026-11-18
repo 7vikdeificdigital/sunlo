@@ -207,6 +207,16 @@ adminRouter.get('/admin/vendors/:id', async (req, res) => {
   });
 });
 
+/** Poora PAN dekhna (TDS filing ke liye). Sirf admin, aur har baar audit log mein darj. */
+adminRouter.get('/admin/vendors/:id/pan', async (req, res) => {
+  const { id } = params(req, idParam);
+  const [v] = await db.select({ panEnc: vendors.panEnc, panName: vendors.panName, panAddedAt: vendors.panAddedAt }).from(vendors).where(eq(vendors.id, id)).limit(1);
+  if (!v) throw notFound('Vendor');
+  if (!v.panEnc) throw notFound('PAN');
+  await audit(req, 'vendor.pan.view', 'vendor', id);
+  res.json({ pan: decryptField(v.panEnc), name: v.panName, addedAt: v.panAddedAt });
+});
+
 async function setVendorStatus(id: string, from: string[], to: 'APPROVED' | 'REJECTED' | 'SUSPENDED', extra: Partial<typeof vendors.$inferInsert> = {}) {
   const [v] = await db
     .update(vendors)
