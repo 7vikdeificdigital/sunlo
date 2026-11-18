@@ -138,15 +138,28 @@ export async function creditPayment(paymentId: string, providerPaymentId: string
   return result;
 }
 
+/** Gateway fee (+GST) ki upar-se-upar seema, % mein */
+const MAX_GATEWAY_FEE_PCT = 5;
+
 async function creditPaymentTx(paymentId: string, providerPaymentId: string, paidAmount: number) {
   return db.transaction(async (tx) => {
     const [p] = await tx.select().from(payments).where(eq(payments.id, paymentId)).for('update').limit(1);
     if (!p) throw notFound('Payment');
     if (p.status === 'PAID') return { alreadyCredited: true, payment: p, referral: null };
-    if (paidAmount !== p.totalPayable) {
-      logger.error({ paymentId, paidAmount, expected: p.totalPayable }, 'Payment amount mismatch');
+    // Razorpay "customer fee bearer" mein customer ne convenience fee + GST bhi di hoti hai (~2.4%),
+    // isliye paid >= total chalega (upar se MAX_FEE_PCT tak). Kam raqam = galat. Bahut zyada = rok ke dekhein.
+    const maxPaid = Math.ceil(p.totalPayable * (1 + MAX_GATEWAY_FEE_PCT / 100));
+    if (paidAmount < p.totalPayable) {
+      logger.error({ paymentId, paidAmount, expected: p.totalPayable }, 'Payment amount mismatch (kam)');
       await tx.update(payments).set({ status: 'FAILED' }).where(eq(payments.id, p.id));
       throw badRequest('AMOUNT_MISMATCH', 'Payment ki raqam mel nahi khati');
+    }
+    if (paidAmount > maxPaid) {
+      logger.error({ paymentId, paidAmount, expected: p.totalPayable, maxPaid }, 'Payment amount mismatch (zyada): manual check zaroori');
+      throw badRequest('AMOUNT_MISMATCH', 'Payment ki raqam mel nahi khati');
+    }
+    if (paidAmount > p.totalPayable) {
+      logger.info({ paymentId, paidAmount, expected: p.totalPayable, gatewayFee: paidAmount - p.totalPayable }, 'Gateway fee customer ne di');
     }
     const [updated] = await tx
       .update(payments)
