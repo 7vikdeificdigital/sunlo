@@ -6,6 +6,7 @@ export interface User {
   email: string | null;
   name: string | null;
   publicId?: number;
+  publicCode?: string;
   username?: string | null;
   gender: Gender | null;
   avatarUrl: string | null;

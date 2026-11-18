@@ -275,7 +275,7 @@ adminRouter.get('/admin/users', async (req, res) => {
     .limit(q.limit)
     .offset((q.page - 1) * q.limit);
   const [{ total }] = await db.select({ total: count }).from(users).where(where);
-  res.json({ items, total, page: q.page, limit: q.limit });
+  res.json({ items: items.map((i) => ({ ...i, publicCode: `BOU${i.publicId}` })), total, page: q.page, limit: q.limit });
 });
 
 adminRouter.get('/admin/users/:id', async (req, res) => {

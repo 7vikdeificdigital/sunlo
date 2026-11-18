@@ -65,7 +65,7 @@ export default function Profile() {
         <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.lg, paddingBottom: space.xxl }} keyboardShouldPersistTaps="handled">
           <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, padding: space.lg, gap: space.lg }}>
             <Input label="Mobile number" value={me.data?.user.phone ?? ''} editable={false} style={{ color: colors.textMuted }} />
-            <Input label="Bondty ID" value={String(me.data?.user.publicId ?? '')} editable={false} style={{ color: colors.textMuted }} />
+            <Input label="Bondty ID" value={me.data?.user.publicCode ?? ''} editable={false} style={{ color: colors.textMuted }} />
             <Input label="Username" value={username} onChangeText={(t) => setUsername(t.toLowerCase())} maxLength={20} autoCapitalize="none" autoCorrect={false} placeholder="apna username" />
             <View style={{ gap: 4 }}>
               <Input label="Naam" value={name} onChangeText={setName} maxLength={60} editable={!nameLocked} style={nameLocked ? { color: colors.textMuted } : undefined} />

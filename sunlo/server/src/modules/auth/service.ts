@@ -259,6 +259,7 @@ export function publicUser(u: typeof users.$inferSelect) {
     email: u.email,
     name: u.name,
     publicId: u.publicId,
+    publicCode: `BOU${u.publicId}`,
     username: u.username,
     gender: u.gender,
     avatarUrl: u.avatarUrl,

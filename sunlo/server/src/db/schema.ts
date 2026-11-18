@@ -179,6 +179,7 @@ export const vendors = pgTable(
   'vendors',
   {
     id: uuid('id').primaryKey().defaultRandom(),
+    publicId: bigint('public_id', { mode: 'number' }).notNull().default(sql`nextval('vendor_public_id_seq')`),
     userId: uuid('user_id')
       .notNull()
       .unique()
@@ -219,6 +220,7 @@ export const vendors = pgTable(
   },
   (t) => [
     index('vendors_status_online_idx').on(t.status, t.isOnline),
+    uniqueIndex('vendors_public_id_uniq').on(t.publicId),
     check('vendor_rates_positive', sql`${t.chatRatePerMin} > 0 AND ${t.callRatePerMin} > 0 AND ${t.videoRatePerMin} > 0`),
   ],
 );

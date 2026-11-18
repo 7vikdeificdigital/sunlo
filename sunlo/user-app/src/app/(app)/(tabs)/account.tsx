@@ -67,7 +67,7 @@ export default function Account() {
             <View style={{ flex: 1 }}>
               <Text variant="h3">{u?.name}</Text>
               {u?.username ? <Text variant="small">@{u.username}</Text> : <Text variant="small">{u?.phone}</Text>}
-              {u?.publicId ? <Text variant="caption">ID: {u.publicId}</Text> : null}
+              {u?.publicCode ? <Text variant="caption">ID: {u.publicCode}</Text> : null}
               <Text variant="label" color={colors.primaryDark}>
                 Profile edit karein
               </Text>

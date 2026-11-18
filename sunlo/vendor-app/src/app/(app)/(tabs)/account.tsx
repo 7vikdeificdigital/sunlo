@@ -57,7 +57,7 @@ export default function Account() {
             <View style={{ flex: 1 }}>
               <Text variant="h3">{v.displayName}</Text>
               <Text variant="small">{v.phone}</Text>
-              {v.publicId ? <Text variant="caption">ID: {v.publicId}{v.username ? ` · @${v.username}` : ''}</Text> : null}
+              {v.publicCode ? <Text variant="caption">ID: {v.publicCode}{v.username ? ` · @${v.username}` : ''}</Text> : null}
               <Row gap={4}>
                 <Ionicons name="checkmark-circle" size={14} color={colors.success} />
                 <Text variant="caption" color={colors.success}>

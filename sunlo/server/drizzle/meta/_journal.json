@@ -64,6 +64,13 @@
       "when": 1794600000000,
       "tag": "0009_identity_gift_split",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794700000000,
+      "tag": "0010_vendor_public_id",
+      "breakpoints": true
     }
   ]
 }

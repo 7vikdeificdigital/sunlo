@@ -121,6 +121,16 @@ describe('Unique ID, username aur naam ka lock', () => {
     expect(ma.publicId).toBeGreaterThan(50000000);
     expect(mb.publicId).not.toBe(ma.publicId);
     expect(ma.username).toBe(`user${ma.publicId}`);
+    expect(ma.publicCode).toBe(`BOU${ma.publicId}`);
+  });
+
+  it('vendor ko BOL wali alag unique ID milti hai', async () => {
+    const v1 = await loginViaOtp(undefined, 'vendor');
+    const v2 = await loginViaOtp(undefined, 'vendor');
+    const m1 = (await api().get(`${P}/vendor/me`).set(bearer(v1.accessToken))).body;
+    const m2 = (await api().get(`${P}/vendor/me`).set(bearer(v2.accessToken))).body;
+    expect(m1.publicCode).toMatch(/^BOL\d{8}$/);
+    expect(m2.publicCode).not.toBe(m1.publicCode);
   });
 
   it('username badal sakta hai (unique, case-insensitive), ID nahi', async () => {

@@ -29,6 +29,7 @@ export interface VendorMe {
   totalSessions: number;
   phone: string;
   publicId?: number;
+  publicCode?: string;
   username?: string | null;
   categories: { id: string; name: string }[];
   payout: { method: 'UPI'; upiId: string } | { method: 'BANK'; accountHolder: string; accountLast4: string; ifsc: string } | null;
