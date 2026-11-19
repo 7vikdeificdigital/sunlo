@@ -150,6 +150,7 @@ export function VendorDetail() {
   const [kycUrl, setKycUrl] = useState<{ url: string; pdf: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<unknown>(null);
+  const [fullPan, setFullPan] = useState<string | null>(null);
 
   useEffect(
     () => () => {
@@ -180,7 +181,6 @@ export function VendorDetail() {
     }
   }
 
-  const [fullPan, setFullPan] = useState<string | null>(null);
   async function revealPan() {
     setErr(null);
     try {
