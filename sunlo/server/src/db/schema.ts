@@ -76,6 +76,8 @@ export const users = pgTable(
     name: text('name'), // ek baar save hone ke baad badalta nahi (users/routes.ts)
     publicId: bigint('public_id', { mode: 'number' }).notNull().default(sql`nextval('user_public_id_seq')`), // har user ki unique ID
     username: text('username'), // badal sakta hai; default 'user<ID>' (DB trigger)
+    anonymous: boolean('anonymous').notNull().default(false), // true = listener ko naam ki jagah @username dikhega
+    totalMinutes: integer('total_minutes').notNull().default(0), // kitne minute baat hui (level ke liye)
     gender: genderEnum('gender'),
     avatarUrl: text('avatar_url'),
     language: text('language').notNull().default('en'),

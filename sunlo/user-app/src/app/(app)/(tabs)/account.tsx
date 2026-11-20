@@ -3,11 +3,12 @@ import { router, type Href } from 'expo-router';
 import { Alert, Platform, Pressable, ScrollView, Share, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { LanguagePicker } from '@/components/LanguagePicker';
+import { LevelBadge, levelFromMinutes } from '@/components/LevelBadge';
 import { Card, Row, Screen, Text } from '@/components/ui';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { rupees } from '@/lib/format';
-import { useMe } from '@/lib/queries';
+import { useAppConfig, useMe } from '@/lib/queries';
 import { disconnectSocket } from '@/lib/socket';
 import { colors, radius, space } from '@/theme';
 
@@ -27,6 +28,7 @@ function ask(title: string, msg: string, ok: string, fn: () => void) {
 /** Account tab: profile, wallet, favorites, support, logout */
 export default function Account() {
   const me = useMe();
+  const cfg = useAppConfig();
   const { refreshToken, signOut } = useAuth();
   const u = me.data?.user;
 
@@ -63,11 +65,12 @@ export default function Account() {
       <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.lg, paddingBottom: space.xxl }}>
         <Card onPress={() => router.push('/profile')}>
           <Row gap={space.md}>
-            <Avatar name={u?.name ?? 'U'} size={58} />
-            <View style={{ flex: 1 }}>
-              <Text variant="h3">{u?.name}</Text>
+            <Avatar name={u?.name ?? 'U'} uri={u?.avatarUrl} gender={u?.gender} size={58} />
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text variant="h3">{u?.anonymous && u?.username ? `@${u.username}` : u?.name}</Text>
               {u?.username ? <Text variant="small">@{u.username}</Text> : <Text variant="small">{u?.phone}</Text>}
               {u?.publicCode ? <Text variant="caption">ID: {u.publicCode}</Text> : null}
+              <LevelBadge level={levelFromMinutes(u?.totalMinutes ?? 0, cfg.data?.settings.levelIntermediateMinutes ?? 500, cfg.data?.settings.levelExpertMinutes ?? 1500)} size="sm" />
               <Text variant="label" color={colors.primaryDark}>
                 Profile edit karein
               </Text>

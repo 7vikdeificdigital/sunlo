@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { VoicePlayer, VoiceRecorder } from '@/components/Voice';
-import { Button, Card, Chip, Empty, ErrorBox, Header, Loader, Row, Screen, Text } from '@/components/ui';
+import { Button, Card, Chip, Empty, ErrorBox, Loader, Row, Screen, Text } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
 import { audioSrc, uploadClip } from '@/lib/voice';
 import { colors, space } from '@/theme';
@@ -63,7 +63,11 @@ export default function VoiceBoard() {
 
   return (
     <Screen edges={['top', 'bottom']}>
-      <Header title="Voice note" />
+      <Row style={{ paddingHorizontal: space.lg, paddingTop: space.sm, paddingBottom: space.md }}>
+        <Text variant="h2" style={{ flex: 1 }}>
+          Voice note
+        </Text>
+      </Row>
       {q.isLoading ? (
         <Loader />
       ) : q.isError ? (

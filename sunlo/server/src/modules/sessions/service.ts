@@ -2,6 +2,7 @@ import { and, desc, eq, inArray, lte, sql } from 'drizzle-orm';
 import { db, type Tx } from '../../db/client';
 import { vendors, consultSessions, notifications, scheduledCalls, trialClaims, userBlocks, users, wallets } from '../../db/schema';
 import { sha256 } from '../../lib/crypto';
+import { firstName, userDisplayName } from '../../lib/displayName';
 import { badRequest, conflict, forbidden, HttpError, notFound } from '../../lib/errors';
 import { logger } from '../../lib/logger';
 import { pushToUser } from '../../lib/push';
@@ -171,17 +172,18 @@ export async function requestSession(
     throw e;
   }
 
-  const [u] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
-  emitToUser(a.userId, 'session:incoming', { ...publicSession(row), userName: u?.name ?? 'User', intake: row.intake });
+  const [u] = await db.select({ name: userDisplayName }).from(users).where(eq(users.id, userId)).limit(1);
+  const shownName = u?.name ?? 'User';
+  emitToUser(a.userId, 'session:incoming', { ...publicSession(row), userName: shownName, intake: row.intake });
   await db.insert(notifications).values({
     userId: a.userId,
     title: input.type === 'CHAT' ? 'Naya chat request' : 'Naya call request',
-    body: `${u?.name ?? 'Ek user'} aapse baat karna chahte hain`,
+    body: `${shownName} aapse baat karna chahte hain`,
     data: { type: 'session', sessionId: row.id },
   });
   void pushToUser(a.userId, {
     title: input.type === 'CHAT' ? 'Naya chat request' : input.type === 'AUDIO' ? 'Naya voice call request' : 'Naya video call request',
-    body: `${u?.name?.split(' ')[0] ?? 'Ek user'} aapse baat karna chahte hain. Jaldi accept karein (60 sec)`,
+    body: `${firstName(shownName)} aapse baat karna chahte hain. Jaldi accept karein (60 sec)`,
     data: { type: 'session', sessionId: row.id },
   });
   return publicSession(row);
@@ -283,12 +285,12 @@ export async function rejectByVendor(vendorUserId: string, sessionId: string) {
 export async function pendingForVendor(vendorUserId: string) {
   const vendorId = await myVendorId(vendorUserId);
   const rows = await db
-    .select({ s: consultSessions, userName: users.name })
+    .select({ s: consultSessions, userName: userDisplayName })
     .from(consultSessions)
     .innerJoin(users, eq(users.id, consultSessions.userId))
     .where(and(eq(consultSessions.vendorId, vendorId), inArray(consultSessions.status, ['REQUESTED', 'ACTIVE'])))
     .orderBy(desc(consultSessions.requestedAt));
-  return rows.map((r) => ({ ...publicSession(r.s), userName: r.userName?.split(' ')[0] ?? 'User', intake: r.s.intake }));
+  return rows.map((r) => ({ ...publicSession(r.s), userName: firstName(r.userName), intake: r.s.intake }));
 }
 
 /** Vendor ki session history (kamai ke saath) */
@@ -296,14 +298,14 @@ export async function vendorSessions(vendorUserId: string, page: number, limit: 
   const [v] = await db.select({ id: vendors.id }).from(vendors).where(eq(vendors.userId, vendorUserId)).limit(1);
   if (!v) throw forbidden('Vendor profile nahi mila');
   const rows = await db
-    .select({ s: consultSessions, userName: users.name })
+    .select({ s: consultSessions, userName: userDisplayName })
     .from(consultSessions)
     .innerJoin(users, eq(users.id, consultSessions.userId))
     .where(eq(consultSessions.vendorId, v.id))
     .orderBy(desc(consultSessions.requestedAt))
     .limit(limit)
     .offset((page - 1) * limit);
-  return rows.map((r) => ({ ...publicSession(r.s), vendorEarning: r.s.vendorEarning, userName: r.userName?.split(' ')[0] ?? 'User', intake: r.s.intake }));
+  return rows.map((r) => ({ ...publicSession(r.s), vendorEarning: r.s.vendorEarning, userName: firstName(r.userName), intake: r.s.intake }));
 }
 
 // ---------------- Dono taraf ----------------
@@ -327,9 +329,9 @@ export async function getSessionDetail(actorId: string, sessionId: string) {
     .from(vendors)
     .where(eq(vendors.id, session.vendorId))
     .limit(1);
-  const [u] = await db.select({ id: users.id, name: users.name }).from(users).where(eq(users.id, session.userId)).limit(1);
-  // Vendor ko user ka sirf pehla naam dikhta hai (privacy)
-  return { ...publicSession(session), vendor: a, user: { id: u.id, name: u.name?.split(' ')[0] ?? 'User' }, intake: session.intake };
+  const [u] = await db.select({ id: users.id, name: userDisplayName }).from(users).where(eq(users.id, session.userId)).limit(1);
+  // Vendor ko user ka sirf pehla naam (ya @username) dikhta hai (privacy)
+  return { ...publicSession(session), vendor: a, user: { id: u.id, name: firstName(u.name) }, intake: session.intake };
 }
 
 export async function endSession(actorId: string, sessionId: string) {
@@ -384,6 +386,11 @@ export async function finalizeSession(sessionId: string, reason: string, vendorU
           });
       }
     }
+    // User ke bhi minute jama hote hain (level ke liye)
+    await tx
+      .update(users)
+      .set({ totalMinutes: sql`${users.totalMinutes} + ${bill.minutes}` })
+      .where(eq(users.id, cur.userId));
     const [a] = await tx
       .update(vendors)
       .set({ totalMinutes: sql`${vendors.totalMinutes} + ${bill.minutes}`, totalSessions: sql`${vendors.totalSessions} + 1` })
@@ -437,7 +444,8 @@ export async function sweepSessions(now = new Date()) {
       logger.error({ err, sessionId: s.id }, 'Auto-end failed');
     }
   }
-  // Balance khatam hone se 1 minute pehle user ko chetavani (ek hi baar)
+  // Balance khatam hone se pehle user ko chetavani (ek hi baar), settings ke hisaab se
+  const warnSec = Math.max(30, Math.min(600, (await getSettings()).lowBalanceWarnSec));
   const warn = await db
     .update(consultSessions)
     .set({ lowBalanceWarnedAt: now })
@@ -445,7 +453,7 @@ export async function sweepSessions(now = new Date()) {
       and(
         eq(consultSessions.status, 'ACTIVE'),
         sql`${consultSessions.lowBalanceWarnedAt} is null`,
-        sql`${consultSessions.acceptedAt} + make_interval(secs => ${consultSessions.maxSeconds} - 60) <= ${now.toISOString()}::timestamptz`,
+        sql`${consultSessions.acceptedAt} + make_interval(secs => ${consultSessions.maxSeconds} - ${warnSec}) <= ${now.toISOString()}::timestamptz`,
       ),
     )
     .returning();

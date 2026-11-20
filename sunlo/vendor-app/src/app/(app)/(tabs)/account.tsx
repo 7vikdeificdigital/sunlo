@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
 import { Alert, Platform, Pressable, ScrollView, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
+import { LevelBadge, levelFromMinutes } from '@/components/LevelBadge';
 import { LanguagePicker } from '@/components/LanguagePicker';
 import { Card, Row, Screen, Text } from '@/components/ui';
 import { api } from '@/lib/api';
@@ -64,6 +65,7 @@ export default function Account() {
                   Verified partner
                 </Text>
               </Row>
+              <LevelBadge level={levelFromMinutes(v.totalMinutes)} size="sm" />
             </View>
           </Card>
         ) : null}

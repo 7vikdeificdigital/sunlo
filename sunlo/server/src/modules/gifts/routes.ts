@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { db } from '../../db/client';
 import { consultSessions, users, vendors, wallets } from '../../db/schema';
 import { badRequest, HttpError, notFound } from '../../lib/errors';
+import { userDisplayName } from '../../lib/displayName';
 import { pushToUser } from '../../lib/push';
 import { emitToSession, emitToUser } from '../../lib/realtime';
 import { getSettings } from '../../lib/settings';
@@ -127,7 +128,7 @@ giftsPrivate.post('/sessions/:id/gifts', requireRole('USER'), async (req, res) =
     return { send, gift: g, vendorUserId: v?.userId ?? null, acceptedAt: sess.acceptedAt, maxSeconds: newMax, earning };
   });
 
-  const [u] = await db.select({ n: users.name }).from(users).where(eq(users.id, userId)).limit(1);
+  const [u] = await db.select({ n: userDisplayName }).from(users).where(eq(users.id, userId)).limit(1);
   const fromUser = u?.n || 'Ek user';
   const sh = shape(out.gift);
   const payload = { sessionId: id, giftId: out.gift.id, name: out.gift.name, icon: out.gift.icon, price: out.gift.price, svgaUrl: sh.svgaUrl, mediaType: sh.mediaType, thumbUrl: sh.thumbUrl, from: fromUser };
@@ -167,7 +168,7 @@ giftsPrivate.get('/admin/gifts', async (_req, res) => {
       commissionPct: giftSends.commissionPct,
       vendorEarning: giftSends.vendorEarning,
       createdAt: giftSends.createdAt,
-      userName: users.name,
+      userName: userDisplayName,
       vendorName: vendors.displayName,
     })
     .from(giftSends)
@@ -263,7 +264,7 @@ giftsPrivate.get('/vendor/gifts', requireRole('VENDOR'), async (req, res) => {
       price: giftSends.price,
       vendorEarning: giftSends.vendorEarning,
       createdAt: giftSends.createdAt,
-      userName: users.name,
+      userName: userDisplayName,
       version: gifts.svgaVersion,
       hasThumb: sql<boolean>`${gifts.thumbData} is not null`,
     })

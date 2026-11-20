@@ -20,12 +20,13 @@ export const DEFAULT_SETTINGS = {
   minRatePerMinPaise: 500, // vendor kam se kam Rs 5/min rakh sakta hai
   maxRatePerMinPaise: 20_000, // zyada se zyada Rs 200/min
   minWithdrawalPaise: 50_000, // Rs 500 se kam ka withdrawal nahi
-  supportEmail: 'support@example.com',
+  supportEmail: 'support@bondty.com',
   maskContactInfoInChat: true,
+  lowBalanceWarnSec: 120, // session khatam hone se itne second pehle "recharge karein" alert
 
   // ---- Grievance Officer (IT Rules 2021/2026: naam aur sampark app + website par dikhana zaroori) ----
   grievanceOfficerName: '',
-  grievanceOfficerEmail: '',
+  grievanceOfficerEmail: 'support@bondty.com',
   grievanceOfficerPhone: '',
   grievanceAddress: '',
   policyVersion: '2026-11', // Terms/Privacy ka version; badalne par users se dobara sahmati
@@ -55,6 +56,15 @@ export const DEFAULT_SETTINGS = {
   referralBonusPaise: 5000, // code lagane wale ko Rs 50 = 50 coins (uske pehle recharge par)
   referrerBonusPaise: 5000, // code dene wale ko Rs 50 = 50 coins (dost ke pehle recharge par)
   referralMinRechargePaise: 10000, // bonus ke liye dost ka kam se kam recharge: Rs 100
+
+  // ---- Level (Beginner / Intermediate / Expert): kitne minute baat hui uske hisaab se ----
+  levelIntermediateMinutes: 500, // itne minute ke baad Intermediate
+  levelExpertMinutes: 1500, // itne minute ke baad Expert
+  // Level ka fayda: 1 coin ki keemat (paise mein). Kam keemat = utne hi rupay mein zyada coins.
+  // Billing wahi rehti hai (rate per minute coins mein), sirf recharge par coins zyada milte hain.
+  coinPaiseBeginner: 80,
+  coinPaiseIntermediate: 60,
+  coinPaiseExpert: 50,
 };
 
 export type Settings = typeof DEFAULT_SETTINGS;
@@ -87,6 +97,12 @@ export const PUBLIC_SETTING_KEYS: SettingKey[] = [
   'referralBonusPaise',
   'referrerBonusPaise',
   'referralMinRechargePaise',
+  'lowBalanceWarnSec',
+  'levelIntermediateMinutes',
+  'levelExpertMinutes',
+  'coinPaiseBeginner',
+  'coinPaiseIntermediate',
+  'coinPaiseExpert',
 ];
 
 let cache: { at: number; value: Settings } | null = null;

@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { ChatBubble } from '@/components/ChatBubble';
 import { GiftLayer } from '@/components/GiftLayer';
 import { PushBanner } from '@/components/PushBanner';
 import { Redirect, Stack, useSegments } from 'expo-router';
@@ -25,20 +26,44 @@ export default function AppLayout() {
     if (!s.connected) s.connect();
     const onUpdate = (sess: Session) => {
       qc.setQueryData(['session', sess.id], (old: object | undefined) => (old ? { ...old, ...sess } : old));
+      qc.invalidateQueries({ queryKey: ['session', 'open'] }); // kone wala chat bubble turant sahi ho
       if (['COMPLETED', 'REJECTED', 'MISSED', 'CANCELLED'].includes(sess.status)) {
         qc.invalidateQueries({ queryKey: qk.me });
         qc.invalidateQueries({ queryKey: qk.wallet });
         qc.invalidateQueries({ queryKey: ['sessions'] });
       }
     };
-    // Balance khatam hone se 1 minute pehle chetavani (CCPA: achanak call na kate)
+    // Balance khatam hone se pehle chetavani (CCPA: achanak call na kate) + seedha recharge ka button
     const onLow = (p: { sessionId: string; secondsLeft: number }) =>
-      emitPushMessage({ title: 'Balance khatam hone wala hai', body: `Lagbhag ${Math.max(1, Math.round(p.secondsLeft / 60))} minute bacha hai. Baat jaari rakhni ho to abhi recharge karein.` });
+      emitPushMessage({
+        title: 'Balance kam hai',
+        body: `Lagbhag ${Math.max(1, Math.round(p.secondsLeft / 60))} minute bacha hai. Baat jaari rakhni ho to abhi recharge karein.`,
+        action: { label: 'Recharge karein', href: '/wallet' },
+        tone: 'alert',
+        seconds: 10,
+      });
+    // Support ka jawab / koi bhi notification: list bina reload ke taaza
+    // (banner FCM khud dikhata hai, isliye yahan se dobara nahi dikhate)
+    const onNotification = (n: { data?: { type?: string; ticketId?: string } }) => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      if (n?.data?.ticketId) {
+        qc.invalidateQueries({ queryKey: ['ticket', n.data.ticketId] });
+        qc.invalidateQueries({ queryKey: ['tickets'] });
+      }
+    };
+    const onSupport = (p: { ticketId: string }) => {
+      qc.invalidateQueries({ queryKey: ['ticket', p.ticketId] });
+      qc.invalidateQueries({ queryKey: ['tickets'] });
+    };
     s.on('session:update', onUpdate);
     s.on('session:low_balance', onLow);
+    s.on('notification', onNotification);
+    s.on('support:message', onSupport);
     return () => {
       s.off('session:update', onUpdate);
       s.off('session:low_balance', onLow);
+      s.off('notification', onNotification);
+      s.off('support:message', onSupport);
     };
   }, [token, qc]);
 
@@ -74,6 +99,7 @@ export default function AppLayout() {
     <>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
       <GiftLayer role="user" />
+      <ChatBubble />
       <PushBanner />
     </>
   );

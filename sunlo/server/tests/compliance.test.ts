@@ -153,13 +153,13 @@ describe('Keemat saaf (CCPA) + raseed + TDS', () => {
     expect(w.body.error.code).toBe('PAN_REQUIRED');
   });
 
-  it('balance khatam hone se 1 minute pehle ek baar chetavani', async () => {
+  it('balance khatam hone se 2 minute pehle ek baar chetavani', async () => {
     const { s } = await activeSession(2000);
     const max = s.maxSeconds!;
-    const r1 = await sweepSessions(new Date(s.acceptedAt!.getTime() + (max - 120) * 1000));
+    const r1 = await sweepSessions(new Date(s.acceptedAt!.getTime() + (max - 180) * 1000));
     const [a] = await db.select().from(consultSessions).where(eq(consultSessions.id, s.id));
     expect(a.lowBalanceWarnedAt).toBeNull();
-    await sweepSessions(new Date(s.acceptedAt!.getTime() + (max - 50) * 1000));
+    await sweepSessions(new Date(s.acceptedAt!.getTime() + (max - 110) * 1000));
     const [b] = await db.select().from(consultSessions).where(eq(consultSessions.id, s.id));
     expect(b.lowBalanceWarnedAt).toBeTruthy();
     expect(r1.warned).toBe(0);

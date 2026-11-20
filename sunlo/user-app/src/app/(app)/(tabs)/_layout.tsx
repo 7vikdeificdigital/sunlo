@@ -10,7 +10,7 @@ const icon =
   (on: IconName, off: IconName) =>
   ({ color, focused }: { color: ColorValue; focused: boolean }) => <Ionicons name={focused ? on : off} size={23} color={color} />;
 
-/** 6 tab: Home, Connect (random), Chat, Call, History, Account */
+/** 6 tab: Home, Connect (random), Chat, Call, Voice, Account (History upar home ke icon se) */
 export default function TabLayout() {
   const lang = useLang((st) => st.lang);
   const insets = useSafeAreaInsets();
@@ -29,7 +29,7 @@ export default function TabLayout() {
       <Tabs.Screen name="connect" options={{ title: tr('Connect'), tabBarIcon: icon('flash', 'flash-outline') }} />
       <Tabs.Screen name="chat" options={{ title: tr('Chat'), tabBarIcon: icon('chatbubbles', 'chatbubbles-outline') }} />
       <Tabs.Screen name="call" options={{ title: tr('Call'), tabBarIcon: icon('call', 'call-outline') }} />
-      <Tabs.Screen name="history" options={{ title: tr('History'), tabBarIcon: icon('time', 'time-outline') }} />
+      <Tabs.Screen name="voice" options={{ title: tr('Voice'), tabBarIcon: icon('mic', 'mic-outline') }} />
       <Tabs.Screen name="account" options={{ title: tr('Account'), tabBarIcon: icon('person-circle', 'person-circle-outline') }} />
     </Tabs>
   );

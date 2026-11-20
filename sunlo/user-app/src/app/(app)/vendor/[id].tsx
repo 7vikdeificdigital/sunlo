@@ -7,11 +7,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ReportSheet } from '@/components/ReportSheet';
 import { vendorStatus } from '@/components/VendorCard';
 import { Avatar } from '@/components/Avatar';
+import { LevelBadge, levelFromMinutes } from '@/components/LevelBadge';
 import { StartSessionSheet } from '@/components/StartSessionSheet';
 import { Button, Card, ErrorBox, Header, Loader, Row, Screen, Text } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
 import { compact, formatDate, perMin } from '@/lib/format';
-import { useVendor, useVendorReviews } from '@/lib/queries';
+import { useAppConfig, useVendor, useVendorReviews } from '@/lib/queries';
 import type { SessionType } from '@/lib/types';
 import { colors, font, radius, space } from '@/theme';
 
@@ -31,6 +32,7 @@ export default function VendorProfile() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const q = useVendor(id);
+  const cfg = useAppConfig();
   const reviews = useVendorReviews(id);
   const [reporting, setReporting] = useState(false);
   const [start, setStart] = useState<SessionType | null>(null);
@@ -53,6 +55,7 @@ export default function VendorProfile() {
 
   const a = q.data;
   const status = vendorStatus(a);
+  const st = cfg.data?.settings;
 
   async function toggleFavorite() {
     setFollowBusy(true);
@@ -93,11 +96,36 @@ export default function VendorProfile() {
       />
       <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.lg, paddingBottom: 120 }}>
         <Card style={{ alignItems: 'center', gap: space.sm }}>
-          <Avatar name={a.displayName} uri={a.avatarUrl} size={96} status={status} ring={a.isOnline} />
+          <Avatar name={a.displayName} uri={a.avatarUrl} gender={a.gender} size={96} status={status} ring={a.isOnline} />
           <Row gap={4}>
             <Text variant="h2">{a.displayName}</Text>
             <Ionicons name="checkmark-circle" size={18} color={colors.info} />
           </Row>
+          <LevelBadge level={levelFromMinutes(a.totalMinutes, st?.levelIntermediateMinutes ?? 500, st?.levelExpertMinutes ?? 1500)} size="sm" />
+          <Pressable
+            onPress={toggleFavorite}
+            disabled={followBusy}
+            accessibilityRole="button"
+            accessibilityLabel={a.isFavorite ? 'Favorite se hatayein' : 'Favorite karein'}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              marginTop: 2,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: radius.pill,
+              borderWidth: 1.5,
+              borderColor: a.isFavorite ? colors.danger : colors.border,
+              backgroundColor: a.isFavorite ? colors.dangerSoft : colors.surface,
+              opacity: followBusy ? 0.6 : 1,
+            }}
+          >
+            <Ionicons name={a.isFavorite ? 'heart' : 'heart-outline'} size={18} color={a.isFavorite ? colors.danger : colors.textMuted} />
+            <Text variant="bodyStrong" color={a.isFavorite ? colors.danger : colors.text}>
+              {a.isFavorite ? 'Favorite mein hai' : 'Favorite karein'}
+            </Text>
+          </Pressable>
           <Text variant="body" color={colors.textMuted} style={{ textAlign: 'center' }}>
             {a.headline}
           </Text>

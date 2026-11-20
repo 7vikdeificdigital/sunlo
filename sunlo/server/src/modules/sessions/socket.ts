@@ -2,6 +2,7 @@ import type { Server as HttpServer } from 'node:http';
 import { Server } from 'socket.io';
 import { z } from 'zod';
 import { db } from '../../db/client';
+import { firstName, userDisplayName } from '../../lib/displayName';
 import { chatMessages } from '../../db/schema';
 import { filterMessage } from '../../lib/contentFilter';
 import { HttpError } from '../../lib/errors';
@@ -145,8 +146,8 @@ export function attachSocket(server: HttpServer, corsOrigins: string[] | true) {
         const s = await getSettings();
         const filtered = s.maskContactInfoInChat ? await filterMessage(input.body) : { body: input.body, flagged: false };
         if (!socket.data.name) {
-          const [u] = await db.select({ n: users.name }).from(users).where(eq(users.id, auth.id)).limit(1);
-          socket.data.name = u?.n?.split(' ')[0] || (p.host ? 'Host' : 'User');
+          const [u] = await db.select({ n: userDisplayName }).from(users).where(eq(users.id, auth.id)).limit(1);
+          socket.data.name = firstName(u?.n) || (p.host ? 'Host' : 'User');
         }
         const out = { roomId: input.roomId, userId: auth.id, name: socket.data.name as string, host: p.host, body: filtered.body, at: Date.now() };
         emitToRoom(input.roomId, 'room:chat', out);

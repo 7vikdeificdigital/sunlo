@@ -15,7 +15,7 @@ export function useVendorMe() {
 }
 
 export interface AppConfig {
-  settings: { appName: string; minRatePerMinPaise: number; maxRatePerMinPaise: number; minWithdrawalPaise: number; supportEmail: string; liveRoomsEnabled?: boolean; videoCallsEnabled?: boolean; policyVersion?: string };
+  settings: { appName: string; minRatePerMinPaise: number; maxRatePerMinPaise: number; minWithdrawalPaise: number; supportEmail: string; liveRoomsEnabled?: boolean; videoCallsEnabled?: boolean; policyVersion?: string; levelIntermediateMinutes?: number; levelExpertMinutes?: number };
   categories: Category[];
   languages: string[];
 }

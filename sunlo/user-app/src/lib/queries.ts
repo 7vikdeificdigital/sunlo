@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api } from './api';
 import { useAuth } from './auth';
-import type { Category, Checkins, Grievance, Helpline, Mood, Paged, RechargePack, ScheduledCall, Session, User, VendorCard, VendorDetail, WalletTxn } from './types';
+import type { Category, Checkins, Grievance, Helpline, LevelInfo, Mood, Paged, RechargePack, ScheduledCall, Session, User, VendorCard, VendorDetail, WalletTxn } from './types';
 
 export const qk = {
   me: ['me'] as const,
@@ -37,6 +37,11 @@ export interface AppConfig {
     giftsEnabled?: boolean;
     chatRetentionDays?: number;
     freeTrialMinutes?: number;
+    levelIntermediateMinutes?: number;
+    levelExpertMinutes?: number;
+    coinPaiseBeginner?: number;
+    coinPaiseIntermediate?: number;
+    coinPaiseExpert?: number;
   };
   categories: Category[];
   languages: string[];
@@ -76,7 +81,8 @@ export const useVendorReviews = (id: string) =>
       api<Paged<{ id: string; rating: number; comment: string | null; reply: string | null; userName: string; createdAt: string }>>(`/vendors/${id}/reviews`, { query: { limit: 10 } }),
   });
 
-export const useWallet = () => useQuery({ queryKey: qk.wallet, queryFn: () => api<{ balance: number; packs: RechargePack[]; provider: 'mock' | 'razorpay' }>('/wallet') });
+export const useWallet = () =>
+  useQuery({ queryKey: qk.wallet, queryFn: () => api<{ balance: number; packs: RechargePack[]; level?: LevelInfo; provider: 'mock' | 'razorpay' }>('/wallet') });
 
 export const useWalletTxns = () =>
   useInfiniteQuery({

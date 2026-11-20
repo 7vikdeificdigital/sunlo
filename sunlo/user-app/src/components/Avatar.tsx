@@ -1,24 +1,36 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Image, View } from 'react-native';
 import { API_URL } from '@/lib/api';
 import { initials } from '@/lib/format';
+import type { Gender } from '@/lib/types';
 import { avatarColor, colors, font } from '@/theme';
 import { Text } from './ui';
 
-/** Photo ho to photo, warna naam ke initials. Online/busy ka chhota dot. */
+/** Gender ke hisaab se alag avatar (photo na ho to): male neela, female gulabi */
+const GENDER_AVATAR: Record<Gender, { bg: string; icon: 'man' | 'woman' | 'person' }> = {
+  MALE: { bg: '#4C7DF0', icon: 'man' },
+  FEMALE: { bg: '#E8559A', icon: 'woman' },
+  OTHER: { bg: '#8A7BE8', icon: 'person' },
+};
+
+/** Photo ho to photo, warna gender ka avatar ya naam ke initials. Online/busy ka chhota dot. */
 export function Avatar({
   name,
   uri,
   size = 56,
   status,
   ring,
+  gender,
 }: {
   name: string;
   uri?: string | null;
   size?: number;
   status?: 'online' | 'busy' | 'offline';
   ring?: boolean;
+  gender?: Gender | null;
 }) {
-  const bg = avatarColor(name);
+  const g = gender ? GENDER_AVATAR[gender] : null;
+  const bg = g ? g.bg : avatarColor(name);
   const dot = status === 'online' ? colors.online : status === 'busy' ? colors.busy : status === 'offline' ? colors.offline : null;
   return (
     <View style={{ width: size, height: size }}>
@@ -37,6 +49,8 @@ export function Avatar({
       >
         {uri ? (
           <Image source={{ uri: resolveFileUrl(uri) }} style={{ width: size, height: size }} accessibilityIgnoresInvertColors />
+        ) : g ? (
+          <Ionicons name={g.icon} size={size * 0.58} color={colors.white} />
         ) : (
           <Text style={{ fontFamily: font.semibold, color: colors.white, fontSize: size * 0.36 }}>{initials(name)}</Text>
         )}

@@ -4,11 +4,12 @@ import jwt from 'jsonwebtoken';
 import Razorpay from 'razorpay';
 import { env, isProd } from '../../config/env';
 import { db } from '../../db/client';
-import { notifications, payments, rechargePacks } from '../../db/schema';
+import { notifications, payments, rechargePacks, users } from '../../db/schema';
 import { pushToUser } from '../../lib/push';
 import { hmac, safeEqualHex } from '../../lib/crypto';
 import { badRequest, forbidden, notFound } from '../../lib/errors';
 import { logger } from '../../lib/logger';
+import { coinPaiseOf, levelBonusPaise, levelOf } from '../../lib/level';
 import { getSettings } from '../../lib/settings';
 import { refreshSessionLimit } from '../sessions/service';
 import { postTxn } from './ledger';
@@ -20,17 +21,33 @@ function razorpay(): Razorpay {
   return rzp;
 }
 
-export async function listPacks() {
+/** User ka level aur us par 1 coin ki keemat */
+export async function userLevel(userId: string) {
   const s = await getSettings();
+  const [u] = await db.select({ totalMinutes: users.totalMinutes }).from(users).where(eq(users.id, userId)).limit(1);
+  const minutes = u?.totalMinutes ?? 0;
+  const level = levelOf(minutes, s);
+  return { level, minutes, coinPaise: coinPaiseOf(level, s), nextAt: level === 'BEGINNER' ? s.levelIntermediateMinutes : level === 'INTERMEDIATE' ? s.levelExpertMinutes : null };
+}
+
+export async function listPacks(userId?: string) {
+  const s = await getSettings();
+  const lv = userId ? await userLevel(userId) : null;
   const rows = await db.select().from(rechargePacks).where(eq(rechargePacks.isActive, true)).orderBy(asc(rechargePacks.sortOrder), asc(rechargePacks.amount));
-  return rows.map((p) => ({
-    id: p.id,
-    amount: p.amount,
-    bonusPct: p.bonusPct,
-    bonus: Math.floor((p.amount * p.bonusPct) / 100),
-    gstAmount: Math.round((p.amount * s.gstPct) / 100),
-    isPopular: p.isPopular,
-  }));
+  return rows.map((p) => {
+    const packBonus = Math.floor((p.amount * p.bonusPct) / 100);
+    const levelBonus = lv ? levelBonusPaise(p.amount, lv.level, s) : 0;
+    return {
+      id: p.id,
+      amount: p.amount,
+      bonusPct: p.bonusPct,
+      bonus: packBonus + levelBonus,
+      packBonus,
+      levelBonus,
+      gstAmount: Math.round((p.amount * s.gstPct) / 100),
+      isPopular: p.isPopular,
+    };
+  });
 }
 
 /** Raqam, bonus, GST: sab server tay karta hai. App se aayi raqam par kabhi bharosa nahi. */
@@ -55,7 +72,9 @@ export async function createRecharge(userId: string, input: { packId?: string; a
   } else {
     throw badRequest('VALIDATION_ERROR', 'packId ya amount dein');
   }
-  const bonus = Math.floor((amount * bonusPct) / 100);
+  // Level ka fayda: utne hi rupay mein zyada coins (pack ke bonus ke upar)
+  const lv = await userLevel(userId);
+  const bonus = Math.floor((amount * bonusPct) / 100) + levelBonusPaise(amount, lv.level, s);
   const gstAmount = Math.round((amount * s.gstPct) / 100);
   const totalPayable = amount + gstAmount;
   const id = crypto.randomUUID();

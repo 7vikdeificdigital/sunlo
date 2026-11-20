@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Coin, coinsOf } from '@/components/Coin';
+import { LevelBadge, coinPriceText } from '@/components/LevelBadge';
 import { Button, ErrorBox, Header, Input, Loader, Row, Screen, Text } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -98,6 +99,22 @@ export default function Wallet() {
               <Ionicons name="wallet" size={80} color="rgba(255,255,255,0.15)" style={{ position: 'absolute', right: 16, top: 16 }} />
             </LinearGradient>
 
+            {w.data!.level ? (
+              <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, padding: space.lg, gap: 6, ...shadow.card }}>
+                <Row gap={space.sm}>
+                  <LevelBadge level={w.data!.level!.level} />
+                  <View style={{ flex: 1 }} />
+                  <Text variant="small">{coinPriceText(w.data!.level!.coinPaise)}</Text>
+                </Row>
+                <Text variant="small">
+                  {w.data!.level!.minutes} minute baat ho chuki hai.{' '}
+                  {w.data!.level!.nextAt
+                    ? `${Math.max(0, w.data!.level!.nextAt! - w.data!.level!.minutes)} minute aur, phir coins aur saste.`
+                    : 'Aapko sabse sasta coin rate mil raha hai.'}
+                </Text>
+              </View>
+            ) : null}
+
             <Text variant="h3">Recharge chunein</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md, rowGap: space.lg }}>
               {w.data!.packs.map((p) => {
@@ -112,7 +129,7 @@ export default function Wallet() {
                       else router.push({ pathname: '/checkout', params: { packId: p.id } });
                     }}
                     accessibilityRole="button"
-                    accessibilityLabel={`${coinsOf(p.amount)} coins, ${rupees(p.amount)}`}
+                    accessibilityLabel={`${coinsOf(p.amount + (p.bonus ?? 0))} coins, ${rupees(p.amount)}`}
                     style={{
                       width: '30.5%',
                       borderRadius: radius.lg,
@@ -125,10 +142,10 @@ export default function Wallet() {
                   >
                     <View style={{ alignItems: 'center', paddingTop: space.lg, paddingBottom: space.md, gap: 6, backgroundColor: on ? colors.primarySoft : colors.surface }}>
                       <Coin size={26} />
-                      <Text style={{ fontFamily: font.bold, fontSize: 18 }}>{coinsOf(p.amount)}</Text>
-                      {p.bonusPct ? (
+                      <Text style={{ fontFamily: font.bold, fontSize: 18 }}>{coinsOf(p.amount + (p.bonus ?? 0))}</Text>
+                      {p.bonus ? (
                         <View style={{ backgroundColor: colors.successSoft, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 1 }}>
-                          <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: colors.success }}>+{p.bonusPct}% extra</Text>
+                          <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: colors.success }}>+{coinsOf(p.bonus)} extra</Text>
                         </View>
                       ) : (
                         <Text style={{ fontSize: 10.5 }}> </Text>

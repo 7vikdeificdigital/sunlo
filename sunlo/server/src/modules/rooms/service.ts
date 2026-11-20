@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { db, type Tx } from '../../db/client';
+import { firstName, userDisplayName } from '../../lib/displayName';
 import { consultSessions, favorites, userBlocks, users, vendors, wallets } from '../../db/schema';
 import { badRequest, conflict, forbidden, HttpError, notFound } from '../../lib/errors';
 import { logger } from '../../lib/logger';
@@ -93,7 +94,7 @@ export async function currentRoomForHost(vendorUserId: string) {
   const [room] = await db.select().from(rooms).where(and(eq(rooms.hostVendorId, v.id), eq(rooms.status, 'LIVE'))).limit(1);
   if (!room) return null;
   const members = await db
-    .select({ userId: roomMembers.userId, name: users.name, joinedAt: roomMembers.joinedAt })
+    .select({ userId: roomMembers.userId, name: userDisplayName, joinedAt: roomMembers.joinedAt })
     .from(roomMembers)
     .innerJoin(users, eq(users.id, roomMembers.userId))
     .where(and(eq(roomMembers.roomId, room.id), isNull(roomMembers.leftAt)))
@@ -204,9 +205,10 @@ export async function joinRoom(userId: string, roomId: string) {
   }
   const [c2] = await db.select({ n: sql<number>`count(*)::int` }).from(roomMembers).where(and(eq(roomMembers.roomId, roomId), isNull(roomMembers.leftAt)));
   if ((c2?.n ?? 0) > room.peakListeners) await db.update(rooms).set({ peakListeners: c2!.n }).where(eq(rooms.id, roomId));
-  const [u] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
-  emitToRoom(roomId, 'room:join', { roomId, userId, name: u?.name?.split(' ')[0] ?? 'User' });
-  emitToUser(host.userId, 'room:join', { roomId, userId, name: u?.name?.split(' ')[0] ?? 'User' });
+  const [u] = await db.select({ name: userDisplayName }).from(users).where(eq(users.id, userId)).limit(1);
+  const shown = firstName(u?.name);
+  emitToRoom(roomId, 'room:join', { roomId, userId, name: shown });
+  emitToUser(host.userId, 'room:join', { roomId, userId, name: shown });
   await broadcastCount(roomId);
   return memberOut(room, m);
 }

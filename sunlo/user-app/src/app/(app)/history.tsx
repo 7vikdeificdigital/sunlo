@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, RefreshControl, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
-import { Empty, Loader, Row, Screen, Segmented, Text } from '@/components/ui';
+import { Empty, Header, Loader, Row, Screen, Segmented, Text } from '@/components/ui';
 import { WalletChip } from '@/components/WalletChip';
 import { durationText, formatDateTime, rupees } from '@/lib/format';
 import { useSessions, useWalletTxns } from '@/lib/queries';
@@ -37,13 +37,8 @@ const STATUS: Record<Session['status'], { label: string; color: string }> = {
 export default function HistoryTab() {
   const [tab, setTab] = useState<Tab>('wallet');
   return (
-    <Screen>
-      <Row style={{ paddingHorizontal: space.lg, paddingTop: space.sm, paddingBottom: space.md }} gap={space.md}>
-        <Text variant="h2" style={{ flex: 1 }}>
-          History
-        </Text>
-        <WalletChip />
-      </Row>
+    <Screen edges={['top']}>
+      <Header title="History" right={<WalletChip />} />
       <View style={{ paddingHorizontal: space.lg, marginBottom: space.md }}>
         <Segmented
           value={tab}

@@ -41,7 +41,7 @@ export default function Home() {
       {/* Top bar */}
       <Row style={{ paddingHorizontal: space.lg, paddingVertical: space.sm }} gap={space.md}>
         <Pressable onPress={() => router.push('/account')} accessibilityLabel="Account">
-          <Avatar name={me.data?.user.name ?? 'U'} size={42} />
+          <Avatar name={me.data?.user.name ?? 'U'} uri={me.data?.user.avatarUrl} gender={me.data?.user.gender} size={42} />
         </Pressable>
         <View style={{ flex: 1 }}>
           <Text variant="small">Namaste</Text>
@@ -50,18 +50,11 @@ export default function Home() {
           </Text>
         </View>
         <WalletChip />
+        <IconButton name="time-outline" label="History" onPress={() => router.push('/history')} />
         <IconButton name="notifications-outline" label="Notifications" badge={notif.data?.unread} onPress={() => router.push('/notifications')} />
       </Row>
 
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />} contentContainerStyle={{ paddingBottom: space.xxl }}>
-        <Pressable onPress={() => router.push('/voice')} accessibilityRole="button" accessibilityLabel="Voice note chhodein" style={{ marginHorizontal: space.lg, marginTop: space.sm, borderRadius: radius.lg, backgroundColor: colors.primarySoft, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <Ionicons name="mic" size={22} color={colors.primary} />
-          <View style={{ flex: 1 }}>
-            <Text variant="title">Voice note chhodein</Text>
-            <Text variant="small">Koi online nahi? Apni baat bolein, listeners jawab denge</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-        </Pressable>
         {/* Search */}
         <Pressable
           onPress={() => router.push({ pathname: '/chat', params: { focus: '1' } })}

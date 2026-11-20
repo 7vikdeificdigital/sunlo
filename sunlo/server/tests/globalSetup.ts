@@ -11,7 +11,11 @@ export default async function setup() {
   await migrate(drizzle(pool), { migrationsFolder: path.resolve(process.cwd(), 'drizzle') });
   // Purane tests purane niyam par likhe gaye hain: free trial / TDS band, live rooms + random video chalu.
   // Naye features ke tests in settings ko khud chalu/band karte hain (tests/compliance.test.ts, tests/care.test.ts).
+  // Level ka coin-bonus bhi band (1 coin = 100 paise) taaki purane billing tests ka hisaab wahi rahe;
+  // level wale apne test (tests/level.test.ts) khud 80/60/50 set karte hain.
   await pool.query(`insert into settings (key, value) values
-    ('freeTrialMinutes', '0'), ('tdsEnabled', 'false'), ('liveRoomsEnabled', 'true'), ('randomVideoEnabled', 'true')`);
+    ('freeTrialMinutes', '0'), ('tdsEnabled', 'false'), ('liveRoomsEnabled', 'true'), ('randomVideoEnabled', 'true'),
+    ('coinPaiseBeginner', '100'), ('coinPaiseIntermediate', '100'), ('coinPaiseExpert', '100')
+    on conflict (key) do update set value = excluded.value`);
   await pool.end();
 }

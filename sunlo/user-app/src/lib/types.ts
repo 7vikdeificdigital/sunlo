@@ -8,6 +8,8 @@ export interface User {
   publicId?: number;
   publicCode?: string;
   username?: string | null;
+  anonymous?: boolean;
+  totalMinutes?: number;
   gender: Gender | null;
   avatarUrl: string | null;
   language: string;
@@ -110,11 +112,22 @@ export interface WalletTxn {
   createdAt: string;
 }
 
+export type Level = 'BEGINNER' | 'INTERMEDIATE' | 'EXPERT';
+
+export interface LevelInfo {
+  level: Level;
+  minutes: number;
+  coinPaise: number;
+  nextAt: number | null;
+}
+
 export interface RechargePack {
   id: string;
   amount: number;
   bonusPct: number;
   bonus: number;
+  packBonus?: number;
+  levelBonus?: number;
   gstAmount: number;
   isPopular: boolean;
   playProductId?: string;

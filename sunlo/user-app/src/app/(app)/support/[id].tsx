@@ -1,13 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Pressable, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKeyboardVisible } from '@/lib/useKeyboardVisible';
 import { Header, Loader, Row, Screen, Text } from '@/components/ui';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/format';
+import { getSocket } from '@/lib/socket';
 import { colors, font, radius, space } from '@/theme';
 import { tr } from '@/lib/i18n';
 
@@ -22,9 +23,23 @@ export default function TicketChat() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const kbOpen = useKeyboardVisible();
-  const q = useQuery({ queryKey: ['ticket', id], queryFn: () => api<Detail>(`/support/tickets/${id}`), refetchInterval: 15_000 });
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ['ticket', id], queryFn: () => api<Detail>(`/support/tickets/${id}`), refetchInterval: 30_000 });
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+
+  // Live: support team ka jawab bina reload ke aa jaye
+  useEffect(() => {
+    const s = getSocket();
+    if (!s.connected) s.connect();
+    const onMsg = (p: { ticketId: string }) => {
+      if (p?.ticketId === id) qc.invalidateQueries({ queryKey: ['ticket', id] });
+    };
+    s.on('support:message', onMsg);
+    return () => {
+      s.off('support:message', onMsg);
+    };
+  }, [id, qc]);
 
   async function send() {
     if (!text.trim()) return;

@@ -603,6 +603,12 @@ const settingsSchema = z
     referralBonusPaise: z.number().int().min(0).max(100_000),
     referrerBonusPaise: z.number().int().min(0).max(100_000),
     referralMinRechargePaise: z.number().int().min(0).max(1_000_000),
+    lowBalanceWarnSec: z.number().int().min(30).max(600),
+    levelIntermediateMinutes: z.number().int().min(1).max(100_000),
+    levelExpertMinutes: z.number().int().min(1).max(1_000_000),
+    coinPaiseBeginner: z.number().int().min(1).max(100),
+    coinPaiseIntermediate: z.number().int().min(1).max(100),
+    coinPaiseExpert: z.number().int().min(1).max(100),
   })
   .partial()
   .strict();
@@ -735,6 +741,8 @@ adminRouter.post('/admin/tickets/:id/reply', async (req, res) => {
   await db.update(supportTickets).set({ updatedAt: new Date() }).where(eq(supportTickets.id, id));
   await audit(req, 'ticket.reply', 'ticket', id);
   await notify(t.userId, 'Support ka jawab aaya', message.slice(0, 120), { type: 'ticket', ticketId: id });
+  // Live: user ki app bina reload ke naya message dikhaye
+  emitToUser(t.userId, 'support:message', { ticketId: id, message: { id: m.id, body: m.body, isStaff: true, createdAt: m.createdAt } });
   res.status(201).json(m);
 });
 

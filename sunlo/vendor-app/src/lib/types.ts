@@ -1,3 +1,5 @@
+export type Level = 'BEGINNER' | 'INTERMEDIATE' | 'EXPERT';
+
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 export type VendorStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
 

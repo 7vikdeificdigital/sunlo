@@ -58,6 +58,7 @@ const profileSchema = z
     ageConfirmed: z.literal(true), // "Main 18 saal ya usse bada hoon"
     dateOfBirth: dobSchema, // DPDP: sirf checkbox kaafi nahi, janm-tithi se 18+ ki jaanch
     checkinReminder: z.boolean(), // roz raat mood check-in ki yaad (user ki marzi)
+    anonymous: z.boolean(), // true = listener ko naam ki jagah @username dikhega
   })
   .partial()
   .strict(); // role, status, phone jaise fields user khud kabhi nahi badal sakta

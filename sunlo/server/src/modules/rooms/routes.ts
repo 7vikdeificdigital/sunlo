@@ -3,6 +3,7 @@ import { and, eq, isNull, sql } from 'drizzle-orm';
 import agora from 'agora-token';
 import { z } from 'zod';
 import { db } from '../../db/client';
+import { userDisplayName } from '../../lib/displayName';
 import { users, vendors, wallets } from '../../db/schema';
 import { env } from '../../config/env';
 import { numericUid } from '../../lib/crypto';
@@ -124,7 +125,7 @@ roomsRouter.post('/rooms/:id/gifts', requireRole('USER'), async (req, res) => {
     return { g, sendId: send.id, hostUserId: h?.userId ?? null, joinedAt: m.joinedAt, newMax };
   });
 
-  const [u] = await db.select({ n: users.name }).from(users).where(eq(users.id, userId)).limit(1);
+  const [u] = await db.select({ n: userDisplayName }).from(users).where(eq(users.id, userId)).limit(1);
   const payload = {
     id: out.sendId,
     roomId: id,

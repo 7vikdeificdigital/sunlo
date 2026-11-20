@@ -7,6 +7,7 @@ import { decryptField, encryptField } from '../../lib/crypto';
 import { badRequest, conflict, forbidden, HttpError, notFound } from '../../lib/errors';
 import { pushToUser } from '../../lib/push';
 import { emitToUser } from '../../lib/realtime';
+import { firstName, userDisplayName } from '../../lib/displayName';
 import { getSettings } from '../../lib/settings';
 import { body, idParam, params, query } from '../../lib/validate';
 import { authId, requireRole } from '../../middleware/auth';
@@ -78,12 +79,27 @@ careRouter.post('/scheduled-calls', requireRole('USER'), async (req, res) => {
     .limit(1);
   if (clash) throw conflict('SLOT_TAKEN', 'Is samay listener pehle se booked hain. Doosra samay chunein');
 
+  // Ek samay par aapki ek hi booking (alag alag samay par kitni bhi)
+  const [mineClash] = await db
+    .select({ id: scheduledCalls.id })
+    .from(scheduledCalls)
+    .where(
+      and(
+        eq(scheduledCalls.userId, userId),
+        inArray(scheduledCalls.status, OPEN),
+        sql`${scheduledCalls.scheduledAt} < ${end.toISOString()}::timestamptz`,
+        sql`${scheduledCalls.scheduledAt} + make_interval(mins => ${scheduledCalls.durationMin}) > ${at.toISOString()}::timestamptz`,
+      ),
+    )
+    .limit(1);
+  if (mineClash) throw conflict('OWN_SLOT_TAKEN', 'Is samay aapki ek booking pehle se hai. Doosra samay chunein');
+
   const [row] = await db
     .insert(scheduledCalls)
     .values({ userId, vendorId: v.id, type: input.type, scheduledAt: at, durationMin: input.durationMin, note: input.note })
     .returning();
-  const [u] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
-  await notify(v.userId, 'Nayi call booking', `${u?.name?.split(' ')[0] ?? 'Ek user'} ne ${fmt(at)} (${input.durationMin} min) book kiya hai. Confirm karein`, { type: 'scheduled_call', id: row.id });
+  const [u] = await db.select({ name: userDisplayName }).from(users).where(eq(users.id, userId)).limit(1);
+  await notify(v.userId, 'Nayi call booking', `${firstName(u?.name)} ne ${fmt(at)} (${input.durationMin} min) book kiya hai. Confirm karein`, { type: 'scheduled_call', id: row.id });
 
   const rate = rateOf(v, input.type);
   const [w] = await db.select({ balance: wallets.balance }).from(wallets).where(eq(wallets.userId, userId)).limit(1);
@@ -150,14 +166,14 @@ async function myVendorId(userId: string) {
 careRouter.get('/vendor/scheduled-calls', requireRole('VENDOR'), async (req, res) => {
   const vendorId = await myVendorId(authId(req));
   const rows = await db
-    .select({ c: scheduledCalls, userName: users.name })
+    .select({ c: scheduledCalls, userName: userDisplayName })
     .from(scheduledCalls)
     .innerJoin(users, eq(users.id, scheduledCalls.userId))
     .where(and(eq(scheduledCalls.vendorId, vendorId), gte(scheduledCalls.scheduledAt, new Date(Date.now() - 7 * 86400_000))))
     .orderBy(asc(scheduledCalls.scheduledAt))
     .limit(100);
   // Vendor ko user ka sirf pehla naam
-  res.json({ items: rows.map((r) => ({ ...r.c, userName: r.userName?.split(' ')[0] ?? 'User' })) });
+  res.json({ items: rows.map((r) => ({ ...r.c, userName: firstName(r.userName) })) });
 });
 
 careRouter.post('/vendor/scheduled-calls/:id/confirm', requireRole('VENDOR'), async (req, res) => {

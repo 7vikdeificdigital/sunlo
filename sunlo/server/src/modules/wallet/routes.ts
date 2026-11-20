@@ -17,7 +17,7 @@ export const walletRouter = Router();
 walletRouter.get('/wallet', async (req, res) => {
   const userId = authId(req);
   const [w] = await db.select({ balance: wallets.balance }).from(wallets).where(eq(wallets.userId, userId)).limit(1);
-  res.json({ balance: w?.balance ?? 0, packs: await pay.listPacks(), provider: env.PAYMENT_PROVIDER });
+  res.json({ balance: w?.balance ?? 0, packs: await pay.listPacks(userId), level: await pay.userLevel(userId), provider: env.PAYMENT_PROVIDER });
 });
 
 walletRouter.get('/wallet/transactions', async (req, res) => {

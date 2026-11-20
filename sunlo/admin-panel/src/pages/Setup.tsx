@@ -352,6 +352,12 @@ interface S {
   referralBonusPaise: number;
   referrerBonusPaise: number;
   referralMinRechargePaise: number;
+  lowBalanceWarnSec: number;
+  levelIntermediateMinutes: number;
+  levelExpertMinutes: number;
+  coinPaiseBeginner: number;
+  coinPaiseIntermediate: number;
+  coinPaiseExpert: number;
 }
 type Field = { k: keyof S; l: string; help: string; money?: boolean; text?: boolean; group?: string };
 const BOOLS: { k: keyof S; l: string; group: string }[] = [
@@ -389,6 +395,12 @@ const FIELDS: Field[] = [
   { k: 'referralBonusPaise', l: 'Code lagane wale (naye user) ko bonus (₹ = coins)', help: '50 = 50 coins. Uske pehle qualifying recharge par, ek baar', money: true, group: 'referral' },
   { k: 'referrerBonusPaise', l: 'Code dene wale ko bonus (₹ = coins)', help: '0 = kuch nahi. Dost ka pehla qualifying recharge hone par', money: true, group: 'referral' },
   { k: 'referralMinRechargePaise', l: 'Referral ke liye min recharge (₹)', help: 'Is raqam ya zyada ke recharge par hi bonus (base pack, GST alag)', money: true, group: 'referral' },
+  { k: 'lowBalanceWarnSec', l: 'Low balance alert (second pehle)', help: '120 = balance khatam hone se 2 minute pehle "recharge karein" alert', group: 'main' },
+  { k: 'levelIntermediateMinutes', l: 'Intermediate level: itne minute ke baad', help: 'User/listener ke kul baat ke minute', group: 'level' },
+  { k: 'levelExpertMinutes', l: 'Expert level: itne minute ke baad', help: 'Isse zyada minute = Expert', group: 'level' },
+  { k: 'coinPaiseBeginner', l: 'Beginner: 1 coin kitne paise ka', help: '100 = koi fayda nahi. 80 = Rs 100 mein 125 coins', group: 'level' },
+  { k: 'coinPaiseIntermediate', l: 'Intermediate: 1 coin kitne paise ka', help: '60 = Rs 100 mein ~166 coins', group: 'level' },
+  { k: 'coinPaiseExpert', l: 'Expert: 1 coin kitne paise ka', help: '50 = Rs 100 mein 200 coins', group: 'level' },
 ];
 const GROUPS: { g: string; t: string; sub?: string }[] = [
   { g: 'main', t: 'Paisa aur session' },
@@ -398,6 +410,7 @@ const GROUPS: { g: string; t: string; sub?: string }[] = [
   { g: 'tds', t: 'TDS' },
   { g: 'trial', t: 'Pehle minute free' },
   { g: 'referral', t: 'Referral code', sub: 'Naya user code lagaye aur pehla recharge min raqam ka kare to dono ko bonus coins' },
+  { g: 'level', t: 'Level (Beginner / Intermediate / Expert)', sub: 'Jitni zyada baat, utna sasta coin. Billing wahi rehti hai; recharge par coins zyada milte hain' },
 ];
 
 export function Settings() {

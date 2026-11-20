@@ -71,6 +71,13 @@
       "when": 1794700000000,
       "tag": "0010_vendor_public_id",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794800000000,
+      "tag": "0011_levels_anonymous",
+      "breakpoints": true
     }
   ]
 }
