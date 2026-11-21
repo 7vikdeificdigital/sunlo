@@ -1,19 +1,23 @@
+import { router } from 'expo-router';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { api } from './api';
 import { emitPushMessage } from './pushBus';
+import { pushHref } from './pushRoute';
 
 /**
  * @react-native-firebase v22+ mein purana messaging() (default export) hata diya gaya hai;
  * ab sirf modular functions hain: getMessaging, getToken, onTokenRefresh, onMessage, deleteToken.
  */
 type Messaging = unknown;
-type Remote = { notification?: { title?: string; body?: string } };
+type Remote = { notification?: { title?: string; body?: string }; data?: Record<string, string> };
 type Fcm = {
   getMessaging: () => Messaging;
   getToken: (m: Messaging) => Promise<string>;
   deleteToken: (m: Messaging) => Promise<void>;
   onTokenRefresh: (m: Messaging, cb: (t: string) => void) => () => void;
   onMessage: (m: Messaging, cb: (msg: Remote) => void) => () => void;
+  onNotificationOpenedApp?: (m: Messaging, cb: (msg: Remote) => void) => () => void;
+  getInitialNotification?: (m: Messaging) => Promise<Remote | null>;
 };
 
 let current: string | null = null;
@@ -53,11 +57,26 @@ export async function registerPush(): Promise<() => void> {
     // App khuli (foreground) ho to Android khud notification nahi dikhata; isliye app ke andar banner
     const offMsg = fcm.onMessage(m, (rm) => {
       const n = rm.notification;
-      if (n?.title || n?.body) emitPushMessage({ title: n.title ?? '', body: n.body ?? '' });
+      if (n?.title || n?.body) emitPushMessage({ title: n.title ?? '', body: n.body ?? '', href: pushHref(rm.data) ?? undefined });
     });
+    // Notification par tap: seedha us screen par le jao
+    const open = (rm?: Remote | null, delay = 0) => {
+      const href = pushHref(rm?.data);
+      if (href) setTimeout(() => router.push(href as never), delay);
+    };
+    // App background mein thi
+    const offOpen = typeof fcm.onNotificationOpenedApp === 'function' ? fcm.onNotificationOpenedApp(m, (rm) => open(rm)) : () => undefined;
+    // App band thi aur notification se hi khuli (router ko mount hone ka thoda waqt)
+    if (typeof fcm.getInitialNotification === 'function') {
+      fcm
+        .getInitialNotification(m)
+        .then((rm) => open(rm, 700))
+        .catch(() => undefined);
+    }
     return () => {
       offToken();
       offMsg();
+      offOpen();
     };
   } catch {
     return () => undefined;

@@ -40,7 +40,15 @@ export function PushBanner() {
   if (!msg) return null;
   return (
     <Animated.View pointerEvents="box-none" style={[s.wrap, { top: insets.top + space.sm, transform: [{ translateY: y }] }]}>
-      <Pressable onPress={hide} style={s.card} accessibilityRole="alert">
+      <Pressable
+        onPress={() => {
+          const href = msg.href;
+          hide();
+          if (href) router.push(href as never);
+        }}
+        style={s.card}
+        accessibilityRole="alert"
+      >
         <View style={[s.bar, msg.tone === 'alert' ? { backgroundColor: colors.danger } : null]} />
         <View style={s.body}>
           <Text style={s.title} numberOfLines={1}>

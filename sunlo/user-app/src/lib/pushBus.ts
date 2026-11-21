@@ -8,6 +8,8 @@ export type PushMsg = {
   tone?: 'info' | 'alert';
   /** Itne second tak dikhe (default 4) */
   seconds?: number;
+  /** Banner par tap karne par is screen par le jao */
+  href?: string;
 };
 type Cb = (m: PushMsg) => void;
 

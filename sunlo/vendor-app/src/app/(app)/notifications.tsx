@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { FlatList, Modal, Pressable, View } from 'react-native';
 import { Button, Empty, Header, Loader, Screen, Text } from '@/components/ui';
 import { api } from '@/lib/api';
+import { pushHref } from '@/lib/pushRoute';
 import { formatDateTime } from '@/lib/format';
 import { useNotifications } from '@/lib/queries';
 import { colors, radius, shadow, space } from '@/theme';
@@ -26,8 +27,9 @@ export default function Notifications() {
   const isWarn = (n: Item) => n.data?.type === 'warning';
 
   function onOpen(n: Item) {
-    if (n.data?.type === 'ticket' && n.data.ticketId) {
-      router.push(`/support/${n.data.ticketId}` as never);
+    const href = pushHref(n.data as Record<string, string | undefined> | undefined);
+    if (href && n.data?.type !== 'warning') {
+      router.push(href as never);
       return;
     }
     setOpen(n);

@@ -179,12 +179,12 @@ export async function requestSession(
     userId: a.userId,
     title: input.type === 'CHAT' ? 'Naya chat request' : 'Naya call request',
     body: `${shownName} aapse baat karna chahte hain`,
-    data: { type: 'session', sessionId: row.id },
+    data: { type: 'session', sessionId: row.id, sessionType: row.type },
   });
   void pushToUser(a.userId, {
     title: input.type === 'CHAT' ? 'Naya chat request' : input.type === 'AUDIO' ? 'Naya voice call request' : 'Naya video call request',
     body: `${firstName(shownName)} aapse baat karna chahte hain. Jaldi accept karein (60 sec)`,
-    data: { type: 'session', sessionId: row.id },
+    data: { type: 'session', sessionId: row.id, sessionType: row.type },
   });
   return publicSession(row);
 }
@@ -263,7 +263,7 @@ export async function acceptByVendor(vendorUserId: string, sessionId: string) {
   if (row.status === 'ACTIVE' && row.scheduledCallId) {
     await db.update(scheduledCalls).set({ status: 'COMPLETED', sessionId: row.id }).where(and(eq(scheduledCalls.id, row.scheduledCallId), inArray(scheduledCalls.status, ['PENDING', 'CONFIRMED'])));
   }
-  if (row.status === 'ACTIVE') void pushToUser(row.userId, { title: 'Request accept ho gayi', body: 'Aapka listener taiyar hai, abhi baat shuru karein', data: { type: 'session', sessionId: row.id } });
+  if (row.status === 'ACTIVE') void pushToUser(row.userId, { title: 'Request accept ho gayi', body: 'Aapka listener taiyar hai, abhi baat shuru karein', data: { type: 'session', sessionId: row.id, sessionType: row.type } });
   if (row.status !== 'ACTIVE') throw conflict(row.endReason ?? 'INVALID_STATE', 'Session shuru nahi ho saka');
   return publicSession(row);
 }
@@ -477,9 +477,9 @@ export async function sweepSessions(now = new Date()) {
     .returning();
   for (const m of missed) {
     await broadcast(m);
-    void pushToUser(m.userId, { title: 'Listener abhi busy hai', body: 'Aapki request ka jawab nahi aaya. Doosre listener try karein', data: { type: 'session', sessionId: m.id } });
+    void pushToUser(m.userId, { title: 'Listener abhi busy hai', body: 'Aapki request ka jawab nahi aaya. Doosre listener try karein', data: { type: 'session', sessionId: m.id, sessionType: m.type } });
     const vu = await vendorUserIdOf(m.vendorId);
-    if (vu) void pushToUser(vu, { title: 'Request miss ho gayi', body: 'Ek user ne aapko try kiya tha. Online rehkar jaldi accept karein', data: { type: 'session', sessionId: m.id } });
+    if (vu) void pushToUser(vu, { title: 'Request miss ho gayi', body: 'Ek user ne aapko try kiya tha. Online rehkar jaldi accept karein', data: { type: 'session', sessionId: m.id, sessionType: m.type } });
   }
   return { ended: expired.length, missed: missed.length, warned: warn.length };
 }

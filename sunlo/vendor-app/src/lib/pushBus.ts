@@ -1,5 +1,5 @@
 /** Push aane par app ke andar banner dikhane ke liye chhota event-bus (FCM foreground mein khud kuch nahi dikhata) */
-export type PushMsg = { title: string; body: string };
+export type PushMsg = { title: string; body: string; /** Banner par tap karne par is screen par le jao */ href?: string };
 type Cb = (m: PushMsg) => void;
 
 const listeners = new Set<Cb>();
